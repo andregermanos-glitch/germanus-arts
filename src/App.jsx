@@ -102,7 +102,7 @@ function AmbientBar() {
   );
 }
 
-// ─── Botão de ala (elongado, serigrafia) ─────────────────────────────────────
+// ─── Botão de ala (elongado, só texto, 3mm padding v) ────────────────────────
 function AlaBtn({ ala, active, onClick }) {
   const [h, setH] = useState(false);
   const hot = active || h;
@@ -114,11 +114,10 @@ function AlaBtn({ ala, active, onClick }) {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 10,
         padding: "11px 14px",
         background: hot
-          ? `linear-gradient(90deg, ${ala.color}45 0%, ${ala.color}12 45%, #faf9f7 100%)`
-          : `linear-gradient(90deg, ${ala.color}18 0%, ${ala.color}05 45%, #faf9f7 100%)`,
+          ? `linear-gradient(90deg, ${ala.color}45 0%, ${ala.color}12 50%, #faf9f7 100%)`
+          : `linear-gradient(90deg, ${ala.color}18 0%, ${ala.color}05 50%, #faf9f7 100%)`,
         border: "1px solid",
         borderColor: hot ? `${ala.color}66` : "#e8e4dc",
         borderLeft: `3px solid ${active ? ala.color : hot ? ala.color+"aa" : "#e0dbd0"}`,
@@ -129,31 +128,16 @@ function AlaBtn({ ala, active, onClick }) {
         width: "100%",
         boxShadow: active ? `0 2px 8px ${ala.color}22` : "none",
       }}>
-      {/* Ícone serigrafia — preto com esfumado */}
-      <span style={{
-        fontSize: 17,
-        lineHeight: 1,
-        display: "inline-block",
-        filter: active
-          ? `grayscale(1) brightness(0.05) drop-shadow(0 0 5px rgba(0,0,0,0.35))`
-          : `grayscale(1) brightness(0.12) drop-shadow(0 0 3px rgba(0,0,0,0.2))`,
-        flexShrink: 0,
-      }}>{ala.icon}</span>
-
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ margin: 0, fontSize: 12, fontFamily: "Verdana,sans-serif", fontWeight: active ? 700 : 600, color: active ? "#0a0a0a" : "#2a2a2a", letterSpacing: ".3px" }}>
-          {ala.name}
-        </p>
-        {active && (
-          <p style={{ margin: 0, fontSize: 10, color: "#888", fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", marginTop: 1, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
-            {ala.desc}
-          </p>
-        )}
-      </div>
-
-      {active && (
-        <span style={{ fontSize: 10, color: ala.color, fontFamily: "Verdana,sans-serif", fontWeight: 700, flexShrink: 0 }}>●</span>
-      )}
+      <p style={{
+        margin: 0,
+        fontSize: 12,
+        fontFamily: "Verdana,sans-serif",
+        fontWeight: active ? 700 : 500,
+        color: active ? "#0a0a0a" : "#2a2a2a",
+        letterSpacing: ".3px",
+      }}>
+        {ala.name}
+      </p>
     </button>
   );
 }
