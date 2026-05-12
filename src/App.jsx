@@ -73,12 +73,12 @@ async function searchArt(query, ala, fromYear, toYear) {
 
 // ─── Componentes base ─────────────────────────────────────────────────────────
 function Logo({ small }) {
-  const n=small?16:44, d=small?22:62, a=small?16:44;
+  const n=small?16:44, d=small?26:68, a=small?16:44;
   return (
     <div style={{ display:"flex", alignItems:"baseline", lineHeight:1, userSelect:"none" }}>
       <span style={{ fontFamily:"Verdana,Geneva,sans-serif", fontSize:n, fontWeight:700, color:"#111", letterSpacing:small?"0.08em":"0.12em", textTransform:"uppercase" }}>Germanus</span>
-      <span style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:d, fontWeight:700, color:"#1a3a6e", margin:"0 1px" }}>.</span>
-      <span style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:a, fontWeight:700, color:"transparent", WebkitTextStroke:`${small?"1px":"1.5px"} #b22222`, letterSpacing:"-0.02em" }}>Arts</span>
+      <span style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:d, fontWeight:700, color:"#1545c7", margin:"0 1px" }}>.</span>
+      <span style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:a, fontWeight:700, color:"#d41515", letterSpacing:"-0.02em" }}>Art</span>
     </div>
   );
 }
