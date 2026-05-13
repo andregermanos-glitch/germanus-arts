@@ -321,7 +321,7 @@ function AlaBtn({ name, ala, active, onClick }) {
     <button onClick={onClick} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
       style={{
         display:"flex", alignItems:"center",
-        padding:"11px 14px",
+        padding:"7px 14px",
         background: hot
           ? `linear-gradient(90deg, ${ala.color}45 0%, ${ala.color}12 50%, #faf9f7 100%)`
           : `linear-gradient(90deg, ${ala.color}18 0%, ${ala.color}05 50%, #faf9f7 100%)`,
