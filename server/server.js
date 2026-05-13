@@ -137,10 +137,18 @@ const KEYS = {
 };
 
 // ─── Prompt Claude ────────────────────────────────────────────────────────────
-function buildPrompt(query, ala, alaHint, fromYear, toYear) {
+function buildPrompt(query, ala, alaHint, fromYear, toYear, lang) {
   const alaCtx  = ala     ? `Gallery: "${ala}" — keywords: ${alaHint||ala}.` : "";
   const yearCtx = (fromYear||toYear) ? `Period: ${fromYear||"any"} to ${toYear||"present"}.` : "";
-  return `You are a world art history expert. Return ONLY a raw JSON array, no markdown.
+
+  const langMap = {
+    fr: `Répondez ENTIÈREMENT en français. Titres: utilisez le titre français courant (ex: "La Joconde", "La Nuit étoilée"). Descriptions, techniques, styles et musées: en français.`,
+    en: `Respond ENTIRELY in English.`,
+    es: `Responda COMPLETAMENTE en español. Títulos: use el título español más conocido si existe. Descripciones, técnicas y estilos: en español.`,
+    it: `Risponda COMPLETAMENTE in italiano. Titoli: usa il titolo italiano più noto se esiste. Descrizioni, tecniche e stili: in italiano.`,
+  };
+  const langInstruction = langMap[lang] || langMap.fr;
+  return `You are a world art history expert. ${langInstruction}
 ${alaCtx} ${yearCtx}
 Search: "${query}"
 Return 8 real well-known artworks. Each object:
@@ -204,7 +212,7 @@ app.get("/api/status", async (req, res) => {
 
 // ─── GET /api/search ──────────────────────────────────────────────────────────
 app.get("/api/search", async (req, res) => {
-  const { q, ala, alaHint, alaId, fromYear, toYear } = req.query;
+  const { q, ala, alaHint, alaId, fromYear, toYear, lang } = req.query;
   if (!q?.trim()) return res.status(400).json({ error: "Parâmetro q obrigatório" });
 
   const cacheKey = `${q}|${ala||""}|${alaId||""}|${fromYear||""}|${toYear||""}`;
@@ -234,7 +242,7 @@ app.get("/api/search", async (req, res) => {
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
         max_tokens: 3000,
-        messages: [{ role:"user", content: buildPrompt(q, ala, alaHint, fromYear, toYear) }]
+        messages: [{ role:"user", content: buildPrompt(q, ala, alaHint, fromYear, toYear, lang||"fr") }]
       })
     });
 
