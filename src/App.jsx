@@ -245,8 +245,8 @@ async function getWeather() {
 }
 
 // ─── Busca ────────────────────────────────────────────────────────────────────
-async function searchArt(query, ala, fromYear, toYear) {
-  const p = new URLSearchParams({ q: query });
+async function searchArt(query, ala, fromYear, toYear, lang) {
+  const p = new URLSearchParams({ q: query, lang: lang || "fr" });
   if (ala) { p.append("ala", ala.nameEn||ala.id); p.append("alaHint", ala.hint||""); p.append("alaId", ala.id); }
   if (fromYear) p.append("fromYear", fromYear);
   if (toYear)   p.append("toYear", toYear);
@@ -259,10 +259,10 @@ async function searchArt(query, ala, fromYear, toYear) {
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 function Logo({ small }) {
-  const n=small?16:44, d=small?26:68, a=small?16:44;
+  const n=small?16:40, d=small?26:68, a=small?16:44;
   return (
     <div style={{ display:"flex", alignItems:"baseline", lineHeight:1, userSelect:"none" }}>
-      <span style={{ fontFamily:"Verdana,Geneva,sans-serif", fontSize:n, fontWeight:700, color:"#111", letterSpacing:small?"0.08em":"0.12em", textTransform:"uppercase" }}>Germanus</span>
+      <span style={{ fontFamily:"Verdana,Geneva,sans-serif", fontSize:n, fontWeight:700, color:"#111", letterSpacing:small?"0.04em":"0.04em", textTransform:"uppercase" }}>Germanus</span>
       <span style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:d, fontWeight:700, color:"#1545c7", margin:"0 1px" }}>.</span>
       <span style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:a, fontWeight:700, color:"#d41515", letterSpacing:"-0.02em" }}>Art</span>
     </div>
@@ -536,7 +536,7 @@ export default function App() {
     if (activeAla?.id===ala.id) { setAla(null);setRes([]);setPhase("idle");return; }
     setAla(ala);setRes([]);setErr("");setPhase("searching");setTab("buscar");
     try {
-      const arts = await searchArt(ala.hint, ala, fromYear, toYear);
+      const arts = await searchArt(ala.hint, ala, fromYear, toYear, lang);
       setRes(arts);setPhase("done");
     } catch(e){setErr(e.message);setPhase("error");}
   },[activeAla,fromYear,toYear]);
@@ -545,7 +545,7 @@ export default function App() {
     if (!query.trim()||phase==="searching") return;
     setRes([]);setErr("");setPhase("searching");
     try {
-      const arts = await searchArt(query, activeAla, fromYear, toYear);
+      const arts = await searchArt(query, activeAla, fromYear, toYear, lang);
       setRes(arts);setPhase("done");
     } catch(e){setErr(e.message);setPhase("error");}
   };
@@ -557,7 +557,7 @@ export default function App() {
     setTab("buscar");setRes([]);setPhase("idle");
     setTimeout(async()=>{
       setPhase("searching");
-      try{const arts=await searchArt(term||query,ala,fromYear,toYear);setRes(arts);setPhase("done");}
+      try{const arts=await searchArt(term||query,ala,fromYear,toYear,lang);setRes(arts);setPhase("done");}
       catch(e){setErr(e.message);setPhase("error");}
     },50);
   },[activeAla,query,fromYear,toYear]);
