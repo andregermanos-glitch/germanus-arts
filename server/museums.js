@@ -205,7 +205,12 @@ async function searchAIC(query, limit = 8) {
     const res = await fetch(url, { timeout: 10000 });
     const data = await res.json();
 
-    const raw = (data.data || []).filter(o => o.image_id).map(o => ({
+    // Exclui tipos que não são obras de arte visual (plantas, mapas, documentos técnicos)
+    const excludeTypes = ["Architectural", "Technical", "Map", "Document", "Decorative Art"];
+    const raw = (data.data || []).filter(o =>
+      o.image_id &&
+      !excludeTypes.some(t => (o.artwork_type_title||"").includes(t))
+    ).map(o => ({
       id:          String(o.id),
       title:       o.title || "Sem título",
       artist:      o.artist_display || "Desconhecido",
