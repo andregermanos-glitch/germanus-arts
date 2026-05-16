@@ -84,15 +84,67 @@ async function searchVAM(query, limit = 8) {
   }
 }
 
-// ─── 2. Rijksmuseum (Amsterdã) ────────────────────────────────────────────────
-// Chave gratuita obrigatória, CORS nativo, 700k+ obras, imagens HD
+// ─── 2. Rijksmuseum (Amsterdã) — API aberta, sem chave ───────────────────────
+// Nova API Linked Art: data.rijksmuseum.nl/search/collection
 async function searchRijks(query, key, limit = 8) {
+  // Tenta primeiro a nova API sem chave
+  try {
+    const url = `https://data.rijksmuseum.nl/search/collection?q=${encodeURIComponent(query)}&limit=${limit}`;
+    const res = await fetch(url, { timeout: 10000 });
+    const data = await res.json();
+    const items = data.orderedItems || data["ordered_items"] || [];
+
+    const raw = items.filter(o => {
+      const reps = o.representation || [];
+      return reps.length > 0;
+    }).map(o => {
+      // Extrai número do objeto do ID (ex: SK-C-5 de /id/collection/SK-C-5)
+      const idParts = (o.id || "").split("/");
+      const objNum = idParts[idParts.length - 1] || "";
+
+      // Imagem via IIIF
+      const rep = (o.representation || [])[0];
+      const imageUrl = rep?.id || (objNum ? `https://iiif.rijksmuseum.nl/iiif/${objNum}/full/400,/0/default.jpg` : "");
+
+      // Título (preferência inglês, depois holandês)
+      const label = o.label || {};
+      const title = (label.en || label.nl || Object.values(label)[0] || ["Sem título"])[0];
+
+      // Artista
+      const produced = o.produced_by?.carried_out_by || [];
+      const artistLabel = produced[0]?.label;
+      const artist = artistLabel ? (Object.values(artistLabel)[0] || ["Desconhecido"])[0] : "Desconhecido";
+
+      return {
+        id:          objNum || `rijks_${Math.random()}`,
+        title,
+        artist,
+        date:        "",
+        medium:      "",
+        dimensions:  "",
+        origin:      "Países Baixos",
+        style:       "",
+        museum:      "Rijksmuseum, Amsterdã, Países Baixos",
+        description: "",
+        credit:      "Rijksmuseum",
+        type:        "",
+        imageUrl,
+        externalUrl: `https://www.rijksmuseum.nl/en/collection/${objNum}`,
+      };
+    });
+
+    const results = await filterWithImages(raw.map(o => normalize("rijks", o)));
+    if (results.length > 0) return results;
+  } catch (e) {
+    console.log("[Rijks nova API]", e.message, "— tentando API antiga...");
+  }
+
+  // Fallback: API antiga com chave (se tiver)
   if (!key) return [];
   try {
     const url = `https://www.rijksmuseum.nl/api/en/collection?key=${key}&q=${encodeURIComponent(query)}&imgonly=True&ps=${limit}&format=json`;
     const res = await fetch(url, { timeout: 10000 });
     const data = await res.json();
-
     const raw = (data.artObjects || []).filter(o => o.webImage?.url).map(o => ({
       id:          o.objectNumber,
       title:       o.title || "Sem título",
@@ -109,10 +161,9 @@ async function searchRijks(query, key, limit = 8) {
       imageUrl:    o.webImage.url,
       externalUrl: `https://www.rijksmuseum.nl/en/collection/${o.objectNumber}`,
     }));
-
     return filterWithImages(raw.map(o => normalize("rijks", o)));
   } catch (e) {
-    console.error("[Rijks]", e.message);
+    console.error("[Rijks antiga]", e.message);
     return [];
   }
 }
