@@ -85,21 +85,18 @@ async function searchVAM(query, limit = 8) {
 }
 
 // ─── 2. Rijksmuseum (Amsterdã) — API aberta, sem chave ───────────────────────
-// Nova API Linked Art: data.rijksmuseum.nl/search/collection
 async function searchRijks(query, key, limit = 8) {
-  // Tenta primeiro a nova API sem chave
+  // Tenta nova API com headers corretos
   try {
     const url = `https://data.rijksmuseum.nl/search/collection?q=${encodeURIComponent(query)}&limit=${limit}`;
-    const res = await fetch(url, { timeout: 10000 });
+    const res = await fetch(url, {
+      timeout: 10000,
+      headers: { "Accept": "application/ld+json, application/json", "User-Agent": "GermanusArt/1.0" }
+    });
     const data = await res.json();
-    const items = data.orderedItems
-      || data["ordered_items"]
-      || data.items
-      || data.results
-      || data["@graph"]
-      || [];
+    const items = data.orderedItems || data["ordered_items"] || data.items || data.results || data["@graph"] || [];
+    console.log(`[Rijks nova API] chaves: ${JSON.stringify(Object.keys(data))} | itens: ${items.length} | detail: ${data.detail||"nenhum"}`);
 
-    console.log(`[Rijks nova API] resposta: ${JSON.stringify(Object.keys(data))} — ${items.length} itens`);
     const raw = items
       .map(o => {
         const idParts = (o.id || "").split("/");
@@ -354,27 +351,26 @@ async function searchHarvard(query, key, limit = 8) {
 }
 
 // ─── 8. Europeana ─────────────────────────────────────────────────────────────
-// Chave gratuita, 50M+ obras europeias — suporta wskey (projeto) e apikey (pessoal)
+// Chave via header X-Api-Key (método preferido desde maio 2025)
 async function searchEuropeana(query, key, limit = 8) {
   if (!key) return [];
   try {
-    // Tenta com apikey (chave pessoal — nova API)
-    const url = `https://api.europeana.eu/record/v2/search.json?apikey=${key}&query=${encodeURIComponent(query)}&rows=${limit}&media=true&reusability=open&qf=TYPE%3AIMAGE&profile=rich`;
-    const res = await fetch(url, { timeout: 10000 });
+    const url = `https://api.europeana.eu/record/v2/search.json?query=${encodeURIComponent(query)}&rows=${limit}&media=true&reusability=open&qf=TYPE%3AIMAGE&profile=rich`;
+    const res = await fetch(url, {
+      timeout: 10000,
+      headers: {
+        "X-Api-Key": key,
+        "Accept": "application/json"
+      }
+    });
     const data = await res.json();
 
-    if (!data.items && data.success === false) {
-      console.log(`[Europeana] apikey falhou:`, data.error || "sem detalhe", "— tentando wskey...");
-      // Fallback wskey (chave de projeto — API antiga)
-      const url2 = `https://api.europeana.eu/record/v2/search.json?wskey=${key}&query=${encodeURIComponent(query)}&rows=${limit}&media=true&reusability=open&qf=TYPE%3AIMAGE&profile=rich`;
-      const res2 = await fetch(url2, { timeout: 10000 });
-      const data2 = await res2.json();
-      if (!data2.items) return [];
-      return processEuropeanaItems(data2.items, limit);
+    if (data.success === false || !data.items) {
+      console.log(`[Europeana] falhou: ${data.error || JSON.stringify(data).slice(0,100)}`);
+      return [];
     }
 
-    if (!data.items) return [];
-    console.log(`[Europeana] ✅ ${data.items?.length || 0} resultados com apikey`);
+    console.log(`[Europeana] ✅ ${data.items?.length || 0} resultados via X-Api-Key header`);
     return processEuropeanaItems(data.items, limit);
   } catch (e) {
     console.error("[Europeana]", e.message);
