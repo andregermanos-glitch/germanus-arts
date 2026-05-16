@@ -137,9 +137,10 @@ const KEYS = {
 };
 
 // ─── Prompt Claude ────────────────────────────────────────────────────────────
-function buildPrompt(query, ala, alaHint, fromYear, toYear, lang) {
-  const alaCtx  = ala     ? `Gallery: "${ala}" — keywords: ${alaHint||ala}.` : "";
-  const yearCtx = (fromYear||toYear) ? `Period: ${fromYear||"any"} to ${toYear||"present"}.` : "";
+function buildPrompt(query, ala, alaHint, fromYear, toYear, lang, variant) {
+  const alaCtx    = ala     ? `Gallery: "${ala}" — keywords: ${alaHint||ala}.` : "";
+  const yearCtx   = (fromYear||toYear) ? `Period: ${fromYear||"any"} to ${toYear||"present"}.` : "";
+  const variantCtx = variant ? `Focus on ${variant} artworks.` : "";
 
   const langMap = {
     fr: `Répondez ENTIÈREMENT en français. Titres: utilisez le titre français courant (ex: "La Joconde", "La Nuit étoilée"). Descriptions, techniques, styles et musées: en français.`,
@@ -149,7 +150,7 @@ function buildPrompt(query, ala, alaHint, fromYear, toYear, lang) {
   };
   const langInstruction = langMap[lang] || langMap.fr;
   return `You are a world art history expert. ${langInstruction}
-${alaCtx} ${yearCtx}
+${alaCtx} ${yearCtx} ${variantCtx}
 Search: "${query}"
 Return 8 real well-known artworks. Each object:
 [{"title":"...","artist":"Full Name (Nationality, YYYY–YYYY)","date":"...","medium":"...","dimensions":"...","origin":"...","style":"...","museum":"Museum, City, Country","description":"2-3 sentences.","credit":"...","wikiTitle":"Exact English Wikipedia article title","commonsFile":"Exact_Wikimedia_Commons_filename.jpg","artic_id":"AIC uuid or empty"}]
@@ -195,8 +196,10 @@ async function resolveImage(o) {
       const r = await fetch(url, { method:"HEAD", signal:AbortSignal.timeout(5000) });
       const ct = r.headers.get("content-type") || "";
       if (r.ok && ct.startsWith("image/")) return r.url || url;
+      // Segue redirect manualmente se houver
+      if (r.redirected && r.url) return r.url;
     } catch {}
-    return url;
+    // Não retorna URL sem verificar — evita IMAGE NON DISPONIBLE
   }
 
   // SEM fallback Wikipedia — evita fotos de artistas aparecerem no lugar das obras
@@ -222,6 +225,10 @@ app.get("/api/search", async (req, res) => {
 
   // IDs já vistos — para rotatividade
   const excludeIds = new Set(exclude ? exclude.split(",").filter(Boolean) : []);
+
+  // Semente de variedade — muda o prompt a cada busca para resultados diferentes
+  const variants = ["", "lesser-known but significant", "from different countries and periods", "emphasizing technique and composition", "with strong narrative or symbolism"];
+  const variant = variants[Math.floor(Date.now() / 60000) % variants.length];
 
   // Aplica exclusão e embaralha levemente para variedade
   const rotate = (results) => {
@@ -261,7 +268,7 @@ app.get("/api/search", async (req, res) => {
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
         max_tokens: 3000,
-        messages: [{ role:"user", content: buildPrompt(q, ala, alaHint, fromYear, toYear, lang||"fr") }]
+        messages: [{ role:"user", content: buildPrompt(q, ala, alaHint, fromYear, toYear, lang||"fr", variant) }]
       })
     });
 
