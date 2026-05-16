@@ -167,8 +167,19 @@ Water Lilies 1906→Claude_Monet_-_Water_Lilies_-_1906,_Ryerson.jpg
 If uncertain leave commonsFile empty.`;
 }
 
-// ─── Resolve imagem ───────────────────────────────────────────────────────────
+// ─── Valida se o filename parece uma obra (não retrato do artista) ─────────────
+function isArtworkFilename(filename) {
+  if (!filename) return false;
+  const f = filename.toLowerCase();
+  // Rejeita se parece só "nome_sobrenome.jpg" sem título de obra
+  if (/^[a-záàâãéèêíïóôõúüç]+_[a-záàâãéèêíïóôõúüç]+\.(jpg|png|jpeg)$/.test(f)) return false;
+  // Aceita se tem traço, underscore múltiplo, ou nome de museu/obra
+  return f.includes("_-_") || f.split("_").length >= 3 || f.includes("google") || f.includes("rijks");
+}
+
+// ─── Resolve imagem — apenas obra, nunca retrato de artista ──────────────────
 async function resolveImage(o) {
+  // 1. AIC IIIF (mais confiável — imagem garantida de obra)
   if (o.artic_id && o.artic_id.length > 10) {
     const url = `https://www.artic.edu/iiif/2/${o.artic_id}/full/400,/0/default.jpg`;
     try {
@@ -176,25 +187,19 @@ async function resolveImage(o) {
       if (r.ok) return url;
     } catch {}
   }
-  if (o.commonsFile) {
+
+  // 2. Wikimedia Special:FilePath — só se filename parece obra, não pessoa
+  if (o.commonsFile && isArtworkFilename(o.commonsFile)) {
     const url = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(o.commonsFile)}?width=400`;
     try {
       const r = await fetch(url, { method:"HEAD", signal:AbortSignal.timeout(5000) });
-      if (r.ok) return r.url || url;
+      const ct = r.headers.get("content-type") || "";
+      if (r.ok && ct.startsWith("image/")) return r.url || url;
     } catch {}
-    return url;
+    return url; // tenta mesmo assim — browser vai seguir redirect
   }
-  if (o.wikiTitle) {
-    try {
-      const r = await fetch(
-        `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(o.wikiTitle)}&prop=pageimages&format=json&piprop=thumbnail&pithumbsize=600&origin=*`,
-        { signal:AbortSignal.timeout(5000) }
-      );
-      const d = await r.json();
-      const img = Object.values(d.query?.pages||{})[0]?.thumbnail?.source;
-      if (img) return img;
-    } catch {}
-  }
+
+  // SEM fallback Wikipedia — evita fotos de artistas aparecerem no lugar das obras
   return "";
 }
 
@@ -212,20 +217,34 @@ app.get("/api/status", async (req, res) => {
 
 // ─── GET /api/search ──────────────────────────────────────────────────────────
 app.get("/api/search", async (req, res) => {
-  const { q, ala, alaHint, alaId, fromYear, toYear, lang } = req.query;
+  const { q, ala, alaHint, alaId, fromYear, toYear, lang, exclude } = req.query;
   if (!q?.trim()) return res.status(400).json({ error: "Parâmetro q obrigatório" });
+
+  // IDs já vistos — para rotatividade
+  const excludeIds = new Set(exclude ? exclude.split(",").filter(Boolean) : []);
+
+  // Aplica exclusão e embaralha levemente para variedade
+  const rotate = (results) => {
+    const fresh = excludeIds.size > 0
+      ? results.filter(a => !excludeIds.has(a.id))
+      : results;
+    // Embaralha mantendo obras com imagem no topo
+    const withImg    = fresh.filter(a => a.imageUrl).sort(() => Math.random() - 0.45);
+    const withoutImg = fresh.filter(a => !a.imageUrl);
+    return [...withImg, ...withoutImg];
+  };
 
   const cacheKey = `${q}|${ala||""}|${alaId||""}|${fromYear||""}|${toYear||""}`;
 
-  // 1. Cache
+  // 1. Cache (aplica rotação nos resultados cacheados)
   const cached = await getCache(cacheKey);
-  if (cached) return res.json({ source:"cache", results: cached });
+  if (cached) return res.json({ source:"cache", results: rotate(cached) });
 
   // 2. Banco local (RAG lookup — sem chamar Claude)
   const localResults = await searchLocal(q, alaId, 40);
   if (localResults.length >= 6) {
     await setCache(cacheKey, localResults);
-    return res.json({ source:"local_db", total: localResults.length, results: localResults });
+    return res.json({ source:"local_db", total: localResults.length, results: rotate(localResults) });
   }
 
   // 3. Claude + museus (só se banco local insuficiente)
@@ -282,13 +301,15 @@ app.get("/api/search", async (req, res) => {
     }));
 
     // Enriquece com museus (obras adicionais com imagem garantida)
-    const museumResults = await searchAll(q, KEYS, { limit:3, fromYear, toYear }).catch(()=>[]);
+    const museumResults = await searchAll(q, KEYS, { limit:5, fromYear, toYear }).catch(()=>[]);
     const seen  = new Set(results.map(a=>a.title.toLowerCase()));
-    const extra = museumResults.filter(a=>!seen.has(a.title.toLowerCase())).slice(0,3);
+    const extra = museumResults.filter(a=>!seen.has(a.title.toLowerCase())).slice(0,5);
     for (const a of extra) await saveArtwork({ ...a, alaId: alaId||null });
 
     const final = [...results, ...extra];
     await setCache(cacheKey, final);
+
+    res.json({ source:"claude+museums", total: final.length, results: rotate(final) });
 
     res.json({ source:"claude+museums", total: final.length, results: final });
 
