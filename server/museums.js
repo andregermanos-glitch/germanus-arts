@@ -84,60 +84,52 @@ async function searchVAM(query, limit = 8) {
   }
 }
 
-// ─── 2. Rijksmuseum (Amsterdã) — API aberta, sem chave ───────────────────────
+// ─── 2. Rijksmuseum (Amsterdã) — API Linked Art, sem chave ───────────────────
 async function searchRijks(query, key, limit = 8) {
-  // Tenta nova API com headers corretos
   try {
-    const url = `https://data.rijksmuseum.nl/search/collection?query=${encodeURIComponent(query)}&limit=${limit}`;
+    // Parâmetros semânticos corretos conforme documentação oficial
+    const mainWord = query.split(" ").filter(w => w.length > 3)[0] || query.split(" ")[0];
+    const params = new URLSearchParams({ type:"painting", imageAvailable:"true", description:mainWord });
+    const url = `https://data.rijksmuseum.nl/search/collection?${params}&limit=${limit}`;
     const res = await fetch(url, {
       timeout: 10000,
       headers: { "Accept": "application/ld+json, application/json", "User-Agent": "GermanusArt/1.0" }
     });
     const data = await res.json();
-    const items = data.orderedItems || data["ordered_items"] || data.items || data.results || data["@graph"] || [];
-    console.log(`[Rijks nova API] chaves: ${JSON.stringify(Object.keys(data))} | itens: ${items.length} | detail: ${data.detail||"nenhum"}`);
+    if (data.detail) console.log(`[Rijks] detalhe: ${data.detail}`);
+    const items = data.orderedItems || [];
+    console.log(`[Rijks] ✅ ${items.length} obras`);
+    if (items.length === 0) return [];
 
-    const raw = items
-      .map(o => {
-        const idParts = (o.id || "").split("/");
-        const objNum  = idParts[idParts.length - 1] || "";
-        if (!objNum) return null;
-
-        // URL IIIF construída diretamente — sempre funciona para objetos do Rijksmuseum
-        const imageUrl = `https://iiif.rijksmuseum.nl/iiif/${objNum}/full/400,/0/default.jpg`;
-
-        const label  = o.label || {};
-        const title  = (label.en || label.nl || Object.values(label)[0] || ["Sem título"])[0];
-        const produced = o.produced_by?.carried_out_by || [];
-        const artistLabel = produced[0]?.label;
-        const artist = artistLabel ? (Object.values(artistLabel)[0] || ["Desconhecido"])[0] : "Desconhecido";
-
-        return normalize("rijks", {
-          id:          objNum,
-          title,
-          artist,
-          date:        "",
-          medium:      "",
-          dimensions:  "",
-          origin:      "Países Baixos",
-          style:       "",
-          museum:      "Rijksmuseum, Amsterdã, Países Baixos",
-          description: "",
-          credit:      "Rijksmuseum",
-          type:        "",
-          imageUrl,
-          externalUrl: `https://www.rijksmuseum.nl/en/collection/${objNum}`,
-        });
-      })
-      .filter(Boolean);
-
-    // Confia nas URLs IIIF do Rijksmuseum sem verificação HEAD
-    if (raw.length > 0) return raw;
+    // Para cada ID, tenta pegar título via IIIF manifest e constrói resultado
+    const results = await Promise.all(items.slice(0, limit).map(async (item) => {
+      const idParts = (item.id || "").split("/");
+      const objNum  = idParts[idParts.length - 1];
+      if (!objNum || objNum.length < 3) return null;
+      let title = objNum, artist = "Rijksmuseum";
+      try {
+        const mr = await fetch(`https://www.rijksmuseum.nl/api/iiif/${objNum}/manifest/json`, { signal:AbortSignal.timeout(4000) });
+        const manifest = await mr.json();
+        const lbl = manifest.label;
+        title = typeof lbl==="string" ? lbl : (lbl?.en?.[0] || lbl?.nl?.[0] || objNum);
+        const meta = manifest.metadata || [];
+        const cf = meta.find(m => (m.label||"").includes("maker") || (m.label||"").includes("Kunst"));
+        if (cf?.value) artist = cf.value;
+      } catch {}
+      return normalize("rijks", {
+        id:objNum, title, artist, date:"", medium:"Oil on canvas", dimensions:"",
+        origin:"Países Baixos", style:"", museum:"Rijksmuseum, Amsterdã, Países Baixos",
+        description:"", credit:"Rijksmuseum", type:"Painting",
+        imageUrl:`https://iiif.rijksmuseum.nl/iiif/${objNum}/full/400,/0/default.jpg`,
+        externalUrl:`https://www.rijksmuseum.nl/en/collection/${objNum}`,
+      });
+    }));
+    return results.filter(Boolean);
   } catch (e) {
-    console.log("[Rijks nova API]", e.message, "— tentando API antiga...");
+    console.log("[Rijks nova API] erro:", e.message);
   }
 
-  // Fallback: API antiga com chave (se tiver)
+  // Fallback: API antiga com chave
   if (!key) return [];
   try {
     const url = `https://www.rijksmuseum.nl/api/en/collection?key=${key}&q=${encodeURIComponent(query)}&imgonly=True&ps=${limit}&format=json`;
@@ -355,9 +347,10 @@ async function searchHarvard(query, key, limit = 8) {
 async function searchEuropeana(query, key, limit = 8) {
   if (!key) return [];
   try {
-    // Europeana funciona melhor com termos simples — usa a primeira palavra da query
+    // Adiciona "painting" ao termo para filtrar patrimônio cultural → só pinturas
     const simpleQuery = query.split(" ")[0];
-    const url = `https://api.europeana.eu/record/v2/search.json?query=${encodeURIComponent(simpleQuery)}&rows=${limit}&media=true&qf=TYPE%3AIMAGE&profile=rich`;
+    const artQuery = `${simpleQuery} painting`;
+    const url = `https://api.europeana.eu/record/v2/search.json?query=${encodeURIComponent(artQuery)}&rows=${limit}&media=true&qf=TYPE%3AIMAGE&profile=rich`;
     const res = await fetch(url, {
       timeout: 10000,
       headers: {
