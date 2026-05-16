@@ -167,14 +167,14 @@ Water Lilies 1906→Claude_Monet_-_Water_Lilies_-_1906,_Ryerson.jpg
 If uncertain leave commonsFile empty.`;
 }
 
-// ─── Valida se o filename parece uma obra (não retrato do artista) ─────────────
+// ─── Valida se o filename parece uma obra (não retrato simples do artista) ────
 function isArtworkFilename(filename) {
   if (!filename) return false;
   const f = filename.toLowerCase();
-  // Rejeita se parece só "nome_sobrenome.jpg" sem título de obra
-  if (/^[a-záàâãéèêíïóôõúüç]+_[a-záàâãéèêíïóôõúüç]+\.(jpg|png|jpeg)$/.test(f)) return false;
-  // Aceita se tem traço, underscore múltiplo, ou nome de museu/obra
-  return f.includes("_-_") || f.split("_").length >= 3 || f.includes("google") || f.includes("rijks");
+  // Rejeita se é muito curto (provavelmente nome de pessoa)
+  if (f.length < 8) return false;
+  // Aceita sempre — a ausência do fallback Wikipedia já resolve o problema de fotos
+  return true;
 }
 
 // ─── Resolve imagem — apenas obra, nunca retrato de artista ──────────────────
@@ -188,15 +188,15 @@ async function resolveImage(o) {
     } catch {}
   }
 
-  // 2. Wikimedia Special:FilePath — só se filename parece obra, não pessoa
-  if (o.commonsFile && isArtworkFilename(o.commonsFile)) {
+  // 2. Wikimedia Special:FilePath
+  if (o.commonsFile) {
     const url = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(o.commonsFile)}?width=400`;
     try {
       const r = await fetch(url, { method:"HEAD", signal:AbortSignal.timeout(5000) });
       const ct = r.headers.get("content-type") || "";
       if (r.ok && ct.startsWith("image/")) return r.url || url;
     } catch {}
-    return url; // tenta mesmo assim — browser vai seguir redirect
+    return url;
   }
 
   // SEM fallback Wikipedia — evita fotos de artistas aparecerem no lugar das obras
