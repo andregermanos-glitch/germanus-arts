@@ -53,7 +53,7 @@ async function initDB() {
 
 // ─── Cache em memória + PostgreSQL ───────────────────────────────────────────
 const memCache = new Map();
-const CACHE_TTL = 600000; // 10 minutos
+const CACHE_TTL = 300000; // 5 minutos
 
 async function getCache(key) {
   const mem = memCache.get(key);
