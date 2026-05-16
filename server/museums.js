@@ -349,38 +349,51 @@ async function searchHarvard(query, key, limit = 8) {
 }
 
 // ─── 8. Europeana ─────────────────────────────────────────────────────────────
-// Chave gratuita obrigatória, 50M+ obras de 4.000+ instituições europeias
+// Chave gratuita, 50M+ obras europeias — suporta wskey (projeto) e apikey (pessoal)
 async function searchEuropeana(query, key, limit = 8) {
   if (!key) return [];
   try {
-    const url = `https://api.europeana.eu/record/v2/search.json?wskey=${key}&query=${encodeURIComponent(query)}&rows=${limit}&media=true&reusability=open&qf=TYPE%3AIMAGE&profile=rich`;
+    // Tenta com apikey (chave pessoal — nova API)
+    const url = `https://api.europeana.eu/record/v2/search.json?apikey=${key}&query=${encodeURIComponent(query)}&rows=${limit}&media=true&reusability=open&qf=TYPE%3AIMAGE&profile=rich`;
     const res = await fetch(url, { timeout: 10000 });
     const data = await res.json();
 
-    const arr = (item, field) => Array.isArray(item?.[field]) ? item[field][0] : (item?.[field] || "");
+    if (!data.items && data.success === false) {
+      // Fallback wskey (chave de projeto — API antiga)
+      const url2 = `https://api.europeana.eu/record/v2/search.json?wskey=${key}&query=${encodeURIComponent(query)}&rows=${limit}&media=true&reusability=open&qf=TYPE%3AIMAGE&profile=rich`;
+      const res2 = await fetch(url2, { timeout: 10000 });
+      const data2 = await res2.json();
+      if (!data2.items) return [];
+      return processEuropeanaItems(data2.items, limit);
+    }
 
-    const raw = (data.items || []).filter(o => arr(o, "edmPreview")).map(o => ({
-      id:          (o.id || "").replace(/\//g, "_"),
-      title:       arr(o, "title") || "Sem título",
-      artist:      arr(o, "dcCreator") || "Desconhecido",
-      date:        arr(o, "year") || "",
-      medium:      "",
-      dimensions:  "",
-      origin:      arr(o, "country") || "Europa",
-      style:       "",
-      museum:      arr(o, "dataProvider") || "Europeana",
-      description: arr(o, "dcDescription") || "",
-      credit:      `Europeana — ${arr(o, "dataProvider") || ""}`,
-      type:        "",
-      imageUrl:    arr(o, "edmPreview"),
-      externalUrl: arr(o, "edmIsShownAt") || o.guid || "",
-    }));
-
-    return filterWithImages(raw.map(o => normalize("europeana", o)));
+    if (!data.items) return [];
+    return processEuropeanaItems(data.items, limit);
   } catch (e) {
     console.error("[Europeana]", e.message);
     return [];
   }
+}
+
+function processEuropeanaItems(items, limit) {
+  const arr = (item, field) => Array.isArray(item?.[field]) ? item[field][0] : (item?.[field] || "");
+  const raw = (items || []).filter(o => arr(o, "edmPreview")).slice(0, limit).map(o => ({
+    id:          (o.id || "").replace(/\//g, "_"),
+    title:       arr(o, "title") || "Sem título",
+    artist:      arr(o, "dcCreator") || "Desconhecido",
+    date:        arr(o, "year") || "",
+    medium:      "",
+    dimensions:  "",
+    origin:      arr(o, "country") || "Europa",
+    style:       "",
+    museum:      arr(o, "dataProvider") || "Europeana",
+    description: arr(o, "dcDescription") || "",
+    credit:      `Europeana — ${arr(o, "dataProvider") || ""}`,
+    type:        "",
+    imageUrl:    arr(o, "edmPreview"),
+    externalUrl: arr(o, "edmIsShownAt") || o.guid || "",
+  }));
+  return filterWithImages(raw.map(o => normalize("europeana", o)));
 }
 
 // ─── Busca unificada ──────────────────────────────────────────────────────────
