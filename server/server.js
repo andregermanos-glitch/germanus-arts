@@ -308,9 +308,9 @@ app.get("/api/search", async (req, res) => {
     }));
 
     // Enriquece com museus (obras adicionais com imagem garantida)
-    const museumResults = await searchAll(q, KEYS, { limit:5, fromYear, toYear }).catch(()=>[]);
+    const museumResults = await searchAll(q, KEYS, { limit:8, fromYear, toYear }).catch(()=>[]);
     const seen  = new Set(results.map(a=>a.title.toLowerCase()));
-    const extra = museumResults.filter(a=>!seen.has(a.title.toLowerCase())).slice(0,5);
+    const extra = museumResults.filter(a=>!seen.has(a.title.toLowerCase())).slice(0,8);
     for (const a of extra) await saveArtwork({ ...a, alaId: alaId||null });
 
     const final = [...results, ...extra];
