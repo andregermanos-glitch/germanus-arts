@@ -170,15 +170,13 @@ async function searchCleveland(query, limit = 8) {
     const res = await fetch(url, { timeout: 10000 });
     const data = await res.json();
 
-    const raw = (data.data || []).filter(o => o.images?.web?.url).map(o => ({
+    const raw = (data.data || []).filter(o => o.images?.web?.url).map(o => normalize("cleveland", {
       id:          String(o.id),
       title:       o.title || "Sem título",
       artist:      o.creators?.[0]?.description || "Desconhecido",
       date:        o.creation_date || "",
       medium:      o.technique || "",
-      dimensions:  o.dimensions?.framed
-                   ? `${Math.round(o.dimensions.framed.height)} × ${Math.round(o.dimensions.framed.width)} cm`
-                   : "",
+      dimensions:  o.dimensions?.framed ? `${Math.round(o.dimensions.framed.height)} × ${Math.round(o.dimensions.framed.width)} cm` : "",
       origin:      o.culture || "EUA",
       style:       o.style || "",
       museum:      "Cleveland Museum of Art, Ohio, EUA",
@@ -189,7 +187,7 @@ async function searchCleveland(query, limit = 8) {
       externalUrl: o.url || `https://www.clevelandart.org/art/${o.id}`,
     }));
 
-    return filterWithImages(raw.map(o => normalize("cleveland", o)));
+    return raw.filter(o => o.imageUrl);
   } catch (e) {
     console.error("[Cleveland]", e.message);
     return [];
@@ -205,12 +203,12 @@ async function searchAIC(query, limit = 8) {
     const res = await fetch(url, { timeout: 10000 });
     const data = await res.json();
 
-    // Exclui tipos que não são obras de arte visual (plantas, mapas, documentos técnicos)
-    const excludeTypes = ["Architectural", "Technical", "Map", "Document", "Decorative Art"];
+    // Exclui tipos que não são obras de arte visual
+    const excludeTypes = ["Architectural", "Technical", "Map", "Document", "Decorative Art", "Stencil", "Poster", "Graphic Design", "Ephemera"];
     const raw = (data.data || []).filter(o =>
       o.image_id &&
       !excludeTypes.some(t => (o.artwork_type_title||"").includes(t))
-    ).map(o => ({
+    ).map(o => normalize("aic", {
       id:          String(o.id),
       title:       o.title || "Sem título",
       artist:      o.artist_display || "Desconhecido",
@@ -223,11 +221,12 @@ async function searchAIC(query, limit = 8) {
       description: (o.description || "").replace(/<[^>]+>/g, ""),
       credit:      o.credit_line || "Art Institute of Chicago",
       type:        o.artwork_type_title || "",
+      // URLs IIIF do AIC são confiáveis — sem verificação HEAD que falha server-side
       imageUrl:    `https://www.artic.edu/iiif/2/${o.image_id}/full/400,/0/default.jpg`,
       externalUrl: `https://www.artic.edu/artworks/${o.id}`,
     }));
 
-    return filterWithImages(raw.map(o => normalize("aic", o)));
+    return raw.filter(o => o.imageUrl);
   } catch (e) {
     console.error("[AIC]", e.message);
     return [];
@@ -251,7 +250,7 @@ async function searchMet(query, limit = 6) {
       )
     );
 
-    const raw = objects.filter(o => o?.primaryImageSmall).slice(0, limit).map(o => ({
+    const raw = objects.filter(o => o?.primaryImageSmall).slice(0, limit).map(o => normalize("met", {
       id:          String(o.objectID),
       title:       o.title || "Sem título",
       artist:      o.artistDisplayName || "Desconhecido",
@@ -268,7 +267,7 @@ async function searchMet(query, limit = 6) {
       externalUrl: o.objectURL || "",
     }));
 
-    return filterWithImages(raw.map(o => normalize("met", o)));
+    return raw.filter(o => o.imageUrl);
   } catch (e) {
     console.error("[Met]", e.message);
     return [];
