@@ -323,7 +323,8 @@ app.get("/api/search", async (req, res) => {
     // Fallback gracioso — retorna museus direto em vez de erro 500
     try {
       const fallback = await searchAll(q, KEYS, { limit:8, fromYear, toYear });
-      const combined = [...(localResults||[]), ...fallback];
+      const safeLocal = (typeof localResults !== "undefined") ? localResults : [];
+      const combined = [...safeLocal, ...fallback];
       if (combined.length > 0) return res.json({ source:"fallback", results: rotate(combined) });
     } catch {}
     res.status(500).json({ error: e.message });
