@@ -92,7 +92,14 @@ async function searchRijks(query, key, limit = 8) {
     const url = `https://data.rijksmuseum.nl/search/collection?q=${encodeURIComponent(query)}&limit=${limit}`;
     const res = await fetch(url, { timeout: 10000 });
     const data = await res.json();
-    const items = data.orderedItems || data["ordered_items"] || data.items || [];
+    const items = data.orderedItems
+      || data["ordered_items"]
+      || data.items
+      || data.results
+      || data["@graph"]
+      || [];
+
+    console.log(`[Rijks nova API] resposta: ${JSON.stringify(Object.keys(data))} — ${items.length} itens`);
     const raw = items
       .map(o => {
         const idParts = (o.id || "").split("/");
@@ -357,6 +364,7 @@ async function searchEuropeana(query, key, limit = 8) {
     const data = await res.json();
 
     if (!data.items && data.success === false) {
+      console.log(`[Europeana] apikey falhou:`, data.error || "sem detalhe", "— tentando wskey...");
       // Fallback wskey (chave de projeto — API antiga)
       const url2 = `https://api.europeana.eu/record/v2/search.json?wskey=${key}&query=${encodeURIComponent(query)}&rows=${limit}&media=true&reusability=open&qf=TYPE%3AIMAGE&profile=rich`;
       const res2 = await fetch(url2, { timeout: 10000 });
@@ -366,6 +374,7 @@ async function searchEuropeana(query, key, limit = 8) {
     }
 
     if (!data.items) return [];
+    console.log(`[Europeana] ✅ ${data.items?.length || 0} resultados com apikey`);
     return processEuropeanaItems(data.items, limit);
   } catch (e) {
     console.error("[Europeana]", e.message);
