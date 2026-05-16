@@ -92,49 +92,43 @@ async function searchRijks(query, key, limit = 8) {
     const url = `https://data.rijksmuseum.nl/search/collection?q=${encodeURIComponent(query)}&limit=${limit}`;
     const res = await fetch(url, { timeout: 10000 });
     const data = await res.json();
-    const items = data.orderedItems || data["ordered_items"] || [];
+    const items = data.orderedItems || data["ordered_items"] || data.items || [];
+    const raw = items
+      .map(o => {
+        const idParts = (o.id || "").split("/");
+        const objNum  = idParts[idParts.length - 1] || "";
+        if (!objNum) return null;
 
-    const raw = items.filter(o => {
-      const reps = o.representation || [];
-      return reps.length > 0;
-    }).map(o => {
-      // Extrai número do objeto do ID (ex: SK-C-5 de /id/collection/SK-C-5)
-      const idParts = (o.id || "").split("/");
-      const objNum = idParts[idParts.length - 1] || "";
+        // URL IIIF construída diretamente — sempre funciona para objetos do Rijksmuseum
+        const imageUrl = `https://iiif.rijksmuseum.nl/iiif/${objNum}/full/400,/0/default.jpg`;
 
-      // Imagem via IIIF
-      const rep = (o.representation || [])[0];
-      const imageUrl = rep?.id || (objNum ? `https://iiif.rijksmuseum.nl/iiif/${objNum}/full/400,/0/default.jpg` : "");
+        const label  = o.label || {};
+        const title  = (label.en || label.nl || Object.values(label)[0] || ["Sem título"])[0];
+        const produced = o.produced_by?.carried_out_by || [];
+        const artistLabel = produced[0]?.label;
+        const artist = artistLabel ? (Object.values(artistLabel)[0] || ["Desconhecido"])[0] : "Desconhecido";
 
-      // Título (preferência inglês, depois holandês)
-      const label = o.label || {};
-      const title = (label.en || label.nl || Object.values(label)[0] || ["Sem título"])[0];
+        return normalize("rijks", {
+          id:          objNum,
+          title,
+          artist,
+          date:        "",
+          medium:      "",
+          dimensions:  "",
+          origin:      "Países Baixos",
+          style:       "",
+          museum:      "Rijksmuseum, Amsterdã, Países Baixos",
+          description: "",
+          credit:      "Rijksmuseum",
+          type:        "",
+          imageUrl,
+          externalUrl: `https://www.rijksmuseum.nl/en/collection/${objNum}`,
+        });
+      })
+      .filter(Boolean);
 
-      // Artista
-      const produced = o.produced_by?.carried_out_by || [];
-      const artistLabel = produced[0]?.label;
-      const artist = artistLabel ? (Object.values(artistLabel)[0] || ["Desconhecido"])[0] : "Desconhecido";
-
-      return {
-        id:          objNum || `rijks_${Math.random()}`,
-        title,
-        artist,
-        date:        "",
-        medium:      "",
-        dimensions:  "",
-        origin:      "Países Baixos",
-        style:       "",
-        museum:      "Rijksmuseum, Amsterdã, Países Baixos",
-        description: "",
-        credit:      "Rijksmuseum",
-        type:        "",
-        imageUrl,
-        externalUrl: `https://www.rijksmuseum.nl/en/collection/${objNum}`,
-      };
-    });
-
-    const results = await filterWithImages(raw.map(o => normalize("rijks", o)));
-    if (results.length > 0) return results;
+    // Confia nas URLs IIIF do Rijksmuseum sem verificação HEAD
+    if (raw.length > 0) return raw;
   } catch (e) {
     console.log("[Rijks nova API]", e.message, "— tentando API antiga...");
   }
@@ -377,23 +371,28 @@ async function searchEuropeana(query, key, limit = 8) {
 
 function processEuropeanaItems(items, limit) {
   const arr = (item, field) => Array.isArray(item?.[field]) ? item[field][0] : (item?.[field] || "");
-  const raw = (items || []).filter(o => arr(o, "edmPreview")).slice(0, limit).map(o => ({
-    id:          (o.id || "").replace(/\//g, "_"),
-    title:       arr(o, "title") || "Sem título",
-    artist:      arr(o, "dcCreator") || "Desconhecido",
-    date:        arr(o, "year") || "",
-    medium:      "",
-    dimensions:  "",
-    origin:      arr(o, "country") || "Europa",
-    style:       "",
-    museum:      arr(o, "dataProvider") || "Europeana",
-    description: arr(o, "dcDescription") || "",
-    credit:      `Europeana — ${arr(o, "dataProvider") || ""}`,
-    type:        "",
-    imageUrl:    arr(o, "edmPreview"),
-    externalUrl: arr(o, "edmIsShownAt") || o.guid || "",
-  }));
-  return filterWithImages(raw.map(o => normalize("europeana", o)));
+  const raw = (items || [])
+    .filter(o => arr(o, "edmPreview"))
+    .slice(0, limit)
+    .map(o => normalize("europeana", {
+      id:          (o.id || "").replace(/\//g, "_"),
+      title:       arr(o, "title") || "Sem título",
+      artist:      arr(o, "dcCreator") || "Desconhecido",
+      date:        arr(o, "year") || "",
+      medium:      "",
+      dimensions:  "",
+      origin:      arr(o, "country") || "Europa",
+      style:       "",
+      museum:      arr(o, "dataProvider") || "Europeana",
+      description: arr(o, "dcDescription") || "",
+      credit:      `Europeana — ${arr(o, "dataProvider") || ""}`,
+      type:        "",
+      // Europeana fornece URLs de thumbnail diretas e confiáveis — sem verificação HEAD
+      imageUrl:    arr(o, "edmPreview"),
+      externalUrl: arr(o, "edmIsShownAt") || o.guid || "",
+    }));
+  // Filtra apenas por URL existente — não faz HEAD request (bloqueia CORS)
+  return raw.filter(o => o.imageUrl && o.imageUrl.startsWith("http"));
 }
 
 // ─── Busca unificada ──────────────────────────────────────────────────────────
