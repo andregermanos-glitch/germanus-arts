@@ -1,10 +1,35 @@
 import { useState, useEffect, useCallback } from "react";
 
 // ─── Persistência ─────────────────────────────────────────────────────────────
-const loadCol = () => { try { return JSON.parse(localStorage.getItem("germ_col")||"[]"); } catch { return []; } };
-const saveCol = col => { try { localStorage.setItem("germ_col", JSON.stringify(col)); } catch {} };
+const loadCol  = () => { try { return JSON.parse(localStorage.getItem("germ_col")||"[]"); } catch { return []; } };
+const saveCol  = col => { try { localStorage.setItem("germ_col", JSON.stringify(col)); } catch {} };
 const loadLang = () => { try { return localStorage.getItem("germ_lang") || "fr"; } catch { return "fr"; } };
-const saveLang = l => { try { localStorage.setItem("germ_lang", l); } catch {} };
+const saveLang = l  => { try { localStorage.setItem("germ_lang", l); } catch {} };
+
+// ─── Rotatividade — rastreia obras vistas (30 min) ───────────────────────────
+const SEEN_KEY = "germ_seen";
+const SEEN_TTL = 30 * 60 * 1000;
+
+function getSeenIds() {
+  try {
+    const s = sessionStorage.getItem(SEEN_KEY);
+    if (!s) return [];
+    const { ids, ts } = JSON.parse(s);
+    if (Date.now() - ts > SEEN_TTL) { sessionStorage.removeItem(SEEN_KEY); return []; }
+    return ids || [];
+  } catch { return []; }
+}
+
+function addSeenIds(newIds) {
+  try {
+    const ids = [...new Set([...getSeenIds(), ...newIds])];
+    sessionStorage.setItem(SEEN_KEY, JSON.stringify({ ids, ts: Date.now() }));
+  } catch {}
+}
+
+function clearSeen() {
+  try { sessionStorage.removeItem(SEEN_KEY); } catch {}
+}
 
 // ─── Traduções ────────────────────────────────────────────────────────────────
 const T = {
@@ -250,11 +275,17 @@ async function searchArt(query, ala, fromYear, toYear, lang) {
   if (ala) { p.append("ala", ala.nameEn||ala.id); p.append("alaHint", ala.hint||""); p.append("alaId", ala.id); }
   if (fromYear) p.append("fromYear", fromYear);
   if (toYear)   p.append("toYear", toYear);
+  // Envia IDs já vistos para o servidor excluir (rotatividade)
+  const seen = getSeenIds();
+  if (seen.length > 0) p.append("exclude", seen.slice(0, 80).join(","));
   const res = await fetch(`/api/search?${p}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
   if (data.error) throw new Error(data.error);
-  return (data.results || []).map((o, i) => ({ ...o, id: o.id || `art_${Date.now()}_${i}` }));
+  const results = (data.results || []).map((o, i) => ({ ...o, id: o.id || `art_${Date.now()}_${i}` }));
+  // Marca obras retornadas como vistas
+  addSeenIds(results.map(r => r.id));
+  return results;
 }
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
