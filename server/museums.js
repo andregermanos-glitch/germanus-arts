@@ -90,7 +90,7 @@ async function searchRijks(query, key, limit = 8) {
     // Parâmetros semânticos corretos conforme documentação oficial
     const mainWord = query.split(" ").filter(w => w.length > 3)[0] || query.split(" ")[0];
     const params = new URLSearchParams({ type:"painting", imageAvailable:"true", description:mainWord });
-    const url = `https://data.rijksmuseum.nl/search/collection?${params}&limit=${limit}`;
+    const url = `https://data.rijksmuseum.nl/search/collection?${params}`;
     const res = await fetch(url, {
       timeout: 10000,
       headers: { "Accept": "application/ld+json, application/json", "User-Agent": "GermanusArt/1.0" }
