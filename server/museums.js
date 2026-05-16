@@ -88,7 +88,7 @@ async function searchVAM(query, limit = 8) {
 async function searchRijks(query, key, limit = 8) {
   // Tenta nova API com headers corretos
   try {
-    const url = `https://data.rijksmuseum.nl/search/collection?q=${encodeURIComponent(query)}&limit=${limit}`;
+    const url = `https://data.rijksmuseum.nl/search/collection?query=${encodeURIComponent(query)}&limit=${limit}`;
     const res = await fetch(url, {
       timeout: 10000,
       headers: { "Accept": "application/ld+json, application/json", "User-Agent": "GermanusArt/1.0" }
@@ -355,7 +355,9 @@ async function searchHarvard(query, key, limit = 8) {
 async function searchEuropeana(query, key, limit = 8) {
   if (!key) return [];
   try {
-    const url = `https://api.europeana.eu/record/v2/search.json?query=${encodeURIComponent(query)}&rows=${limit}&media=true&reusability=open&qf=TYPE%3AIMAGE&profile=rich`;
+    // Europeana funciona melhor com termos simples — usa a primeira palavra da query
+    const simpleQuery = query.split(" ")[0];
+    const url = `https://api.europeana.eu/record/v2/search.json?query=${encodeURIComponent(simpleQuery)}&rows=${limit}&media=true&qf=TYPE%3AIMAGE&profile=rich`;
     const res = await fetch(url, {
       timeout: 10000,
       headers: {
