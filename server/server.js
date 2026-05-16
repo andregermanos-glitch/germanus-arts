@@ -152,7 +152,7 @@ function buildPrompt(query, ala, alaHint, fromYear, toYear, lang, variant) {
   return `You are a world art history expert. ${langInstruction}
 ${alaCtx} ${yearCtx} ${variantCtx}
 Search: "${query}"
-Return 8 real well-known artworks. Each object:
+Return 8 real well-known artworks from DIVERSE museums — include works from European museums (Louvre, Orsay, Prado, Uffizi, Rijksmuseum, National Gallery London, Hermitage) not only from American museums. Each object:
 [{"title":"...","artist":"Full Name (Nationality, YYYY–YYYY)","date":"...","medium":"...","dimensions":"...","origin":"...","style":"...","museum":"Museum, City, Country","description":"2-3 sentences.","credit":"...","wikiTitle":"Exact English Wikipedia article title","commonsFile":"Exact_Wikimedia_Commons_filename.jpg","artic_id":"AIC uuid or empty"}]
 Known commonsFile values:
 Starry Night→Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg
