@@ -311,12 +311,14 @@ app.get("/api/search", async (req, res) => {
 
     res.json({ source:"claude+museums", total: final.length, results: rotate(final) });
 
-    res.json({ source:"claude+museums", total: final.length, results: final });
-
   } catch(e) {
     console.error("[Search]", e.message);
-    // Fallback: retorna o que tiver no banco local
-    if (localResults.length > 0) return res.json({ source:"local_fallback", results: localResults });
+    // Fallback gracioso — retorna museus direto em vez de erro 500
+    try {
+      const fallback = await searchAll(q, KEYS, { limit:8, fromYear, toYear });
+      const combined = [...(localResults||[]), ...fallback];
+      if (combined.length > 0) return res.json({ source:"fallback", results: rotate(combined) });
+    } catch {}
     res.status(500).json({ error: e.message });
   }
 });
