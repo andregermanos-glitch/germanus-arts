@@ -4,9 +4,22 @@ const express  = require("express");
 const cors     = require("cors");
 const path     = require("path");
 const { Pool } = require("pg");
-const { searchAll, searchVAM, searchCleveland, searchAIC,
-        searchMet, searchRijks, searchSmithsonian,
-        searchHarvard, searchEuropeana } = require("./museums");
+const { searchAll } = require("./museums");
+const { indexarCuradoria } = require("./curador");
+const { expandirAla }      = require("./expansor");
+
+// Hint de busca por ala (usado pelo expansor)
+const ALA_HINTS = {
+  retratos:"portrait painting face",pessoas_reais:"historical figure portrait",
+  cidades:"abstract expressionism emotion Kandinsky Rothko Pollock",historico:"battle historical scene",
+  objetos:"still life flowers Dutch",lugares:"landmark famous place",
+  natureza:"landscape nature countryside",familiar:"domestic interior family",
+  nudes:"classical nude Venus figure",esoterico:"mysticism symbolism esoteric",
+  sacro:"religious painting Madonna saints",arquitetura:"architecture building ruins",
+  povo:"peasant workers folk genre",perspectiva:"perspective depth painting",
+  luz_sol:"sunlight luminism natural light",cores:"colorful expressionism vibrant",
+  fase:"surrealism dream psychology Dalí Magritte unconscious",femininas:"female woman artist painter",
+};
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -183,6 +196,34 @@ app.get("/api/status", async (req, res) => {
   });
 });
 
+// ─── POST /api/curadoria/expandir ─────────────────────────────────────────────
+// Adiciona N novas obras a uma ala por importância e diversidade
+app.post("/api/curadoria/expandir", async (req, res) => {
+  const ala  = req.query.ala  || req.body?.ala  || "retratos";
+  const n    = parseInt(req.query.n || req.body?.n || "30");
+  const hint = ALA_HINTS[ala] || "painting art masterwork";
+  try {
+    const resultado = await expandirAla(pool, KEYS, ala, hint, n);
+    res.json({ ok:true, ala, ...resultado });
+  } catch(e) {
+    res.status(500).json({ ok:false, error:e.message });
+  }
+});
+
+// ─── GET /api/curadoria/status ─────────────────────────────────────────────────
+app.get("/api/curadoria/status", async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT ala_id, source, COUNT(*) as n FROM artworks
+       WHERE image_url IS NOT NULL AND image_url != ''
+       GROUP BY ala_id, source ORDER BY ala_id`
+    );
+    res.json({ alas: r.rows });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ─── GET /api/search ──────────────────────────────────────────────────────────
 app.get("/api/search", async (req, res) => {
   const { q, alaId, fromYear, toYear, exclude, lang } = req.query;
@@ -236,7 +277,9 @@ app.get("*", (req, res) => {
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
-initDB().then(() => {
+initDB().then(async () => {
+  // Indexa curadoria fixa (obras icônicas por ala) — só na primeira vez
+  indexarCuradoria(pool, KEYS).catch(e => console.error("Curadoria erro:", e.message));
   app.listen(PORT, () => {
     console.log(`
 ╔══════════════════════════════════════════════════╗
