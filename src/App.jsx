@@ -70,12 +70,12 @@ const T = {
     footer: "18 GALERIES · MUSÉES MONDIAUX · COLLECTION PERSONNELLE",
     global: "Collection d'Art Mondial",
     alas: {
-      retratos:"Portraits", pessoas_reais:"Personnages Réels", cidades:"Villes Réelles",
+      retratos:"Portraits", pessoas_reais:"Personnages Réels", cidades:"Émotion",
       historico:"Moments Historiques", objetos:"Objets", lugares:"Lieux Connus",
       natureza:"Nature", familiar:"Ambiance Familiale", nudes:"Nus Féminins",
       esoterico:"Ésotérisme", sacro:"Sacré", arquitetura:"Architecture",
       povo:"Gens du Peuple", perspectiva:"Perspective", luz_sol:"Lumière du Soleil",
-      cores:"Couleurs", fase:"Phase de l'Artiste", femininas:"Artistes Féminines",
+      cores:"Couleurs", fase:"Psyché", femininas:"Artistes Féminines",
     }
   },
   en: {
@@ -115,12 +115,12 @@ const T = {
     footer: "18 GALLERIES · GLOBAL MUSEUMS · PERSONAL COLLECTION",
     global: "Global Art Collection",
     alas: {
-      retratos:"Portraits", pessoas_reais:"Real People", cidades:"Real Cities",
+      retratos:"Portraits", pessoas_reais:"Real People", cidades:"Emotion",
       historico:"Historical Moments", objetos:"Objects", lugares:"Famous Places",
       natureza:"Nature", familiar:"Home Environment", nudes:"Female Nudes",
       esoterico:"Esotericism", sacro:"Sacred", arquitetura:"Architecture",
       povo:"Common People", perspectiva:"Perspective", luz_sol:"Sunlight",
-      cores:"Colors", fase:"Artist's Phase", femininas:"Female Artists",
+      cores:"Colors", fase:"Psyche", femininas:"Female Artists",
     }
   },
   es: {
@@ -160,12 +160,12 @@ const T = {
     footer: "18 GALERÍAS · MUSEOS GLOBALES · COLECCIÓN PERSONAL",
     global: "Colección de Arte Global",
     alas: {
-      retratos:"Retratos", pessoas_reais:"Personas Reales", cidades:"Ciudades Reales",
+      retratos:"Retratos", pessoas_reais:"Personas Reales", cidades:"Emoción",
       historico:"Momentos Históricos", objetos:"Objetos", lugares:"Lugares Conocidos",
       natureza:"Naturaleza", familiar:"Ambiente Familiar", nudes:"Desnudos Femeninos",
       esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Arquitectura",
       povo:"Gente del Pueblo", perspectiva:"Perspectiva", luz_sol:"Luz del Sol",
-      cores:"Colores", fase:"Fase del Artista", femininas:"Artistas Femeninas",
+      cores:"Colores", fase:"Psiqué", femininas:"Artistas Femeninas",
     }
   },
   it: {
@@ -205,12 +205,12 @@ const T = {
     footer: "18 GALLERIE · MUSEI GLOBALI · COLLEZIONE PERSONALE",
     global: "Collezione d'Arte Globale",
     alas: {
-      retratos:"Ritratti", pessoas_reais:"Persone Reali", cidades:"Città Reali",
+      retratos:"Ritratti", pessoas_reais:"Persone Reali", cidades:"Emozione",
       historico:"Momenti Storici", objetos:"Oggetti", lugares:"Luoghi Noti",
       natureza:"Natura", familiar:"Ambiente Familiare", nudes:"Nudi Femminili",
       esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Architettura",
       povo:"Gente del Popolo", perspectiva:"Prospettiva", luz_sol:"Luce del Sole",
-      cores:"Colori", fase:"Fase dell'Artista", femininas:"Artiste Femminili",
+      cores:"Colori", fase:"Psiche", femininas:"Artiste Femminili",
     }
   }
 };
@@ -219,7 +219,7 @@ const T = {
 const ALAS = [
   { id:"retratos",     icon:"👤", color:"#8B7355", desc:{fr:"Expression humaine dans le visage",en:"Human expression in the face",es:"Expresión humana en el rostro",it:"Espressione umana nel volto"},           hint:"portrait face expression Renaissance" },
   { id:"pessoas_reais",icon:"🧑", color:"#6B8E6B", desc:{fr:"Personnages identifiables",en:"Identifiable individuals",es:"Individuos identificables",it:"Individui identificabili"},                             hint:"real person historical figure identified" },
-  { id:"cidades",      icon:"🏙", color:"#5B7FA6", desc:{fr:"Vues urbaines identifiables",en:"Identifiable urban views",es:"Vistas urbanas identificables",it:"Vedute urbane identificabili"},                   hint:"cityscape urban view known city" },
+  { id:"cidades",      icon:"💭", color:"#5B7FA6", desc:{fr:"Art abstrait et langage émotionnel",en:"Abstract art and emotional language",es:"Arte abstracto y lenguaje emocional",it:"Arte astratta e linguaggio emotivo"},           hint:"abstract expressionism color emotion painting" },
   { id:"historico",    icon:"⚔️", color:"#8B4A4A", desc:{fr:"Batailles et événements politiques",en:"Battles and political events",es:"Batallas y eventos políticos",it:"Battaglie ed eventi politici"},         hint:"historical event battle political scene" },
   { id:"objetos",      icon:"🏺", color:"#A08B5B", desc:{fr:"Natures mortes et compositions",en:"Still life and compositions",es:"Naturalezas muertas",it:"Natura morta e composizioni"},                        hint:"still life objects vanitas composition" },
   { id:"lugares",      icon:"🗺", color:"#5B8B8B", desc:{fr:"Monuments et paysages célèbres",en:"Famous monuments and landscapes",es:"Monumentos y paisajes famosos",it:"Monumenti e paesaggi famosi"},          hint:"landmark known place monument famous" },
@@ -233,7 +233,7 @@ const ALAS = [
   { id:"perspectiva",  icon:"📐", color:"#5B6B8B", desc:{fr:"La profondeur comme élément central",en:"Depth as central element",es:"La profundidad como elemento central",it:"La profondità come elemento centrale"}, hint:"perspective depth optical illusion" },
   { id:"luz_sol",      icon:"☀️", color:"#A08B3B", desc:{fr:"La lumière naturelle comme protagoniste",en:"Natural light as protagonist",es:"La luz natural como protagonista",it:"La luce naturale come protagonista"}, hint:"sunlight natural light dawn sunset luminism" },
   { id:"cores",        icon:"🌈", color:"#7B5B9B", desc:{fr:"La couleur comme langage expressif",en:"Color as expressive language",es:"El color como lenguaje expresivo",it:"Il colore come linguaggio espressivo"}, hint:"color chromatic fauvism expressionism vibrant" },
-  { id:"fase",         icon:"🖌️", color:"#5B8B7B", desc:{fr:"Une période dans la carrière de l'artiste",en:"A period in the artist's career",es:"Un período en la carrera del artista",it:"Un periodo nella carriera dell'artista"}, hint:"artist period early work mature late style" },
+  { id:"fase",         icon:"🧠", color:"#5B8B7B", desc:{fr:"Surréalisme et art psychologique",en:"Surrealism and psychological art",es:"Surrealismo y arte psicológico",it:"Surrealismo e arte psicologica"}, hint:"surrealism dream psychology Dalí Magritte unconscious" },
   { id:"femininas",    icon:"👩‍🎨", color:"#9B5B8B", desc:{fr:"Grandes artistes femmes",en:"Great women artists",es:"Grandes artistas mujeres",it:"Grandi artiste donne"},                                   hint:"female artist woman painter Frida Kahlo Mary Cassatt" },
 ];
 
