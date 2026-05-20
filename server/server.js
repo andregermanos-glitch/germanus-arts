@@ -102,6 +102,39 @@ async function saveArtwork(art) {
 }
 
 async function searchLocal(q, alaId, limit) {
+  // ─── Busca curadoria — 18 obras da lista fixa, sem repetição ─────────────────
+async function searchCuradoria(alaId, excludeIds = [], limit = 18) {
+  try {
+    const excl = excludeIds.filter(Boolean);
+
+    // Tenta retornar obras ainda não vistas
+    const r = await pool.query(
+      `SELECT * FROM artworks
+       WHERE ala_id = $1
+         AND source = 'curadoria'
+         AND image_url IS NOT NULL AND image_url != ''
+         ${excl.length ? "AND id != ALL($3::TEXT[])" : ""}
+       ORDER BY RANDOM()
+       LIMIT $2`,
+      excl.length ? [alaId, limit, excl] : [alaId, limit]
+    );
+
+    // Se esgotou (todas já vistas), reinicia o ciclo sem exclusões
+    if (r.rows.length < limit) {
+      const r2 = await pool.query(
+        `SELECT * FROM artworks
+         WHERE ala_id = $1
+           AND source = 'curadoria'
+           AND image_url IS NOT NULL AND image_url != ''
+         ORDER BY RANDOM() LIMIT $2`,
+        [alaId, limit]
+      );
+      return r2.rows.map(mapRow);
+    }
+
+    return r.rows.map(mapRow);
+  } catch { return []; }
+}
   try {
     const r = await pool.query(
       `SELECT * FROM artworks
