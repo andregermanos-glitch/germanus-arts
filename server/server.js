@@ -11,7 +11,7 @@ const { expandirAla }      = require("./expansor");
 // Hint de busca por ala (usado pelo expansor)
 const ALA_HINTS = {
   retratos:"portrait painting face",pessoas_reais:"historical figure portrait",
-  cidades:"abstract expressionism emotion Kandinsky Rothko Pollock",historico:"battle historical scene",
+  cidades:"cityscape urban street painting night city Hopper Kirchner",
   objetos:"still life flowers Dutch",lugares:"landmark famous place",
   natureza:"landscape nature countryside",familiar:"domestic interior family",
   nudes:"classical nude Venus figure",esoterico:"mysticism symbolism esoteric",
@@ -127,7 +127,7 @@ function mapRow(r) {
 const ALA_TERMS = {
   retratos:      ["portrait painting face expression","self-portrait oil canvas master","Renaissance baroque portrait figure"],
   pessoas_reais: ["historical figure portrait identified","royal portrait king queen noble","identified person historical painting"],
-  cidades:       ["cityscape urban view painting","city veduta panorama canal","urban landscape known city painting"],
+  cidades: ["cityscape urban street painting night city","city veduta canal nocturnal impressionism","urban street scene figures Hopper Kirchner Caillebotte"],
   historico:     ["battle historical scene painting","war allegory history canvas","historical event narrative painting"],
   objetos:       ["still life flowers objects Dutch","vanitas nature morte Flemish","still life fruit objects canvas"],
   lugares:       ["landmark famous place painting","monument landscape famous view","iconic location landscape art"],
