@@ -11,7 +11,7 @@ const { expandirAla }      = require("./expansor");
 // Hint de busca por ala (usado pelo expansor)
 const ALA_HINTS = {
   retratos:"portrait painting face",pessoas_reais:"historical figure portrait",
-  cidades:"cityscape urban street painting night city Hopper Kirchner",
+  cidades:"cityscape urban street painting night city Hopper Kirchner",historico:"battle historical scene",
   objetos:"still life flowers Dutch",lugares:"landmark famous place",
   natureza:"landscape nature countryside",familiar:"domestic interior family",
   nudes:"classical nude Venus figure",esoterico:"mysticism symbolism esoteric",
@@ -102,39 +102,6 @@ async function saveArtwork(art) {
 }
 
 async function searchLocal(q, alaId, limit) {
-  // ─── Busca curadoria — 18 obras da lista fixa, sem repetição ─────────────────
-async function searchCuradoria(alaId, excludeIds = [], limit = 18) {
-  try {
-    const excl = excludeIds.filter(Boolean);
-
-    // Tenta retornar obras ainda não vistas
-    const r = await pool.query(
-      `SELECT * FROM artworks
-       WHERE ala_id = $1
-         AND source = 'curadoria'
-         AND image_url IS NOT NULL AND image_url != ''
-         ${excl.length ? "AND id != ALL($3::TEXT[])" : ""}
-       ORDER BY RANDOM()
-       LIMIT $2`,
-      excl.length ? [alaId, limit, excl] : [alaId, limit]
-    );
-
-    // Se esgotou (todas já vistas), reinicia o ciclo sem exclusões
-    if (r.rows.length < limit) {
-      const r2 = await pool.query(
-        `SELECT * FROM artworks
-         WHERE ala_id = $1
-           AND source = 'curadoria'
-           AND image_url IS NOT NULL AND image_url != ''
-         ORDER BY RANDOM() LIMIT $2`,
-        [alaId, limit]
-      );
-      return r2.rows.map(mapRow);
-    }
-
-    return r.rows.map(mapRow);
-  } catch { return []; }
-}
   try {
     const r = await pool.query(
       `SELECT * FROM artworks
@@ -155,12 +122,46 @@ function mapRow(r) {
     imageUrl:r.image_url, externalUrl:r.external_url, alaId:r.ala_id };
 }
 
+// ─── Curadoria fixa — 18 obras por vez, sem repetição por 30 min ──────────────
+async function searchCuradoria(alaId, excludeIds = [], limit = 18) {
+  try {
+    const excl = excludeIds.filter(Boolean);
+
+    // Tenta retornar obras ainda não vistas nos últimos 30 min
+    if (excl.length > 0) {
+      const r = await pool.query(
+        `SELECT * FROM artworks
+         WHERE ala_id = $1
+           AND source = 'curadoria'
+           AND image_url IS NOT NULL AND image_url != ''
+           AND id != ALL($3::TEXT[])
+         ORDER BY RANDOM()
+         LIMIT $2`,
+        [alaId, limit, excl]
+      );
+      if (r.rows.length >= limit) return r.rows.map(mapRow);
+    }
+
+    // Esgotou ou sem exclusões — reinicia o ciclo sem filtro
+    const r2 = await pool.query(
+      `SELECT * FROM artworks
+       WHERE ala_id = $1
+         AND source = 'curadoria'
+         AND image_url IS NOT NULL AND image_url != ''
+       ORDER BY RANDOM()
+       LIMIT $2`,
+      [alaId, limit]
+    );
+    return r2.rows.map(mapRow);
+  } catch { return []; }
+}
+
 // ─── Algoritmo de curadoria por ala ──────────────────────────────────────────
-// Substitui Claude — cada ala tem termos de busca rotacionados
+// Cada ala tem termos de busca rotacionados (usado apenas em buscas livres)
 const ALA_TERMS = {
   retratos:      ["portrait painting face expression","self-portrait oil canvas master","Renaissance baroque portrait figure"],
   pessoas_reais: ["historical figure portrait identified","royal portrait king queen noble","identified person historical painting"],
-  cidades: ["cityscape urban street painting night city","city veduta canal nocturnal impressionism","urban street scene figures Hopper Kirchner Caillebotte"],
+  cidades:       ["cityscape urban street painting night city","city veduta canal nocturnal impressionism","urban street scene figures Hopper Kirchner Caillebotte"],
   historico:     ["battle historical scene painting","war allegory history canvas","historical event narrative painting"],
   objetos:       ["still life flowers objects Dutch","vanitas nature morte Flemish","still life fruit objects canvas"],
   lugares:       ["landmark famous place painting","monument landscape famous view","iconic location landscape art"],
@@ -174,41 +175,37 @@ const ALA_TERMS = {
   perspectiva:   ["perspective depth landscape painting","architectural perspective vanishing","optical depth view painting"],
   luz_sol:       ["sunlight luminism natural light painting","golden hour sunshine landscape","natural light impressionism painting"],
   cores:         ["colorful expressionism vibrant painting","fauvism bold color art","chromatic color field painting"],
-  fase:          ["masterwork iconic famous painter","artist mature period style","great master painter masterpiece"],
+  fase:          ["surrealism dream unconscious painting","Dalí Magritte dream symbolic","psychological symbolist figurative painting"],
   femininas:     ["woman female artist painter work","Mary Cassatt Berthe Morisot art","female artist painting impressionism"],
 };
 
-// Busca curada sem Claude — usa termos rotacionados por ala
+// Busca curada sem Claude — usa termos rotacionados por ala (busca livre)
 async function searchByGallery(alaId, extraQuery, keys, options = {}) {
   const terms   = ALA_TERMS[alaId] || ["painting art masterwork"];
-  const timeIdx = Math.floor(Date.now() / 180000) % terms.length; // muda a cada 3 min
+  const timeIdx = Math.floor(Date.now() / 180000) % terms.length;
 
-  // Usa a query do usuário ou os termos da ala
   const q1 = extraQuery || terms[timeIdx];
   const q2 = terms[(timeIdx + 1) % terms.length];
 
-  // Busca em paralelo com dois termos diferentes
   const [r1, r2] = await Promise.all([
     searchAll(q1, keys, { limit: 8, ...options }),
     searchAll(q2, keys, { limit: 6, ...options }),
   ]);
 
-  // Merge e deduplica
   const seen = new Set();
   return [...r1, ...r2].filter(a => {
     const key = a.id || a.title;
     if (seen.has(key)) return false;
     seen.add(key);
-    return a.imageUrl; // só obras com imagem
+    return a.imageUrl;
   });
 }
 
-// ─── Rotatividade ─────────────────────────────────────────────────────────────
+// ─── Rotatividade (busca livre) ───────────────────────────────────────────────
 function rotate(results, excludeIds) {
   const excluded = new Set(excludeIds || []);
   const fresh    = excluded.size > 0 ? results.filter(a => !excluded.has(a.id)) : results;
-  const withImg  = fresh.filter(a => a.imageUrl).sort(() => Math.random() - 0.45);
-  return withImg;
+  return fresh.filter(a => a.imageUrl).sort(() => Math.random() - 0.45);
 }
 
 // ─── GET /api/status ──────────────────────────────────────────────────────────
@@ -219,9 +216,9 @@ app.get("/api/status", async (req, res) => {
     status: "online",
     database: "PostgreSQL (persistente)",
     artworks_indexed: artCount,
-    mode: "Algoritmo próprio — independente de Claude",
+    mode: "Curadoria fixa — 18 obras por ala, sem repetição 30 min",
     apis: {
-      vam:"ok", cleveland:"ok", aic:"ok", met:"ok", rijksmuseum:"ok (sem chave)",
+      vam:"ok", cleveland:"ok", aic:"ok", met:"ok", rijksmuseum:"ok",
       smithsonian: KEYS.si ? "ok" : "DEMO_KEY",
       harvard:     KEYS.harvard   ? "ok" : "sem chave",
       europeana:   KEYS.europeana ? "ok" : "sem chave",
@@ -230,7 +227,6 @@ app.get("/api/status", async (req, res) => {
 });
 
 // ─── POST /api/curadoria/expandir ─────────────────────────────────────────────
-// Adiciona N novas obras a uma ala por importância e diversidade
 app.post("/api/curadoria/expandir", async (req, res) => {
   const ala  = req.query.ala  || req.body?.ala  || "retratos";
   const n    = parseInt(req.query.n || req.body?.n || "30");
@@ -243,7 +239,7 @@ app.post("/api/curadoria/expandir", async (req, res) => {
   }
 });
 
-// ─── GET /api/curadoria/status ─────────────────────────────────────────────────
+// ─── GET /api/curadoria/status ────────────────────────────────────────────────
 app.get("/api/curadoria/status", async (req, res) => {
   try {
     const r = await pool.query(
@@ -259,39 +255,44 @@ app.get("/api/curadoria/status", async (req, res) => {
 
 // ─── GET /api/search ──────────────────────────────────────────────────────────
 app.get("/api/search", async (req, res) => {
-  const { q, alaId, fromYear, toYear, exclude, lang } = req.query;
+  const { q, alaId, fromYear, toYear, exclude } = req.query;
   if (!q?.trim()) return res.status(400).json({ error: "Parâmetro q obrigatório" });
 
   const excludeIds = exclude ? exclude.split(",").filter(Boolean) : [];
-  const cacheKey   = `${q}|${alaId||""}|${fromYear||""}|${toYear||""}`;
 
-  // 1. Cache
+  // ── Ala selecionada → curadoria fixa, 18 obras, sem repetição 30 min ──────
+  if (alaId) {
+    const results = await searchCuradoria(alaId, excludeIds, 18);
+    if (results.length > 0)
+      return res.json({ source:"curadoria", total:results.length, results });
+    // fallback se a ala ainda não foi indexada: continua para busca livre
+  }
+
+  // ── Busca livre (texto sem ala) → pipeline completo ───────────────────────
+  const cacheKey = `${q}|${alaId||""}|${fromYear||""}|${toYear||""}`;
+
   const cached = await getCache(cacheKey);
   if (cached) return res.json({ source:"cache", results: rotate(cached, excludeIds) });
 
-  // 2. Banco local (RAG — sem API externa)
   const localResults = await searchLocal(q, alaId, 50);
   if (localResults.length >= 8) {
     await setCache(cacheKey, localResults);
-    return res.json({ source:"local_db", total: localResults.length, results: rotate(localResults, excludeIds) });
+    return res.json({ source:"local_db", total:localResults.length, results: rotate(localResults, excludeIds) });
   }
 
-  // 3. Algoritmo de curadoria — busca nas APIs dos museus
   try {
     const galleryResults = await searchByGallery(alaId, q, KEYS, { fromYear, toYear });
 
-    // Salva no banco para futuras buscas
     for (const art of galleryResults) {
       await saveArtwork({ ...art, alaId: alaId || null, imageUrl: art.imageUrl, externalUrl: art.externalUrl });
     }
 
-    // Combina com resultados locais e remove duplicatas
     const seen  = new Set(galleryResults.map(a => a.id));
     const extra = localResults.filter(a => !seen.has(a.id));
     const final = [...galleryResults, ...extra];
 
     await setCache(cacheKey, final);
-    res.json({ source:"algorithm+museums", total: final.length, results: rotate(final, excludeIds) });
+    res.json({ source:"algorithm+museums", total:final.length, results: rotate(final, excludeIds) });
 
   } catch(e) {
     console.error("[Search]", e.message);
@@ -311,15 +312,13 @@ app.get("*", (req, res) => {
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 initDB().then(async () => {
-  // Indexa curadoria fixa (obras icônicas por ala) — só na primeira vez
   indexarCuradoria(pool, KEYS).catch(e => console.error("Curadoria erro:", e.message));
   app.listen(PORT, () => {
     console.log(`
 ╔══════════════════════════════════════════════════╗
-║   GERMANUS.Art — Algoritmo Autônomo              ║
+║   GERMANUS.Art — Curadoria Fixa                  ║
 ║   http://localhost:${PORT}                         ║
-║   Modo: 8 museus × termos rotacionados           ║
-║   Claude: não necessário                         ║
+║   Modo: 18 obras por ala · sem repetição 30 min  ║
 ║   Europeana: ${KEYS.europeana ? "✅ ativo" : "⚠️  sem chave"}                   ║
 ║   Harvard:   ${KEYS.harvard   ? "✅ ativo" : "⚠️  sem chave"}                   ║
 ╚══════════════════════════════════════════════════╝
