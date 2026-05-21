@@ -1,0 +1,252 @@
+/* ============================================
+   GERMANUS.Art — Visual Premium
+   Integrado com App.jsx — Maio 2026
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&display=swap');
+
+/* ─── Variáveis globais ──────────────────────────────────────────────────── */
+:root {
+  --bg:            #f3efe7;
+  --bg-card:       #ffffff;
+  --text:          #2c2418;
+  --text-meta:     #5c5346;
+  --gold:          #c4a46c;
+  --gold-light:    #e8d5b5;
+  --blue:          #1a3a6e;        /* cor de acento original do app */
+  --shadow-card:   0 8px 24px rgba(0,0,0,0.07);
+  --shadow-hover:  0 16px 36px rgba(0,0,0,0.12);
+  --radius-card:   16px;
+  --radius-btn:    40px;
+  --transition:    all 0.3s cubic-bezier(0.25, 0.9, 0.4, 1);
+  --font-serif:    'Cormorant Garamond', 'Times New Roman', serif;
+  --font-sans:     'Inter', 'Verdana', system-ui, sans-serif;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  scroll-behavior: smooth;
+}
+
+/* ─── App root ───────────────────────────────────────────────────────────── */
+.germ-app {
+  background-color: var(--bg);
+  min-height: 100vh;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.germ-header {
+  background: rgba(243, 239, 231, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+.germ-footer {
+  background: rgba(243, 239, 231, 0.95);
+}
+
+/* ─── Grid de obras ──────────────────────────────────────────────────────── */
+.artworks-grid {
+  grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+}
+
+/* ─── Grid de alas ───────────────────────────────────────────────────────── */
+.alas-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+}
+
+/* ─── Botão de ala ───────────────────────────────────────────────────────── */
+.ala-btn {
+  font-family: var(--font-sans);
+  border-radius: 4px;
+  transition: var(--transition);
+  width: 100%;
+  text-align: left;
+}
+
+.ala-btn--active {
+  font-weight: 700;
+}
+
+.ala-btn:hover {
+  transform: translateX(2px);
+}
+
+/* ─── Card de obra — estrutura ───────────────────────────────────────────── */
+.artwork-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-card) !important;
+  border: 1px solid rgba(196, 164, 108, 0.18) !important;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-card);
+  transition: var(--transition);
+  cursor: pointer;
+
+  /* Animação de entrada — controlada por classe */
+  opacity: 0;
+  transform: translateY(20px);
+  animation: cardEnter 0.45s ease forwards;
+}
+
+/* Stagger para os 18 cards */
+.artwork-card:nth-child(1)  { animation-delay: 0.02s; }
+.artwork-card:nth-child(2)  { animation-delay: 0.05s; }
+.artwork-card:nth-child(3)  { animation-delay: 0.07s; }
+.artwork-card:nth-child(4)  { animation-delay: 0.09s; }
+.artwork-card:nth-child(5)  { animation-delay: 0.11s; }
+.artwork-card:nth-child(6)  { animation-delay: 0.13s; }
+.artwork-card:nth-child(7)  { animation-delay: 0.15s; }
+.artwork-card:nth-child(8)  { animation-delay: 0.17s; }
+.artwork-card:nth-child(9)  { animation-delay: 0.19s; }
+.artwork-card:nth-child(10) { animation-delay: 0.21s; }
+.artwork-card:nth-child(11) { animation-delay: 0.23s; }
+.artwork-card:nth-child(12) { animation-delay: 0.25s; }
+.artwork-card:nth-child(13) { animation-delay: 0.27s; }
+.artwork-card:nth-child(14) { animation-delay: 0.29s; }
+.artwork-card:nth-child(15) { animation-delay: 0.31s; }
+.artwork-card:nth-child(16) { animation-delay: 0.33s; }
+.artwork-card:nth-child(17) { animation-delay: 0.35s; }
+.artwork-card:nth-child(18) { animation-delay: 0.37s; }
+
+.artwork-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--gold-light) !important;
+}
+
+/* ─── Área de imagem do card ─────────────────────────────────────────────── */
+.artwork-card__img-area {
+  /* Altura fixa preserva pinturas verticais e horizontais sem corte excessivo */
+  height: 240px;
+  background: #f0ece4;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── Imagem ─────────────────────────────────────────────────────────────── */
+.artwork-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top; /* prioriza rostos em retratos */
+  display: block;
+  transition: transform 0.55s ease;
+}
+
+.artwork-card:hover .artwork-card__img {
+  transform: scale(1.03);
+}
+
+/* ─── Placeholder "IMAGE NON DISPONIBLE" ─────────────────────────────────── */
+.artwork-card__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  text-align: center;
+  background: linear-gradient(135deg, #f5f2ec 0%, #edeae2 100%);
+}
+
+.artwork-card__placeholder::before {
+  content: '';
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(196, 164, 108, 0.3);
+  border-radius: 4px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c4a46c' stroke-width='1' opacity='0.4'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpath d='m21 15-5-5L5 21'/%3E%3C/svg%3E") center/28px no-repeat;
+}
+
+/* ─── Conteúdo do card ───────────────────────────────────────────────────── */
+.artwork-card__content {
+  padding: 14px 14px 16px;
+}
+
+/* ─── Título da obra ─────────────────────────────────────────────────────── */
+.artwork-card__title {
+  font-family: var(--font-serif) !important;
+  font-size: 14px !important;
+  font-style: italic;
+  font-weight: 600;
+  color: var(--text) !important;
+  line-height: 1.35;
+  margin: 0 0 4px !important;
+
+  /* Limita a 2 linhas — evita cards muito altos */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ─── Museu — linha dourada ──────────────────────────────────────────────── */
+.artwork-card__museum {
+  font-size: 11px;
+  color: var(--text-meta);
+  border-left: 2px solid var(--gold) !important;
+  padding-left: 7px;
+  line-height: 1.4;
+  margin: 0 !important;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.artwork-card__museum:hover {
+  color: var(--blue) !important;
+}
+
+/* ─── Animação de entrada ────────────────────────────────────────────────── */
+@keyframes cardEnter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+/* ─── Responsivo ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .artworks-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px !important;
+  }
+
+  .alas-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px !important;
+  }
+
+  .artwork-card__img-area {
+    height: 180px;
+  }
+
+  .artwork-card__title {
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .artworks-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
