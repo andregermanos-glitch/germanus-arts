@@ -2,7 +2,57 @@
   {
     "ala": "luz_sol",
     "api": "rijksmuseum",
-    "api_id": "SK-A-3869",
+    "api_id": "SK-A-3879",
+    "autor": "Paulus Potter",
+    "titulo": "The Bull",
+    "ano": 1647,
+    "importancia": "iconica",
+    "origem": "Países Baixos",
+    "institution": "Rijksmuseum, Amsterdã"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Johan Barthold Jongkind",
+    "titulo": "The Seine and Notre-Dame de Paris",
+    "ano": 1864,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Johan_Barthold_Jongkind_-_The_Seine_and_Notre-Dame_de_Paris_-_Google_Art_Project.jpg/400px-Johan_Barthold_Jongkind_-_The_Seine_and_Notre-Dame_de_Paris_-_Google_Art_Project.jpg",
+    "search_q": "Jongkind Seine Notre-Dame Dutch impressionist light water",
+    "importancia": "iconica",
+    "origem": "Países Baixos",
+    "institution": "Musée d'Orsay, Paris"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Anders Zorn",
+    "titulo": "Midsommar Dance",
+    "ano": 1897,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Anders_Zorn_-_Midsommar.jpg/400px-Anders_Zorn_-_Midsommar.jpg",
+    "search_q": "Zorn Midsommar dance Swedish impressionist light summer",
+    "importancia": "iconica",
+    "origem": "Suécia",
+    "institution": "Nationalmuseum, Estocolmo"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Peder Severin Krøyer",
+    "titulo": "Summer Evening on the Skagen Southern Beach",
+    "ano": 1893,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Peder_Severin_Krøyer_-_Sommeraften_ved_Skagen_Sønderstrand_-_Google_Art_Project.jpg/400px-Peder_Severin_Krøyer_-_Sommeraften_ved_Skagen_Sønderstrand_-_Google_Art_Project.jpg",
+    "search_q": "Krøyer Skagen Summer Evening beach Danish light impressionist",
+    "importancia": "iconica",
+    "origem": "Dinamarca",
+    "institution": "Skagens Museum, Skagen"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "rijksmuseum",
+    "api_id": null,
     "autor": "Aelbert Cuyp",
     "titulo": "River Landscape with Horsemen and Peasants",
     "ano": 1655,
@@ -14,7 +64,7 @@
   {
     "ala": "luz_sol",
     "api": "rijksmuseum",
-    "api_id": "SK-A-3870",
+    "api_id": null,
     "autor": "Aelbert Cuyp",
     "titulo": "Herdsmen with Cows",
     "ano": 1650,
@@ -26,7 +76,7 @@
   {
     "ala": "luz_sol",
     "api": "rijksmuseum",
-    "api_id": "SK-A-3",
+    "api_id": null,
     "autor": "Jacob van Ruisdael",
     "titulo": "The Mill at Wijk bij Duurstede",
     "ano": 1668,
@@ -38,7 +88,7 @@
   {
     "ala": "luz_sol",
     "api": "rijksmuseum",
-    "api_id": "SK-A-1353",
+    "api_id": null,
     "autor": "Jacob van Ruisdael",
     "titulo": "Landscape with a Waterfall",
     "ano": 1665,
@@ -62,7 +112,7 @@
   {
     "ala": "luz_sol",
     "api": "rijksmuseum",
-    "api_id": "SK-A-1352",
+    "api_id": null,
     "autor": "Jan van Goyen",
     "titulo": "River Landscape with Windmill",
     "ano": 1642,
@@ -74,7 +124,7 @@
   {
     "ala": "luz_sol",
     "api": "rijksmuseum",
-    "api_id": "SK-A-1935",
+    "api_id": null,
     "autor": "Rembrandt van Rijn",
     "titulo": "Landscape with a Stone Bridge",
     "ano": 1638,
@@ -86,7 +136,7 @@
   {
     "ala": "luz_sol",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4717",
+    "api_id": null,
     "autor": "Vincent van Gogh",
     "titulo": "Wheatfield with Crows",
     "ano": 1890,
@@ -98,7 +148,7 @@
   {
     "ala": "luz_sol",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4719",
+    "api_id": null,
     "autor": "Vincent van Gogh",
     "titulo": "The Yellow House",
     "ano": 1888,
@@ -110,7 +160,7 @@
   {
     "ala": "luz_sol",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4100",
+    "api_id": null,
     "autor": "Vincent van Gogh",
     "titulo": "Almond Blossom",
     "ano": 1890,
@@ -177,8 +227,7 @@
     "search_artist": "Monet",
     "search_q": "haystacks sunset light",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Claude_Monet_-_Haystacks_%28sunset%29_-_Google_Art_Project.jpg/400px-Claude_Monet_-_Haystacks_%28sunset%29_-_Google_Art_Project.jpg"
+    "origem": "França"
   },
   {
     "ala": "luz_sol",
@@ -190,8 +239,7 @@
     "search_artist": "Monet",
     "search_q": "morning Seine Giverny mist",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Claude_Monet_-_Morning_on_the_Seine_near_Giverny%2C_Mist_-_Google_Art_Project.jpg/400px-Claude_Monet_-_Morning_on_the_Seine_near_Giverny%2C_Mist_-_Google_Art_Project.jpg"
+    "origem": "França"
   },
   {
     "ala": "luz_sol",
@@ -203,8 +251,7 @@
     "search_artist": "Monet",
     "search_q": "Rouen Cathedral sunlight facade",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Claude_Monet_-_Rouen_Cathedral_-_Harmony_in_Blue_-_Mus%C3%A9e_d%27Orsay.jpg/400px-Claude_Monet_-_Rouen_Cathedral_-_Harmony_in_Blue_-_Mus%C3%A9e_d%27Orsay.jpg"
+    "origem": "França"
   },
   {
     "ala": "luz_sol",
@@ -216,8 +263,7 @@
     "search_artist": "Homer",
     "search_q": "blue boat water light",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Winslow_Homer_-_The_Blue_Boat_-_Google_Art_Project.jpg/400px-Winslow_Homer_-_The_Blue_Boat_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "luz_sol",
@@ -229,8 +275,7 @@
     "search_artist": "Homer",
     "search_q": "sunlight coast waves",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Winslow_Homer_-_Sunlight_on_the_Coast_-_Google_Art_Project.jpg/400px-Winslow_Homer_-_Sunlight_on_the_Coast_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "luz_sol",
@@ -242,8 +287,7 @@
     "search_artist": "Heade",
     "search_q": "thunderstorm bay light luminism",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Martin_Johnson_Heade_-_Approaching_Storm%3A_Beach_near_Newport_-_Google_Art_Project.jpg/400px-Martin_Johnson_Heade_-_Approaching_Storm%3A_Beach_near_Newport_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "luz_sol",
@@ -267,8 +311,7 @@
     "search_artist": "Church",
     "search_q": "twilight wilderness sunset American",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Frederic_Edwin_Church_-_Twilight_in_the_Wilderness_-_Google_Art_Project.jpg/400px-Frederic_Edwin_Church_-_Twilight_in_the_Wilderness_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "luz_sol",
@@ -280,8 +323,7 @@
     "search_artist": "Church",
     "search_q": "Cotopaxi volcano sunset light",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Frederic_Edwin_Church_-_Cotopaxi_-_Google_Art_Project.jpg/400px-Frederic_Edwin_Church_-_Cotopaxi_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "luz_sol",
@@ -293,8 +335,7 @@
     "search_artist": "Cole",
     "search_q": "oxbow Connecticut river light landscape",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Thomas_Cole_-_The_Oxbow_-_Google_Art_Project.jpg/400px-Thomas_Cole_-_The_Oxbow_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "luz_sol",
@@ -306,8 +347,7 @@
     "search_artist": "Sisley",
     "search_q": "flood Port-Marly water light",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Alfred_Sisley_-_The_Flood_at_Port-Marly_-_Google_Art_Project.jpg/400px-Alfred_Sisley_-_The_Flood_at_Port-Marly_-_Google_Art_Project.jpg"
+    "origem": "França"
   },
   {
     "ala": "luz_sol",
@@ -319,8 +359,7 @@
     "search_artist": "Pissarro",
     "search_q": "Boulevard Montmartre night light",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Pissarro_-_Boulevard_Montmartre_at_Night.jpg/400px-Pissarro_-_Boulevard_Montmartre_at_Night.jpg"
+    "origem": "França"
   },
   {
     "ala": "luz_sol",
@@ -404,8 +443,7 @@
     "search_q": "Turner Fighting Temeraire sunset",
     "importancia": "iconica",
     "origem": "Reino Unido",
-    "institution": "National Gallery London",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg/400px-The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg"
+    "institution": "National Gallery London"
   },
   {
     "ala": "luz_sol",
@@ -417,8 +455,7 @@
     "search_q": "Turner Rain Steam Speed train light",
     "importancia": "iconica",
     "origem": "Reino Unido",
-    "institution": "National Gallery London",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/J.M.W._Turner_-_Rain%2C_Steam_and_Speed_-_The_Great_Western_Railway_-_Google_Art_Project.jpg/400px-J.M.W._Turner_-_Rain%2C_Steam_and_Speed_-_The_Great_Western_Railway_-_Google_Art_Project.jpg"
+    "institution": "National Gallery London"
   },
   {
     "ala": "luz_sol",
@@ -442,8 +479,7 @@
     "search_q": "Turner Norham Castle sunrise mist",
     "importancia": "iconica",
     "origem": "Reino Unido",
-    "institution": "Tate Britain",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Joseph_Mallord_William_Turner_-_Norham_Castle%2C_Sunrise_-_Google_Art_Project.jpg/400px-Joseph_Mallord_William_Turner_-_Norham_Castle%2C_Sunrise_-_Google_Art_Project.jpg"
+    "institution": "Tate Britain"
   },
   {
     "ala": "luz_sol",
@@ -467,8 +503,7 @@
     "search_q": "Monet Impression Sunrise harbour",
     "importancia": "iconica",
     "origem": "França",
-    "institution": "Musée Marmottan",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Claude_Monet_-_Impression%2C_Sunrise_-_Google_Art_Project.jpg/400px-Claude_Monet_-_Impression%2C_Sunrise_-_Google_Art_Project.jpg"
+    "institution": "Musée Marmottan"
   },
   {
     "ala": "luz_sol",
@@ -852,8 +887,7 @@
     "search_q": "Van Gogh Starry Night Rhône reflections",
     "importancia": "iconica",
     "origem": "Países Baixos",
-    "institution": "Musée d'Orsay",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/400px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg"
+    "institution": "Musée d'Orsay"
   },
   {
     "ala": "luz_sol",
