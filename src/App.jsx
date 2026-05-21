@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import "./germanus.css";
 
 // ─── Persistência ─────────────────────────────────────────────────────────────
 const loadCol  = () => { try { return JSON.parse(localStorage.getItem("germ_col")||"[]"); } catch { return []; } };
@@ -349,7 +350,7 @@ function AlaBtn({ name, ala, active, onClick }) {
   const [h,setH] = useState(false);
   const hot = active || h;
   return (
-    <button onClick={onClick} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
+    <button className={`ala-btn${active?" ala-btn--active":""}`} onClick={onClick} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
       style={{
         display:"flex", alignItems:"center",
         padding:"7px 14px",
@@ -383,18 +384,18 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, t }) {
   const ala = ALAS.find(a=>a.id===art.alaId);
 
   return (
-    <div style={{ background:"#fff", border:"1px solid #e8e4dc", borderRadius:3, overflow:"hidden", display:"flex", flexDirection:"column", transition:"border-color .18s, box-shadow .18s" }}
+    <div className="artwork-card" style={{ background:"#fff", border:"1px solid #e8e4dc", overflow:"hidden", display:"flex", flexDirection:"column" }}
       onMouseEnter={e=>{ e.currentTarget.style.borderColor="#aaa"; e.currentTarget.style.boxShadow="3px 3px 0 #0a0a0a20"; }}
       onMouseLeave={e=>{ e.currentTarget.style.borderColor="#e8e4dc"; e.currentTarget.style.boxShadow="none"; }}>
 
-      <div style={{ height:210, background:"#f2f0eb", borderBottom:"1px solid #ece9e2", overflow:"hidden", position:"relative", display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <div className="artwork-card__img-area" style={{ borderBottom:"1px solid #ece9e2", overflow:"hidden", position:"relative", display:"flex", alignItems:"center", justifyContent:"center" }}>
         {art.imageUrl&&!imgErr?(
           <>
             {!imgOk&&<div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"#f2f0eb" }}><div style={{ width:20, height:20, border:"2px solid #ddd", borderTopColor:"#888", borderRadius:"50%", animation:"spin 1s linear infinite" }}/></div>}
-            <img src={art.imageUrl} alt={art.title} style={{ width:"100%", height:"100%", objectFit:"cover", opacity:imgOk?1:0, transition:"opacity .3s" }} onLoad={()=>setImgOk(true)} onError={()=>setImgErr(true)}/>
+            <img src={art.imageUrl} alt={art.title} className="artwork-card__img" style={{ opacity:imgOk?1:0, transition:"opacity .3s" }} onLoad={()=>setImgOk(true)} onError={()=>setImgErr(true)}/>
           </>
         ):(
-          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:12, textAlign:"center" }}>
+          <div className="artwork-card__placeholder" style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:12, textAlign:"center" }}>
             <span style={{ fontSize:24, opacity:.1 }}>🖼</span>
             <span style={{ fontSize:9, color:"#bbb", fontFamily:"monospace", letterSpacing:1.5, textTransform:"uppercase" }}>{t.noImg}</span>
             {art.externalUrl&&<a href={art.externalUrl} target="_blank" rel="noreferrer" style={{ fontSize:9, color:"#aaa", fontFamily:"monospace" }}>wikipedia ↗</a>}
@@ -403,8 +404,8 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, t }) {
         {ala&&<div style={{ position:"absolute", top:7, left:7, background:`${ala.color}ee`, borderRadius:2, padding:"2px 7px" }}><span style={{ fontSize:9, color:"#fff", fontFamily:"Verdana,sans-serif", letterSpacing:.5 }}>{t.alas[ala.id]}</span></div>}
       </div>
 
-      <div style={{ padding:"13px", flex:1, display:"flex", flexDirection:"column", gap:5 }}>
-        <h3 style={{ margin:0, fontSize:13.5, fontFamily:"'Cormorant Garamond',serif", fontStyle:"italic", fontWeight:600, color:"#0a0a0a", lineHeight:1.35 }}>{art.title}</h3>
+      <div className="artwork-card__content" style={{ flex:1, display:"flex", flexDirection:"column", gap:5 }}>
+        <h3 className="artwork-card__title" style={{ margin:0, lineHeight:1.35 }}>{art.title}</h3>
         <p style={{ margin:0, fontSize:12, color:"#444", cursor:"pointer" }}
           onClick={()=>nav(art.artist?.split("(")[0].trim())}
           onMouseEnter={e=>e.target.style.color="#1a3a6e"} onMouseLeave={e=>e.target.style.color="#444"}>
@@ -415,7 +416,7 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, t }) {
           {art.origin&&<span onClick={()=>nav(art.origin)} style={{ fontSize:10.5, color:"#888", fontFamily:"monospace", cursor:"pointer", borderBottom:"1px dotted #ccc" }} onMouseEnter={e=>e.target.style.color="#1a3a6e"} onMouseLeave={e=>e.target.style.color="#888"}>🌍 {art.origin}</span>}
           {art.style&&<span onClick={()=>nav(art.style)} style={{ fontSize:10.5, color:"#888", fontFamily:"monospace", cursor:"pointer", borderBottom:"1px dotted #ccc" }} onMouseEnter={e=>e.target.style.color="#1a3a6e"} onMouseLeave={e=>e.target.style.color="#888"}>🎨 {art.style}</span>}
         </div>
-        {art.museum&&<p style={{ margin:0, fontSize:11, color:"#555", borderLeft:"2px solid #1a3a6e", paddingLeft:7, lineHeight:1.4, cursor:"pointer" }} onClick={()=>nav(art.museum?.split(",")[0])} onMouseEnter={e=>e.currentTarget.style.color="#1a3a6e"} onMouseLeave={e=>e.currentTarget.style.color="#555"}>{art.museum}</p>}
+        {art.museum&&<p className="artwork-card__museum" style={{ margin:0, lineHeight:1.4, cursor:"pointer" }} onClick={()=>nav(art.museum?.split(",")[0])} onMouseEnter={e=>e.currentTarget.style.color="#1a3a6e"} onMouseLeave={e=>e.currentTarget.style.color="#555"}>{art.museum}</p>}
         {art.medium&&<p style={{ margin:0, fontSize:10.5, color:"#bbb" }}>{art.medium.slice(0,80)}{art.medium.length>80?"…":""}</p>}
 
         {open&&(
@@ -609,13 +610,13 @@ export default function App() {
   ];
 
   return (
-    <div style={{ minHeight:"100vh",background:"#faf9f7",color:"#0a0a0a",fontFamily:"'Cormorant Garamond',Georgia,serif" }}>
+    <div className="germ-app" style={{ minHeight:"100vh",color:"#0a0a0a",fontFamily:"'Cormorant Garamond',Georgia,serif" }}>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
       <style>{`*{box-sizing:border-box}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       <AmbientBar/>
 
-      <header style={{ background:"#faf9f7",borderBottom:"1px solid #e8e4dc",padding:"18px 36px 0" }}>
+      <header className="germ-header" style={{ borderBottom:"1px solid #e8e4dc",padding:"18px 36px 0" }}>
         <div style={{ maxWidth:1300,margin:"0 auto" }}>
           <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:16 }}>
             <Logo/>
@@ -655,7 +656,7 @@ export default function App() {
               <YearRange from={fromYear} to={toYear} onFrom={setFrom} onTo={setTo} t={t}/>
             </div>
 
-            <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(min(100%, 280px), 1fr))",gap:6,marginBottom:22 }}>
+            <div className="alas-grid" style={{ display:"grid",gap:6,marginBottom:22 }}>
               {ALAS.map(ala=>(
                 <AlaBtn key={ala.id} name={t.alas[ala.id]} ala={ala} active={activeAla?.id===ala.id} onClick={()=>clickAla(ala)}/>
               ))}
@@ -666,7 +667,7 @@ export default function App() {
             {phase==="error"&&<p style={{ fontSize:10.5,color:"#b22222",fontFamily:"Verdana,sans-serif",marginBottom:14 }}>Erreur: {errMsg}</p>}
 
             {results.length>0&&(
-              <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(265px, 1fr))",gap:18 }}>
+              <div className="artworks-grid" style={{ display:"grid",gap:18 }}>
                 {results.map(a=><Card key={a.id} art={a} onAdd={add} inCollection={ids.has(a.id)} onNavigate={navigate} t={t}/>)}
               </div>
             )}
@@ -702,7 +703,7 @@ export default function App() {
                 </div>
               :<>
                   <p style={{ fontSize:10,color:"#bbb",fontFamily:"Verdana,sans-serif",marginBottom:16 }}>{t.artworks(filtered.length)}</p>
-                  <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(265px, 1fr))",gap:18 }}>
+                  <div className="artworks-grid" style={{ display:"grid",gap:18 }}>
                     {filtered.map(a=><Card key={a.id} art={a} onRemove={remove} onNavigate={navigate} t={t}/>)}
                   </div>
                 </>
@@ -723,7 +724,7 @@ export default function App() {
         )}
       </main>
 
-      <footer style={{ borderTop:"1px solid #ece9e2",padding:"14px 36px",display:"flex",justifyContent:"space-between",alignItems:"center",background:"#faf9f7" }}>
+      <footer className="germ-footer" style={{ borderTop:"1px solid #ece9e2",padding:"14px 36px",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
         <Logo small/>
         <p style={{ margin:0,fontSize:9,color:"#ccc",fontFamily:"Verdana,sans-serif",letterSpacing:2 }}>{t.footer}</p>
       </footer>
