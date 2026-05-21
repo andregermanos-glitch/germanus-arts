@@ -7,6 +7,63 @@
     "titulo": "The Night Watch",
     "ano": 1642,
     "importancia": "iconica",
+    "origem": "Países Baixos",
+    "institution": "Rijksmuseum, Amsterdã"
+  },
+  {
+    "ala": "retratos",
+    "api": "rijksmuseum",
+    "api_id": "SK-A-3262",
+    "autor": "Vincent van Gogh",
+    "titulo": "Self-Portrait",
+    "ano": 1887,
+    "importancia": "iconica",
+    "origem": "Países Baixos",
+    "institution": "Rijksmuseum, Amsterdã"
+  },
+  {
+    "ala": "retratos",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Helene Schjerfbeck",
+    "titulo": "Self-Portrait with Black Background",
+    "ano": 1915,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Helene_Schjerfbeck_-_Self-Portrait,_1884_-_Google_Art_Project.jpg/400px-Helene_Schjerfbeck_-_Self-Portrait,_1884_-_Google_Art_Project.jpg",
+    "search_q": "Schjerfbeck self-portrait Finnish painter",
+    "importancia": "iconica",
+    "origem": "Finlândia",
+    "institution": "Ateneum, Helsinque"
+  },
+  {
+    "ala": "retratos",
+    "api": "rijksmuseum",
+    "api_id": "SK-A-166",
+    "autor": "Rembrandt van Rijn",
+    "titulo": "The Jewish Bride",
+    "ano": 1665,
+    "importancia": "iconica",
+    "origem": "Países Baixos",
+    "institution": "Rijksmuseum, Amsterdã"
+  },
+  {
+    "ala": "retratos",
+    "api": "rijksmuseum",
+    "api_id": "SK-A-135",
+    "autor": "Frans Hals",
+    "titulo": "The Merry Drinker",
+    "ano": 1628,
+    "importancia": "iconica",
+    "origem": "Países Baixos",
+    "institution": "Rijksmuseum, Amsterdã"
+  },
+  {
+    "ala": "retratos",
+    "api": "rijksmuseum",
+    "api_id": "SK-C-5",
+    "autor": "Rembrandt van Rijn",
+    "titulo": "The Night Watch",
+    "ano": 1642,
+    "importancia": "iconica",
     "origem": "Países Baixos"
   },
   {
@@ -92,7 +149,7 @@
   {
     "ala": "retratos",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4050",
+    "api_id": null,
     "autor": "Rembrandt van Rijn",
     "titulo": "Self-Portrait as the Apostle Paul",
     "ano": 1661,
@@ -104,7 +161,7 @@
   {
     "ala": "retratos",
     "api": "rijksmuseum",
-    "api_id": "SK-A-3149",
+    "api_id": null,
     "autor": "Rembrandt van Rijn",
     "titulo": "Titus as a Monk",
     "ano": 1660,
@@ -116,7 +173,7 @@
   {
     "ala": "retratos",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4833",
+    "api_id": null,
     "autor": "Rembrandt van Rijn",
     "titulo": "Portrait of Marten Soolmans",
     "ano": 1634,
@@ -140,7 +197,7 @@
   {
     "ala": "retratos",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4834",
+    "api_id": null,
     "autor": "Rembrandt van Rijn",
     "titulo": "Portrait of Herman Doomer",
     "ano": 1640,
@@ -152,7 +209,7 @@
   {
     "ala": "retratos",
     "api": "rijksmuseum",
-    "api_id": "SK-A-2717",
+    "api_id": null,
     "autor": "Carel Fabritius",
     "titulo": "Self-Portrait",
     "ano": 1654,
@@ -176,7 +233,7 @@
   {
     "ala": "retratos",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4835",
+    "api_id": null,
     "autor": "Govert Flinck",
     "titulo": "Rembrandt as a Shepherd",
     "ano": 1636,
@@ -200,7 +257,7 @@
   {
     "ala": "retratos",
     "api": "rijksmuseum",
-    "api_id": "SK-A-3138",
+    "api_id": null,
     "autor": "Thomas de Keyser",
     "titulo": "Portrait of a Man",
     "ano": 1626,
@@ -236,7 +293,7 @@
   {
     "ala": "retratos",
     "api": "rijksmuseum",
-    "api_id": "SK-A-2717",
+    "api_id": null,
     "autor": "Gerrit Dou",
     "titulo": "Self-Portrait",
     "ano": 1660,
@@ -260,7 +317,7 @@
   {
     "ala": "retratos",
     "api": "rijksmuseum",
-    "api_id": "SK-A-3138",
+    "api_id": null,
     "autor": "Frans Hals",
     "titulo": "Portrait of a Man",
     "ano": 1660,
@@ -272,7 +329,7 @@
   {
     "ala": "retratos",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4836",
+    "api_id": null,
     "autor": "Rembrandt van Rijn",
     "titulo": "Portrait of Nicolaes van Bambeeck",
     "ano": 1641,
@@ -301,8 +358,7 @@
     "search_artist": "Degas",
     "search_q": "self portrait",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg/400px-Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg"
+    "origem": "França"
   },
   {
     "ala": "retratos",
@@ -326,8 +382,7 @@
     "search_artist": "Picasso",
     "search_q": "mother child",
     "importancia": "alta",
-    "origem": "Espanha",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Pablo_Picasso%2C_1921%2C_Nous_autres_musiciens_%28Three_Musicians%29%2C_oil_on_canvas%2C_200.7_x_222.9_cm%2C_Philadelphia_Museum_of_Art.jpg/400px-Pablo_Picasso%2C_1921%2C_Nous_autres_musiciens_%28Three_Musicians%29%2C_oil_on_canvas%2C_200.7_x_222.9_cm%2C_Philadelphia_Museum_of_Art.jpg"
+    "origem": "Espanha"
   },
   {
     "ala": "retratos",
@@ -339,8 +394,7 @@
     "search_artist": "David",
     "search_q": "Sieyès",
     "importancia": "alta",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Jacques-Louis_David_-_Portrait_of_Monsieur_Seriziat_-_Google_Art_Project.jpg/400px-Jacques-Louis_David_-_Portrait_of_Monsieur_Seriziat_-_Google_Art_Project.jpg"
+    "origem": "França"
   },
   {
     "ala": "retratos",
@@ -376,8 +430,7 @@
     "search_artist": "Manet",
     "search_q": "Monet garden",
     "importancia": "alta",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/%C3%89douard_Manet_-_The_Monet_Family_in_Their_Garden_at_Argenteuil_-_Google_Art_Project.jpg/400px-%C3%89douard_Manet_-_The_Monet_Family_in_Their_Garden_at_Argenteuil_-_Google_Art_Project.jpg"
+    "origem": "França"
   },
   {
     "ala": "retratos",
@@ -389,8 +442,7 @@
     "search_artist": "Schiele",
     "search_q": "self portrait arms",
     "importancia": "iconica",
-    "origem": "Áustria",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Egon_Schiele_-_Selbstbildnis_-_1913.jpg/400px-Egon_Schiele_-_Selbstbildnis_-_1913.jpg"
+    "origem": "Áustria"
   },
   {
     "ala": "retratos",
@@ -402,8 +454,7 @@
     "search_artist": "Kollwitz",
     "search_q": "self portrait",
     "importancia": "alta",
-    "origem": "Alemanha",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg/400px-Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg"
+    "origem": "Alemanha"
   },
   {
     "ala": "retratos",
@@ -415,8 +466,7 @@
     "search_artist": "Cassatt",
     "search_q": "portrait artist",
     "importancia": "alta",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Mary_Cassatt_-_Portrait_of_the_Artist_-_Google_Art_Project.jpg/400px-Mary_Cassatt_-_Portrait_of_the_Artist_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "retratos",
@@ -428,8 +478,7 @@
     "search_artist": "Vigée Le Brun",
     "search_q": "self portrait",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg/400px-Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg"
+    "origem": "França"
   },
   {
     "ala": "retratos",
@@ -537,8 +586,7 @@
     "search_q": "Girl Pearl Earring Vermeer",
     "importancia": "iconica",
     "origem": "Países Baixos",
-    "institution": "Mauritshuis",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Girl_with_a_Pearl_Earring.jpg/400px-Girl_with_a_Pearl_Earring.jpg"
+    "institution": "Mauritshuis"
   },
   {
     "ala": "retratos",
@@ -574,8 +622,7 @@
     "search_q": "Las Meninas Velázquez",
     "importancia": "iconica",
     "origem": "Espanha",
-    "institution": "Museo del Prado",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Las_Meninas_01.jpg/400px-Las_Meninas_01.jpg"
+    "institution": "Museo del Prado"
   },
   {
     "ala": "retratos",
@@ -647,8 +694,7 @@
     "search_q": "Henry VIII Holbein portrait",
     "importancia": "iconica",
     "origem": "Alemanha",
-    "institution": "National Portrait Gallery",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Hans_Holbein_d._J._-_Portr%C3%A4t_Heinrichs_VIII._-_Thyssen-Bornemisza.jpg/400px-Hans_Holbein_d._J._-_Portr%C3%A4t_Heinrichs_VIII._-_Thyssen-Bornemisza.jpg"
+    "institution": "National Portrait Gallery"
   },
   {
     "ala": "retratos",
@@ -672,8 +718,7 @@
     "search_q": "van Dyck self portrait",
     "importancia": "alta",
     "origem": "Bélgica",
-    "institution": "National Portrait Gallery",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg/400px-Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg"
+    "institution": "National Portrait Gallery"
   },
   {
     "ala": "retratos",
@@ -685,8 +730,7 @@
     "search_q": "Rubens self portrait 1638",
     "importancia": "iconica",
     "origem": "Bélgica",
-    "institution": "Kunsthistorisches Museum",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg/400px-Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg"
+    "institution": "Kunsthistorisches Museum"
   },
   {
     "ala": "retratos",
@@ -818,8 +862,7 @@
     "search_q": "Delacroix self portrait 1837",
     "importancia": "alta",
     "origem": "França",
-    "institution": "Louvre",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg/400px-Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg"
+    "institution": "Louvre"
   },
   {
     "ala": "retratos",
@@ -855,8 +898,7 @@
     "search_q": "Berthe Morisot self portrait",
     "importancia": "alta",
     "origem": "França",
-    "institution": "Musée Marmottan",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg/400px-Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg"
+    "institution": "Musée Marmottan"
   },
   {
     "ala": "retratos",
@@ -904,8 +946,7 @@
     "search_q": "Gainsborough Blue Boy",
     "importancia": "iconica",
     "origem": "Reino Unido",
-    "institution": "Huntington Library",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/The_Blue_Boy_by_Gainsborough.jpg/400px-The_Blue_Boy_by_Gainsborough.jpg"
+    "institution": "Huntington Library"
   },
   {
     "ala": "retratos",
@@ -1049,8 +1090,7 @@
     "search_q": "Carl Larsson self portrait",
     "importancia": "alta",
     "origem": "Suécia",
-    "institution": "Uffizi",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg/400px-Edgar_Degas_-_Self-Portrait_-_Google_Art_Project.jpg"
+    "institution": "Uffizi"
   },
   {
     "ala": "retratos",
@@ -1074,8 +1114,7 @@
     "search_q": "Repin Tolstoy portrait",
     "importancia": "iconica",
     "origem": "Rússia",
-    "institution": "Tretyakov Gallery",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Ilya_Efimovich_Repin_%281844-1930%29_-_Portrait_of_Leo_Tolstoy_%281887%29.jpg/400px-Ilya_Efimovich_Repin_%281844-1930%29_-_Portrait_of_Leo_Tolstoy_%281887%29.jpg"
+    "institution": "Tretyakov Gallery"
   },
   {
     "ala": "retratos",
