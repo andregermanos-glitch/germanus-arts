@@ -240,7 +240,7 @@ async function resolverObra(obra, keys) {
     };
   }
 
-  // 1. Rijksmuseum por api_id
+  // 1. Rijksmuseum IIIF por api_id (mais confiável)
   if (obra.api === "rijksmuseum" && obra.api_id) {
     const r = await fetchRijksById(obra.api_id);
     if (r) return r;
@@ -252,32 +252,46 @@ async function resolverObra(obra, keys) {
     if (r) return r;
   }
 
-  // 3. Met Museum (sem chave — grande acervo público)
+  // 3. Met por ID direto (met_id no JSON — resolução garantida)
+  if (obra.met_id) {
+    const r = await fetchMetById(obra.met_id);
+    if (r) return r;
+  }
+
+  // 4. AIC por ID direto (aic_id no JSON — resolução garantida)
+  if (obra.aic_id) {
+    const r = await fetchAICById(obra.aic_id);
+    if (r) return r;
+  }
+
+  // ── Fallbacks por busca de texto (menos confiáveis) ──────────────────────────
   const q = obra.search_q || `${obra.autor} ${obra.titulo}`;
+
+  // 5. Met Museum por texto
   const met = await searchMet(q);
   if (met) return met;
 
-  // 4. Art Institute of Chicago (sem chave)
+  // 6. AIC por texto
   const aic = await searchAIC(q);
   if (aic) return aic;
 
-  // 5. Cleveland Museum (sem chave)
+  // 7. Cleveland por texto
   const cle = await searchCleveland(q);
   if (cle) return cle;
 
-  // 6. Rijksmuseum por título (se sem api_id)
+  // 8. Rijksmuseum por título (último recurso Rijks sem api_id)
   if (obra.api === "rijksmuseum" && obra.search_creator) {
     const r = await searchRijksByTitle(obra.search_creator, obra.search_title || "");
     if (r) return r;
   }
 
-  // 7. Harvard por título
+  // 9. Harvard por título
   if (obra.api === "harvard" && !obra.api_id) {
     const r = await searchHarvardByTitle(obra.search_artist || obra.autor, obra.search_q || obra.titulo, keys.harvard);
     if (r) return r;
   }
 
-  // 8. Europeana
+  // 10. Europeana
   if (obra.api === "europeana") {
     const r = await searchEuropeana(obra.search_q || obra.titulo, keys.europeana);
     if (r) return r;
