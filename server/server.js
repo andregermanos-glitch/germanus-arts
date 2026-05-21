@@ -11,7 +11,7 @@ const { expandirAla }      = require("./expansor");
 // Hint de busca por ala (usado pelo expansor)
 const ALA_HINTS = {
   retratos:"portrait painting face",pessoas_reais:"historical figure portrait",
-  cidades:"abstract expressionism emotion Kandinsky Rothko Pollock",historico:"battle historical scene",
+  cidades:"cityscape urban street painting night city Hopper Kirchner",historico:"battle historical scene",
   objetos:"still life flowers Dutch",lugares:"landmark famous place",
   natureza:"landscape nature countryside",familiar:"domestic interior family",
   nudes:"classical nude Venus figure",esoterico:"mysticism symbolism esoteric",
@@ -178,7 +178,7 @@ const ALA_TERMS = {
   perspectiva:   ["perspective depth landscape painting","architectural perspective vanishing","optical depth view painting"],
   luz_sol:       ["sunlight luminism natural light painting","golden hour sunshine landscape","natural light impressionism painting"],
   cores:         ["colorful expressionism vibrant painting","fauvism bold color art","chromatic color field painting"],
-  fase:          ["masterwork iconic famous painter","artist mature period style","great master painter masterpiece"],
+  fase:          ["surrealism dream unconscious painting","Dalí Magritte dream symbolic figurative","psychological symbolist metaphysical painting"],
   femininas:     ["woman female artist painter work","Mary Cassatt Berthe Morisot art","female artist painting impressionism"],
 };
 
