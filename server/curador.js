@@ -187,8 +187,20 @@ async function searchHarvardByTitle(artist, title, key) {
 }
 
 // ─── Indexa uma obra no PostgreSQL ────────────────────────────────────────────
+// ─── hasMetadata — rejeita obras sem título, artista ou URL ──────────────────
+function hasMetadata(resultado) {
+  const title  = (resultado.title  || "").trim();
+  const artist = (resultado.artist || "").trim();
+  const url    = (resultado.imageUrl || "").trim();
+
+  if (!url) return false;
+  if (!title || title.toLowerCase() === "sem título") return false;
+  if (!artist || artist.toLowerCase() === "desconhecido" || artist.toLowerCase() === "unknown") return false;
+  return true;
+}
+
 async function indexar(pool, obra, resultado) {
-  if (!resultado?.imageUrl) return false;
+  if (!hasMetadata(resultado)) return false;   // ← rejeita metadados incompletos
   const id = `curated_${obra.api}_${(resultado.api_id || obra.titulo).replace(/[^a-zA-Z0-9]/g,"_").slice(0,30)}`;
   try {
     await pool.query(
