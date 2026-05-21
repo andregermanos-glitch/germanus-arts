@@ -226,6 +226,43 @@ async function alaJaIndexada(pool, ala) {
   } catch { return false; }
 }
 
+// ─── Met Museum por ID direto ────────────────────────────────────────────────
+async function fetchMetById(metId) {
+  try {
+    const d = await get(
+      `https://collectionapi.metmuseum.org/public/collection/v1/objects/${metId}`
+    );
+    if (!d.primaryImage || !d.isPublicDomain) return null;
+    return {
+      imageUrl: d.primaryImageSmall || d.primaryImage,
+      museum:   `${d.repository || "The Metropolitan Museum of Art"}, Nova York, EUA`,
+      title:    d.title || "",
+      artist:   d.artistDisplayName || "Desconhecido",
+      date:     d.objectDate || "",
+      api_id:   `met_${metId}`,
+    };
+  } catch { return null; }
+}
+
+// ─── AIC por ID direto ────────────────────────────────────────────────────────
+async function fetchAICById(aicId) {
+  try {
+    const d = await get(
+      `https://api.artic.edu/api/v1/artworks/${aicId}?fields=id,title,artist_display,date_display,image_id,is_public_domain`
+    );
+    const obj = d.data;
+    if (!obj?.image_id || !obj?.is_public_domain) return null;
+    return {
+      imageUrl: `https://www.artic.edu/iiif/2/${obj.image_id}/full/400,/0/default.jpg`,
+      museum:   "Art Institute of Chicago, Chicago, EUA",
+      title:    obj.title || "",
+      artist:   obj.artist_display || "Desconhecido",
+      date:     obj.date_display || "",
+      api_id:   `aic_${aicId}`,
+    };
+  } catch { return null; }
+}
+
 // ─── Resolve imagem de uma obra (cascata de 6 fontes) ────────────────────────
 async function resolverObra(obra, keys) {
   // 0. image_url direto no JSON (mais confiável, sem chamada de API)
