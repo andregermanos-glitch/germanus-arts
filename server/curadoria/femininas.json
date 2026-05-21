@@ -1,8 +1,72 @@
 [
   {
     "ala": "femininas",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Helene Schjerfbeck",
+    "titulo": "The Convalescent",
+    "ano": 1888,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Helene_Schjerfbeck_-_The_Convalescent_-_Google_Art_Project.jpg/400px-Helene_Schjerfbeck_-_The_Convalescent_-_Google_Art_Project.jpg",
+    "search_q": "Schjerfbeck Convalescent Finnish painter woman",
+    "importancia": "iconica",
+    "origem": "Finlândia",
+    "institution": "Ateneum, Helsinque"
+  },
+  {
+    "ala": "femininas",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Helene Schjerfbeck",
+    "titulo": "Self-Portrait with Red Spot",
+    "ano": 1944,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Helene_Schjerfbeck_-_Self-Portrait,_1884_-_Google_Art_Project.jpg/400px-Helene_Schjerfbeck_-_Self-Portrait,_1884_-_Google_Art_Project.jpg",
+    "search_q": "Schjerfbeck self-portrait Finnish late style modern",
+    "importancia": "iconica",
+    "origem": "Finlândia",
+    "institution": "Ateneum, Helsinque"
+  },
+  {
+    "ala": "femininas",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Paula Modersohn-Becker",
+    "titulo": "Old Poorhouse Woman",
+    "ano": 1906,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Paula_Modersohn-Becker_-_Old_Poorhouse_Woman_-_Google_Art_Project.jpg/400px-Paula_Modersohn-Becker_-_Old_Poorhouse_Woman_-_Google_Art_Project.jpg",
+    "search_q": "Modersohn-Becker German expressionist female artist portrait",
+    "importancia": "iconica",
+    "origem": "Alemanha",
+    "institution": "Kunsthalle Bremen"
+  },
+  {
+    "ala": "femininas",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Gabriele Münter",
+    "titulo": "Boating",
+    "ano": 1910,
+    "search_q": "Gabriele Münter Blaue Reiter expressionist German female Kandinsky",
+    "importancia": "iconica",
+    "origem": "Alemanha",
+    "institution": "Städtische Galerie, Munique"
+  },
+  {
+    "ala": "femininas",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Käthe Kollwitz",
+    "titulo": "Woman with Dead Child",
+    "ano": 1903,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Käthe_Kollwitz_Pietà.jpg/400px-Käthe_Kollwitz_Pietà.jpg",
+    "search_q": "Kollwitz Woman Dead Child etching German expressionist grief",
+    "importancia": "iconica",
+    "origem": "Alemanha",
+    "institution": "Nationalgalerie, Berlim"
+  },
+  {
+    "ala": "femininas",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4835",
+    "api_id": null,
     "autor": "Judith Leyster",
     "titulo": "The Jester",
     "ano": 1626,
@@ -14,7 +78,7 @@
   {
     "ala": "femininas",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4833",
+    "api_id": null,
     "autor": "Judith Leyster",
     "titulo": "Self-Portrait",
     "ano": 1630,
@@ -26,7 +90,7 @@
   {
     "ala": "femininas",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4832",
+    "api_id": null,
     "autor": "Judith Leyster",
     "titulo": "The Proposition",
     "ano": 1631,
@@ -38,7 +102,7 @@
   {
     "ala": "femininas",
     "api": "rijksmuseum",
-    "api_id": "SK-A-2999",
+    "api_id": null,
     "autor": "Rachel Ruysch",
     "titulo": "Flowers in a Vase with a Bird's Nest",
     "ano": 1702,
@@ -50,7 +114,7 @@
   {
     "ala": "femininas",
     "api": "rijksmuseum",
-    "api_id": "SK-A-3000",
+    "api_id": null,
     "autor": "Rachel Ruysch",
     "titulo": "Still Life with Flowers on a Marble Ledge",
     "ano": 1716,
@@ -62,7 +126,7 @@
   {
     "ala": "femininas",
     "api": "rijksmuseum",
-    "api_id": "SK-A-2570",
+    "api_id": null,
     "autor": "Maria van Oosterwijck",
     "titulo": "Vanitas Still Life",
     "ano": 1668,
@@ -74,7 +138,7 @@
   {
     "ala": "femininas",
     "api": "rijksmuseum",
-    "api_id": "SK-A-2557",
+    "api_id": null,
     "autor": "Clara Peeters",
     "titulo": "Still Life with Cheeses, Almonds and Pretzels",
     "ano": 1615,
@@ -86,7 +150,7 @@
   {
     "ala": "femininas",
     "api": "rijksmuseum",
-    "api_id": "SK-A-2558",
+    "api_id": null,
     "autor": "Margaretha de Heer",
     "titulo": "Still Life with Flowers",
     "ano": 1650,
@@ -98,7 +162,7 @@
   {
     "ala": "femininas",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4833",
+    "api_id": null,
     "autor": "Anna Maria van Schurman",
     "titulo": "Self-Portrait",
     "ano": 1640,
@@ -117,8 +181,7 @@
     "search_artist": "O'Keeffe",
     "search_q": "Black Iris flower close-up sensual",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Georgia_O%27Keeffe_-_Black_Iris_-_Google_Art_Project.jpg/400px-Georgia_O%27Keeffe_-_Black_Iris_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -130,8 +193,7 @@
     "search_artist": "O'Keeffe",
     "search_q": "Cow Skull Red White Blue desert American",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Georgia_O%27Keeffe_-_Cow%27s_Skull%3A_Red%2C_White%2C_and_Blue_-_Google_Art_Project.jpg/400px-Georgia_O%27Keeffe_-_Cow%27s_Skull%3A_Red%2C_White%2C_and_Blue_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -143,8 +205,7 @@
     "search_artist": "O'Keeffe",
     "search_q": "Jack Pulpit flower abstract close O'Keeffe",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Georgia_O%27Keeffe_-_Jack-in-the-Pulpit_No._VI_-_Google_Art_Project.jpg/400px-Georgia_O%27Keeffe_-_Jack-in-the-Pulpit_No._VI_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -156,8 +217,7 @@
     "search_artist": "O'Keeffe",
     "search_q": "From Plains road horizon sky O'Keeffe",
     "importancia": "alta",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Georgia_O%27Keeffe_-_From_the_Plains_II_-_Google_Art_Project.jpg/400px-Georgia_O%27Keeffe_-_From_the_Plains_II_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -169,8 +229,7 @@
     "search_artist": "Frankenthaler",
     "search_q": "Mountains Sea Color Field stain abstract",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Helen_Frankenthaler_-_Mountains_and_Sea_-_Google_Art_Project.jpg/400px-Helen_Frankenthaler_-_Mountains_and_Sea_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -182,8 +241,7 @@
     "search_artist": "Frankenthaler",
     "search_q": "The Bay color field large abstract",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Helen_Frankenthaler_-_The_Bay_-_Google_Art_Project.jpg/400px-Helen_Frankenthaler_-_The_Bay_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -195,8 +253,7 @@
     "search_artist": "Joan Mitchell",
     "search_q": "Ladybug abstract expressionist brushwork",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Joan_Mitchell_-_Ladybug_-_Google_Art_Project.jpg/400px-Joan_Mitchell_-_Ladybug_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -220,8 +277,7 @@
     "search_artist": "Lee Krasner",
     "search_q": "Seasons abstract expressionist gestural",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Lee_Krasner_-_The_Seasons_-_Google_Art_Project.jpg/400px-Lee_Krasner_-_The_Seasons_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -245,8 +301,7 @@
     "search_artist": "Agnes Martin",
     "search_q": "Friendship gold leaf grid minimalism meditation",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Agnes_Martin_-_Friendship_-_Google_Art_Project.jpg/400px-Agnes_Martin_-_Friendship_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -270,8 +325,7 @@
     "search_artist": "Cassatt",
     "search_q": "Cassatt In Loge theatre opera woman binoculars",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Mary_Cassatt_-_In_the_Loge_-_Google_Art_Project.jpg/400px-Mary_Cassatt_-_In_the_Loge_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -283,8 +337,7 @@
     "search_artist": "Cassatt",
     "search_q": "Cassatt Boating Party flat perspective Japanese",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Mary_Cassatt_-_The_Boating_Party_-_Google_Art_Project.jpg/400px-Mary_Cassatt_-_The_Boating_Party_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -296,8 +349,7 @@
     "search_artist": "Cassatt",
     "search_q": "Cassatt Young Mother Sewing child intimate",
     "importancia": "alta",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Mary_Cassatt_-_Young_Mother_Sewing_-_Google_Art_Project.jpg/400px-Mary_Cassatt_-_Young_Mother_Sewing_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "femininas",
@@ -357,8 +409,7 @@
     "search_q": "Artemisia Gentileschi Judith Slaying Holofernes sword",
     "importancia": "iconica",
     "origem": "Itália",
-    "institution": "Uffizi Firenze",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Artemisia_Gentileschi_-_Judith_Slaying_Holofernes_-_Google_Art_Project.jpg/400px-Artemisia_Gentileschi_-_Judith_Slaying_Holofernes_-_Google_Art_Project.jpg"
+    "institution": "Uffizi Firenze"
   },
   {
     "ala": "femininas",
@@ -514,8 +565,7 @@
     "search_q": "Berthe Morisot The Cradle mother infant domestic",
     "importancia": "iconica",
     "origem": "França",
-    "institution": "Musée d'Orsay",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Berthe_Morisot_-_Le_Berceau_-_The_Cradle_-_Google_Art_Project.jpg/400px-Berthe_Morisot_-_Le_Berceau_-_The_Cradle_-_Google_Art_Project.jpg"
+    "institution": "Musée d'Orsay"
   },
   {
     "ala": "femininas",
@@ -563,8 +613,7 @@
     "search_q": "Modersohn-Becker mother child primal earthy",
     "importancia": "iconica",
     "origem": "Alemanha",
-    "institution": "Ludwig Roselius Museum",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Mary_Cassatt_-_Mother_and_Child_-_Google_Art_Project.jpg/400px-Mary_Cassatt_-_Mother_and_Child_-_Google_Art_Project.jpg"
+    "institution": "Ludwig Roselius Museum"
   },
   {
     "ala": "femininas",
