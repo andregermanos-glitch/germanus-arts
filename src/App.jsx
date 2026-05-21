@@ -71,7 +71,7 @@ const T = {
     footer: "18 GALERIES · MUSÉES MONDIAUX · COLLECTION PERSONNELLE",
     global: "Collection d'Art Mondial",
     alas: {
-      retratos:"Portraits", pessoas_reais:"Personnages Réels", cidades:"Émotion",
+      retratos:"Portraits", pessoas_reais:"Personnages Réels", cidades:"Cités",
       historico:"Moments Historiques", objetos:"Objets", lugares:"Lieux Connus",
       natureza:"Nature", familiar:"Ambiance Familiale", nudes:"Nus Féminins",
       esoterico:"Ésotérisme", sacro:"Sacré", arquitetura:"Architecture",
@@ -116,7 +116,7 @@ const T = {
     footer: "18 GALLERIES · GLOBAL MUSEUMS · PERSONAL COLLECTION",
     global: "Global Art Collection",
     alas: {
-      retratos:"Portraits", pessoas_reais:"Real People", cidades:"Emotion",
+      retratos:"Portraits", pessoas_reais:"Real People", cidades:"Cities",
       historico:"Historical Moments", objetos:"Objects", lugares:"Famous Places",
       natureza:"Nature", familiar:"Home Environment", nudes:"Female Nudes",
       esoterico:"Esotericism", sacro:"Sacred", arquitetura:"Architecture",
@@ -161,7 +161,7 @@ const T = {
     footer: "18 GALERÍAS · MUSEOS GLOBALES · COLECCIÓN PERSONAL",
     global: "Colección de Arte Global",
     alas: {
-      retratos:"Retratos", pessoas_reais:"Personas Reales", cidades:"Emoción",
+      retratos:"Retratos", pessoas_reais:"Personas Reales", cidades:"Ciudades",
       historico:"Momentos Históricos", objetos:"Objetos", lugares:"Lugares Conocidos",
       natureza:"Naturaleza", familiar:"Ambiente Familiar", nudes:"Desnudos Femeninos",
       esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Arquitectura",
@@ -206,7 +206,7 @@ const T = {
     footer: "18 GALLERIE · MUSEI GLOBALI · COLLEZIONE PERSONALE",
     global: "Collezione d'Arte Globale",
     alas: {
-      retratos:"Ritratti", pessoas_reais:"Persone Reali", cidades:"Emozione",
+      retratos:"Ritratti", pessoas_reais:"Persone Reali", cidades:"Città",
       historico:"Momenti Storici", objetos:"Oggetti", lugares:"Luoghi Noti",
       natureza:"Natura", familiar:"Ambiente Familiare", nudes:"Nudi Femminili",
       esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Architettura",
@@ -220,7 +220,7 @@ const T = {
 const ALAS = [
   { id:"retratos",     icon:"👤", color:"#8B7355", desc:{fr:"Expression humaine dans le visage",en:"Human expression in the face",es:"Expresión humana en el rostro",it:"Espressione umana nel volto"},           hint:"portrait face expression Renaissance" },
   { id:"pessoas_reais",icon:"🧑", color:"#6B8E6B", desc:{fr:"Personnages identifiables",en:"Identifiable individuals",es:"Individuos identificables",it:"Individui identificabili"},                             hint:"real person historical figure identified" },
-  { id:"cidades",      icon:"💭", color:"#5B7FA6", desc:{fr:"Art abstrait et langage émotionnel",en:"Abstract art and emotional language",es:"Arte abstracto y lenguaje emocional",it:"Arte astratta e linguaggio emotivo"},           hint:"abstract expressionism color emotion painting" },
+  { id:"cidades",      icon:"🏙️", color:"#5B7FA6", desc:{fr:"Rues, nuits et atmosphères urbaines",en:"Streets, nights and urban atmospheres",es:"Calles, noches y atmósferas urbanas",it:"Strade, notti e atmosfere urbane"},            hint:"cityscape urban street painting night city impressionism" },
   { id:"historico",    icon:"⚔️", color:"#8B4A4A", desc:{fr:"Batailles et événements politiques",en:"Battles and political events",es:"Batallas y eventos políticos",it:"Battaglie ed eventi politici"},         hint:"historical event battle political scene" },
   { id:"objetos",      icon:"🏺", color:"#A08B5B", desc:{fr:"Natures mortes et compositions",en:"Still life and compositions",es:"Naturalezas muertas",it:"Natura morta e composizioni"},                        hint:"still life objects vanitas composition" },
   { id:"lugares",      icon:"🗺", color:"#5B8B8B", desc:{fr:"Monuments et paysages célèbres",en:"Famous monuments and landscapes",es:"Monumentos y paisajes famosos",it:"Monumenti e paesaggi famosi"},          hint:"landmark known place monument famous" },
