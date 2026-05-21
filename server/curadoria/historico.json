@@ -2,7 +2,55 @@
   {
     "ala": "historico",
     "api": "rijksmuseum",
-    "api_id": "SK-C-12",
+    "api_id": "SK-C-5",
+    "autor": "Rembrandt van Rijn",
+    "titulo": "The Night Watch",
+    "ano": 1642,
+    "importancia": "iconica",
+    "origem": "Países Baixos",
+    "institution": "Rijksmuseum, Amsterdã"
+  },
+  {
+    "ala": "historico",
+    "api": "rijksmuseum",
+    "api_id": "SK-C-6",
+    "autor": "Rembrandt van Rijn",
+    "titulo": "The Syndics of the Amsterdam Drapers' Guild",
+    "ano": 1662,
+    "importancia": "iconica",
+    "origem": "Países Baixos",
+    "institution": "Rijksmuseum, Amsterdã"
+  },
+  {
+    "ala": "historico",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Albrecht Dürer",
+    "titulo": "The Four Apostles",
+    "ano": 1526,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Albrecht_Dürer_-_Four_Apostles_-_WGA7123.jpg/400px-Albrecht_Dürer_-_Four_Apostles_-_WGA7123.jpg",
+    "search_q": "Dürer Four Apostles John Peter Mark Paul Reformation",
+    "importancia": "iconica",
+    "origem": "Alemanha",
+    "institution": "Alte Pinakothek, Munique"
+  },
+  {
+    "ala": "historico",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Peter Paul Rubens",
+    "titulo": "The Consequences of War",
+    "ano": 1638,
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Peter_Paul_Rubens_-_Consequences_of_War_-_Pitti_Palace.jpg/400px-Peter_Paul_Rubens_-_Consequences_of_War_-_Pitti_Palace.jpg",
+    "search_q": "Rubens Consequences War allegory Mars Venus Pitti",
+    "importancia": "iconica",
+    "origem": "Bélgica",
+    "institution": "Palazzo Pitti, Florença"
+  },
+  {
+    "ala": "historico",
+    "api": "rijksmuseum",
+    "api_id": null,
     "autor": "Rembrandt van Rijn",
     "titulo": "The Conspiracy of Claudius Civilis",
     "ano": 1661,
@@ -50,7 +98,7 @@
   {
     "ala": "historico",
     "api": "rijksmuseum",
-    "api_id": "SK-A-1936",
+    "api_id": null,
     "autor": "Ferdinand Bol",
     "titulo": "Moses Descending from Mount Sinai",
     "ano": 1662,
@@ -74,7 +122,7 @@
   {
     "ala": "historico",
     "api": "rijksmuseum",
-    "api_id": "SK-C-1066",
+    "api_id": null,
     "autor": "Gerard ter Borch",
     "titulo": "The Ratification of the Treaty of Münster",
     "ano": 1648,
@@ -86,7 +134,7 @@
   {
     "ala": "historico",
     "api": "rijksmuseum",
-    "api_id": "SK-A-175",
+    "api_id": null,
     "autor": "Jan Asselijn",
     "titulo": "The Threatened Swan",
     "ano": 1650,
@@ -129,8 +177,7 @@
     "search_artist": "Picasso",
     "search_q": "Guernica war bombing political",
     "importancia": "iconica",
-    "origem": "Espanha",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Mural_del_Gernika.jpg/400px-Mural_del_Gernika.jpg"
+    "origem": "Espanha"
   },
   {
     "ala": "historico",
@@ -142,8 +189,7 @@
     "search_artist": "Delacroix",
     "search_q": "Massacre Chios Greek war",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Eug%C3%A8ne_Delacroix_-_The_Massacre_at_Chios_-_Google_Art_Project.jpg/400px-Eug%C3%A8ne_Delacroix_-_The_Massacre_at_Chios_-_Google_Art_Project.jpg"
+    "origem": "França"
   },
   {
     "ala": "historico",
@@ -155,8 +201,7 @@
     "search_artist": "Delacroix",
     "search_q": "Death Sardanapalus dramatic scene",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Eug%C3%A8ne_Delacroix_-_The_Death_of_Sardanapalus_-_Google_Art_Project.jpg/400px-Eug%C3%A8ne_Delacroix_-_The_Death_of_Sardanapalus_-_Google_Art_Project.jpg"
+    "origem": "França"
   },
   {
     "ala": "historico",
@@ -168,8 +213,7 @@
     "search_artist": "Copley",
     "search_q": "Watson shark historical dramatic",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/John_Singleton_Copley_-_Watson_and_the_Shark_-_Google_Art_Project.jpg/400px-John_Singleton_Copley_-_Watson_and_the_Shark_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "historico",
@@ -181,8 +225,7 @@
     "search_artist": "West",
     "search_q": "Death General Wolfe Quebec battle",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Benjamin_West_-_The_Death_of_General_Wolfe_-_Google_Art_Project.jpg/400px-Benjamin_West_-_The_Death_of_General_Wolfe_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "historico",
@@ -194,8 +237,7 @@
     "search_artist": "Leutze",
     "search_q": "Washington crossing Delaware river",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Washington_Crossing_the_Delaware_by_Emanuel_Leutze%2C_MMA-NYC%2C_1851.jpg/400px-Washington_Crossing_the_Delaware_by_Emanuel_Leutze%2C_MMA-NYC%2C_1851.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "historico",
@@ -207,8 +249,7 @@
     "search_artist": "David",
     "search_q": "Death Marat bathtub revolution",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Death_of_Marat_by_David.jpg/400px-Death_of_Marat_by_David.jpg"
+    "origem": "França"
   },
   {
     "ala": "historico",
@@ -220,8 +261,7 @@
     "search_artist": "David",
     "search_q": "Coronation Napoleon cathedral ceremony",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Jacques-Louis_David_-_The_Coronation_of_Napoleon_%281807%29.jpg/400px-Jacques-Louis_David_-_The_Coronation_of_Napoleon_%281807%29.jpg"
+    "origem": "França"
   },
   {
     "ala": "historico",
@@ -233,8 +273,7 @@
     "search_artist": "David",
     "search_q": "Oath Horatii swords patriotism",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Jacques-Louis_David_-_Oath_of_the_Horatii_-_Google_Art_Project.jpg/400px-Jacques-Louis_David_-_Oath_of_the_Horatii_-_Google_Art_Project.jpg"
+    "origem": "França"
   },
   {
     "ala": "historico",
@@ -246,8 +285,7 @@
     "search_artist": "Géricault",
     "search_q": "Raft Medusa shipwreck survival",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/JEAN_LOUIS_TH%C3%89ODORE_G%C3%89RICAULT_-_La_Balsa_de_la_Medusa_%28Museo_del_Louvre%2C_1818-19%29.jpg/400px-JEAN_LOUIS_TH%C3%89ODORE_G%C3%89RICAULT_-_La_Balsa_de_la_Medusa_%28Museo_del_Louvre%2C_1818-19%29.jpg"
+    "origem": "França"
   },
   {
     "ala": "historico",
@@ -259,8 +297,7 @@
     "search_artist": "Rubens",
     "search_q": "consequences war Mars Venus allegory",
     "importancia": "iconica",
-    "origem": "Bélgica",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Peter_Paul_Rubens_-_Consequences_of_War_-_Google_Art_Project.jpg/400px-Peter_Paul_Rubens_-_Consequences_of_War_-_Google_Art_Project.jpg"
+    "origem": "Bélgica"
   },
   {
     "ala": "historico",
@@ -272,8 +309,7 @@
     "search_artist": "Nash",
     "search_q": "new world WWI landscape desolation",
     "importancia": "iconica",
-    "origem": "Reino Unido",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Paul_Nash_-_We_Are_Making_a_New_World_-_Google_Art_Project.jpg/400px-Paul_Nash_-_We_Are_Making_a_New_World_-_Google_Art_Project.jpg"
+    "origem": "Reino Unido"
   },
   {
     "ala": "historico",
@@ -285,8 +321,7 @@
     "search_artist": "Delaroche",
     "search_q": "Execution Lady Jane Grey Tower",
     "importancia": "iconica",
-    "origem": "França",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Delaroche_Execution_of_Lady_Jane_Grey.jpg/400px-Delaroche_Execution_of_Lady_Jane_Grey.jpg"
+    "origem": "França"
   },
   {
     "ala": "historico",
@@ -310,8 +345,7 @@
     "search_artist": "Homer",
     "search_q": "prisoners front Civil War",
     "importancia": "iconica",
-    "origem": "EUA",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Winslow_Homer_-_Prisoners_from_the_Front_-_Google_Art_Project.jpg/400px-Winslow_Homer_-_Prisoners_from_the_Front_-_Google_Art_Project.jpg"
+    "origem": "EUA"
   },
   {
     "ala": "historico",
@@ -323,8 +357,7 @@
     "search_artist": "Vereshchagin",
     "search_q": "apotheosis war skulls pyramid",
     "importancia": "iconica",
-    "origem": "Rússia",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Vasily_Vereshchagin_-_The_Apotheosis_of_War_-_Google_Art_Project.jpg/400px-Vasily_Vereshchagin_-_The_Apotheosis_of_War_-_Google_Art_Project.jpg"
+    "origem": "Rússia"
   },
   {
     "ala": "historico",
@@ -336,8 +369,7 @@
     "search_q": "Delacroix Liberty Leading People revolution",
     "importancia": "iconica",
     "origem": "França",
-    "institution": "Musée du Louvre",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Eug%C3%A8ne_Delacroix_-_La_libert%C3%A9_guidant_le_peuple.jpg/400px-Eug%C3%A8ne_Delacroix_-_La_libert%C3%A9_guidant_le_peuple.jpg"
+    "institution": "Musée du Louvre"
   },
   {
     "ala": "historico",
@@ -349,8 +381,7 @@
     "search_q": "Goya Third May 1808 execution French",
     "importancia": "iconica",
     "origem": "Espanha",
-    "institution": "Museo del Prado",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/El_Tres_de_Mayo%2C_by_Francisco_de_Goya%2C_from_Prado_in_Google_Earth.jpg/400px-El_Tres_de_Mayo%2C_by_Francisco_de_Goya%2C_from_Prado_in_Google_Earth.jpg"
+    "institution": "Museo del Prado"
   },
   {
     "ala": "historico",
@@ -362,8 +393,7 @@
     "search_q": "Goya Second May 1808 Mamluk cavalry",
     "importancia": "iconica",
     "origem": "Espanha",
-    "institution": "Museo del Prado",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/El_dos_de_mayo_de_1808_en_Madrid_-_El_cargo_de_los_mamelucos_%28Museo_del_Prado%29.jpg/400px-El_dos_de_mayo_de_1808_en_Madrid_-_El_cargo_de_los_mamelucos_%28Museo_del_Prado%29.jpg"
+    "institution": "Museo del Prado"
   },
   {
     "ala": "historico",
@@ -375,8 +405,7 @@
     "search_q": "Velázquez Surrender Breda Las Lanzas",
     "importancia": "iconica",
     "origem": "Espanha",
-    "institution": "Museo del Prado",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Vel%C3%A1zquez-_The_Surrender_of_Breda.jpg/400px-Vel%C3%A1zquez-_The_Surrender_of_Breda.jpg"
+    "institution": "Museo del Prado"
   },
   {
     "ala": "historico",
@@ -388,8 +417,7 @@
     "search_q": "Uccello Battle San Romano lances",
     "importancia": "iconica",
     "origem": "Itália",
-    "institution": "National Gallery London",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Paolo_Uccello_-_The_Battle_of_San_Romano_-_Google_Art_Project.jpg/400px-Paolo_Uccello_-_The_Battle_of_San_Romano_-_Google_Art_Project.jpg"
+    "institution": "National Gallery London"
   },
   {
     "ala": "historico",
@@ -413,8 +441,7 @@
     "search_q": "David Napoleon Alps horse heroic",
     "importancia": "iconica",
     "origem": "França",
-    "institution": "Château de Malmaison",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Jacques-Louis_David_-_Napoleon_Crossing_the_Alps_-_Schloss_Charlottenburg.jpg/400px-Jacques-Louis_David_-_Napoleon_Crossing_the_Alps_-_Schloss_Charlottenburg.jpg"
+    "institution": "Château de Malmaison"
   },
   {
     "ala": "historico",
@@ -426,8 +453,7 @@
     "search_q": "David Tennis Court Oath Revolution",
     "importancia": "iconica",
     "origem": "França",
-    "institution": "Château de Versailles",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Jacques-Louis_David_-_Serment_du_Jeu_de_Paume_-_Google_Art_Project.jpg/400px-Jacques-Louis_David_-_Serment_du_Jeu_de_Paume_-_Google_Art_Project.jpg"
+    "institution": "Château de Versailles"
   },
   {
     "ala": "historico",
@@ -439,8 +465,7 @@
     "search_q": "Bruegel Massacre Innocents soldiers village",
     "importancia": "iconica",
     "origem": "Países Baixos",
-    "institution": "Kunsthistorisches Museum",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Peter_Paul_Rubens_-_Massacre_of_the_Innocents_-_Google_Art_Project.jpg/400px-Peter_Paul_Rubens_-_Massacre_of_the_Innocents_-_Google_Art_Project.jpg"
+    "institution": "Kunsthistorisches Museum"
   },
   {
     "ala": "historico",
@@ -548,8 +573,7 @@
     "search_q": "Rubens Massacre Innocents Baroque dramatic",
     "importancia": "iconica",
     "origem": "Bélgica",
-    "institution": "Alte Pinakothek Munich",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Peter_Paul_Rubens_-_Massacre_of_the_Innocents_-_Google_Art_Project.jpg/400px-Peter_Paul_Rubens_-_Massacre_of_the_Innocents_-_Google_Art_Project.jpg"
+    "institution": "Alte Pinakothek Munich"
   },
   {
     "ala": "historico",
@@ -585,8 +609,7 @@
     "search_q": "Repin Barge Haulers Volga workers",
     "importancia": "iconica",
     "origem": "Rússia",
-    "institution": "Russian Museum St Petersburg",
-    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Burlaki_na_volge.jpg/400px-Burlaki_na_volge.jpg"
+    "institution": "Russian Museum St Petersburg"
   },
   {
     "ala": "historico",
