@@ -71,8 +71,8 @@ const T = {
     footer: "18 GALERIES · MUSÉES MONDIAUX · COLLECTION PERSONNELLE",
     global: "Collection d'Art Mondial",
     alas: {
-      retratos:"Portraits", pessoas_reais:"Personnages Réels", cidades:"Cités",
-      historico:"Moments Historiques", objetos:"Objets", lugares:"Lieux Connus",
+      retratos:"Portraits", pessoas_reais:"Personnages Réels", historico:"Histoire", emocao:"Émotion", cidades:"Émotion",
+      objetos:"Objets", lugares:"Lieux Connus",
       natureza:"Nature", familiar:"Ambiance Familiale", nudes:"Nus Féminins",
       esoterico:"Ésotérisme", sacro:"Sacré", arquitetura:"Architecture",
       povo:"Gens du Peuple", perspectiva:"Perspective", luz_sol:"Lumière du Soleil",
@@ -116,8 +116,8 @@ const T = {
     footer: "18 GALLERIES · GLOBAL MUSEUMS · PERSONAL COLLECTION",
     global: "Global Art Collection",
     alas: {
-      retratos:"Portraits", pessoas_reais:"Real People", cidades:"Cities",
-      historico:"Historical Moments", objetos:"Objects", lugares:"Famous Places",
+      retratos:"Portraits", pessoas_reais:"Real People", historico:"History", emocao:"Emotion", cidades:"Emotion",
+      objetos:"Objects", lugares:"Famous Places",
       natureza:"Nature", familiar:"Home Environment", nudes:"Female Nudes",
       esoterico:"Esotericism", sacro:"Sacred", arquitetura:"Architecture",
       povo:"Common People", perspectiva:"Perspective", luz_sol:"Sunlight",
@@ -161,8 +161,8 @@ const T = {
     footer: "18 GALERÍAS · MUSEOS GLOBALES · COLECCIÓN PERSONAL",
     global: "Colección de Arte Global",
     alas: {
-      retratos:"Retratos", pessoas_reais:"Personas Reales", cidades:"Ciudades",
-      historico:"Momentos Históricos", objetos:"Objetos", lugares:"Lugares Conocidos",
+      retratos:"Retratos", pessoas_reais:"Personas Reales", historico:"Historia", emocao:"Emoción", cidades:"Emoción",
+      objetos:"Objetos", lugares:"Lugares Conocidos",
       natureza:"Naturaleza", familiar:"Ambiente Familiar", nudes:"Desnudos Femeninos",
       esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Arquitectura",
       povo:"Gente del Pueblo", perspectiva:"Perspectiva", luz_sol:"Luz del Sol",
@@ -206,8 +206,8 @@ const T = {
     footer: "18 GALLERIE · MUSEI GLOBALI · COLLEZIONE PERSONALE",
     global: "Collezione d'Arte Globale",
     alas: {
-      retratos:"Ritratti", pessoas_reais:"Persone Reali", cidades:"Città",
-      historico:"Momenti Storici", objetos:"Oggetti", lugares:"Luoghi Noti",
+      retratos:"Ritratti", pessoas_reais:"Persone Reali", historico:"Storia", emocao:"Emozione", cidades:"Emozione",
+      objetos:"Oggetti", lugares:"Luoghi Noti",
       natureza:"Natura", familiar:"Ambiente Familiare", nudes:"Nudi Femminili",
       esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Architettura",
       povo:"Gente del Popolo", perspectiva:"Prospettiva", luz_sol:"Luce del Sole",
@@ -218,24 +218,44 @@ const T = {
 
 // ─── 18 Alas ──────────────────────────────────────────────────────────────────
 const ALAS = [
-  { id:"retratos",     icon:"👤", color:"#8B7355", desc:{fr:"Expression humaine dans le visage",en:"Human expression in the face",es:"Expresión humana en el rostro",it:"Espressione umana nel volto"},           hint:"portrait face expression Renaissance" },
-  { id:"pessoas_reais",icon:"🧑", color:"#6B8E6B", desc:{fr:"Personnages identifiables",en:"Identifiable individuals",es:"Individuos identificables",it:"Individui identificabili"},                             hint:"real person historical figure identified" },
-  { id:"cidades",      icon:"🏙️", color:"#5B7FA6", desc:{fr:"Rues, nuits et atmosphères urbaines",en:"Streets, nights and urban atmospheres",es:"Calles, noches y atmósferas urbanas",it:"Strade, notti e atmosfere urbane"},            hint:"cityscape urban street painting night city impressionism" },
-  { id:"historico",    icon:"⚔️", color:"#8B4A4A", desc:{fr:"Batailles et événements politiques",en:"Battles and political events",es:"Batallas y eventos políticos",it:"Battaglie ed eventi politici"},         hint:"historical event battle political scene" },
-  { id:"objetos",      icon:"🏺", color:"#A08B5B", desc:{fr:"Natures mortes et compositions",en:"Still life and compositions",es:"Naturalezas muertas",it:"Natura morta e composizioni"},                        hint:"still life objects vanitas composition" },
-  { id:"lugares",      icon:"🗺", color:"#5B8B8B", desc:{fr:"Monuments et paysages célèbres",en:"Famous monuments and landscapes",es:"Monumentos y paisajes famosos",it:"Monumenti e paesaggi famosi"},          hint:"landmark known place monument famous" },
-  { id:"natureza",     icon:"🌿", color:"#5B8B5B", desc:{fr:"Paysages, faune et flore",en:"Landscapes, fauna and flora",es:"Paisajes, fauna y flora",it:"Paesaggi, fauna e flora"},                             hint:"nature landscape flora fauna countryside sea" },
-  { id:"familiar",     icon:"🏠", color:"#9B7B5B", desc:{fr:"Scènes domestiques et quotidiennes",en:"Domestic and everyday scenes",es:"Escenas domésticas",it:"Scene domestiche e quotidiane"},                  hint:"domestic interior family everyday life home" },
-  { id:"nudes",        icon:"🎨", color:"#9B7B7B", desc:{fr:"Art classique du nu féminin",en:"Classical art of the female nude",es:"Arte clásico del desnudo femenino",it:"Arte classica del nudo femminile"},   hint:"female nude classical Venus goddess" },
-  { id:"esoterico",    icon:"🔮", color:"#7B5B9B", desc:{fr:"Symbolisme et mysticisme",en:"Symbolism and mysticism",es:"Simbolismo y misticismo",it:"Simbolismo e misticismo"},                                  hint:"esoteric mysticism symbolism alchemy" },
-  { id:"sacro",        icon:"✝️", color:"#9B8B5B", desc:{fr:"Art religieux et iconographie",en:"Religious art and iconography",es:"Arte religioso e iconografía",it:"Arte religiosa e iconografia"},            hint:"sacred religious icon devotional spiritual" },
-  { id:"arquitetura",  icon:"🏛", color:"#6B7B8B", desc:{fr:"Édifices, ruines et espaces",en:"Buildings, ruins and spaces",es:"Edificios, ruinas y espacios",it:"Edifici, rovine e spazi"},                     hint:"architecture building ruins interior" },
-  { id:"povo",         icon:"🧑‍🤝‍🧑", color:"#8B7B5B", desc:{fr:"Paysans et vie simple",en:"Peasants and simple life",es:"Campesinos y vida simple",it:"Contadini e vita semplice"},                     hint:"peasant worker common people folk" },
-  { id:"perspectiva",  icon:"📐", color:"#5B6B8B", desc:{fr:"La profondeur comme élément central",en:"Depth as central element",es:"La profundidad como elemento central",it:"La profondità come elemento centrale"}, hint:"perspective depth optical illusion" },
-  { id:"luz_sol",      icon:"☀️", color:"#A08B3B", desc:{fr:"La lumière naturelle comme protagoniste",en:"Natural light as protagonist",es:"La luz natural como protagonista",it:"La luce naturale come protagonista"}, hint:"sunlight natural light dawn sunset luminism" },
-  { id:"cores",        icon:"🌈", color:"#7B5B9B", desc:{fr:"La couleur comme langage expressif",en:"Color as expressive language",es:"El color como lenguaje expresivo",it:"Il colore come linguaggio espressivo"}, hint:"color chromatic fauvism expressionism vibrant" },
-  { id:"fase",         icon:"🧠", color:"#5B8B7B", desc:{fr:"Surréalisme et art psychologique",en:"Surrealism and psychological art",es:"Surrealismo y arte psicológico",it:"Surrealismo e arte psicologica"}, hint:"surrealism dream psychology Dalí Magritte unconscious" },
-  { id:"femininas",    icon:"👩‍🎨", color:"#9B5B8B", desc:{fr:"Grandes artistes femmes",en:"Great women artists",es:"Grandes artistas mujeres",it:"Grandi artiste donne"},                                   hint:"female artist woman painter Frida Kahlo Mary Cassatt" },
+  // ── GERMANUS.Art — 18 ALAS COM CRITÉRIOS FIXOS ────────────────────────────────
+  // retratos:      Bustos e configuração clássica de retrato — pessoa real ou não
+  // pessoas_reais: Pessoa identificável, corpo todo ou em ação, INCLUI eventos históricos pessoais
+  // historico:     Momentos históricos clássicos — independências, guerras, eventos conhecidos
+  // perspectiva:   Lugares NÃO identificáveis onde a perspectiva é a linguagem
+  // objetos:       Todos os objetos — INCLUI natureza morta/natura morta
+  // lugares:       Lugares RECONHECÍVEIS — o utilizador sabe onde é ao primeiro olhar
+  // natureza:      Natureza desconhecida — SEM natureza morta, SEM lugares famosos
+  // familiar:      Cotidiano doméstico — SEM pessoa em contexto específico/atividade
+  // nudes:         Nu feminino clássico — a mulher como tema universal da arte
+  // esoterico:     Conhecimento oculto — alquimia, Rosa-Cruz, Varo, budismo esotérico
+  // sacro:         Barroco mundial — fé, santos, anjos, arte sacra de toda tradição
+  // arquitetura:   Prédio, ponte, construção como DESTAQUE — não cidade conhecida
+  // povo:          Gente em contexto/atividade específica — a vida social cotidiana
+  // luz_sol:       Luz do sol em qualquer sujeito — céu, pessoas, paisagem, chão
+  // cores:         Cor como LINGUAGEM — Fauvismo + Impressionismo + Pop Art (Warhol, Basquiat)
+  // cidades:       Abstracionismo — cor/forma EMERGINDO como realidade emocional (=Emoção)
+  // fase (Psyché): Sonho como tema + ilusão de ótica — artistas do século XX
+  // femininas:     A artista mulher — Frida Kahlo e Tarsila do Amaral protagonistas
+  // ── Apenas pinturas — sem gravuras, fotos ou desenhos antigos ─────────────────
+  { id:"retratos",     icon:"👤", color:"#7A5C4A", desc:{fr:"Portraits classiques — bustes et figures",en:"Classical portraits — busts and figures",es:"Retratos clásicos — bustos y figuras",it:"Ritratti classici — busti e figure"},            hint:"portrait bust figure man woman classical painting face" },
+  { id:"pessoas_reais",icon:"🎭", color:"#8B4A4A", desc:{fr:"Personnages identifiables — célébrités en action",en:"Identifiable people — celebrities in action or full body",es:"Personas identificables — celebridades en acción",it:"Persone identificabili — celebrità in azione"},              hint:"known figure identified person celebrity full body action portrait" },
+  { id:"historico",    icon:"⚔️", color:"#6B4A4A", desc:{fr:"Moments historiques — événements qui ont changé le monde",en:"Historical moments — events that changed the world",es:"Momentos históricos — eventos que cambiaron el mundo",it:"Momenti storici — eventi che hanno cambiato il mondo"},    hint:"historical event battle independence revolution war famous moment" },
+  { id:"perspectiva",  icon:"📐", color:"#5B6B8B", desc:{fr:"Lieux inconnus vus en profondeur — la perspective comme langage",en:"Unknown places in depth — perspective as language",es:"Lugares desconocidos en profundidad — la perspectiva como lenguaje",it:"Luoghi sconosciuti in profondità — la prospettiva come linguaggio"},hint:"unknown place street interior depth perspective viewpoint urban" },
+  { id:"objetos",      icon:"🏺", color:"#A08B5B", desc:{fr:"Objets et natures mortes — toute composition d'objets",en:"Objects and still life — all object compositions",es:"Objetos y naturalezas muertas — toda composición de objetos",it:"Oggetti e natura morta — ogni composizione di oggetti"},    hint:"still life objects vanitas flowers fruit natura morta composition" },
+  { id:"lugares",      icon:"🗺", color:"#5B8B8B", desc:{fr:"Lieux célèbres — vous les reconnaîtrez au premier regard",en:"Famous places — you will recognize them at first glance",es:"Lugares famosos — los reconocerás a primera vista",it:"Luoghi famosi — li riconoscerai al primo sguardo"},        hint:"famous recognizable place landmark known city building landscape monument" },
+  { id:"natureza",     icon:"🌿", color:"#5B8B5B", desc:{fr:"Paysages et nature sauvage — sans nature morte",en:"Landscapes and wild nature — no still life",es:"Paisajes y naturaleza salvaje — sin naturaleza muerta",it:"Paesaggi e natura selvaggia — senza natura morta"},            hint:"landscape nature wilderness countryside forest pastoral sea mountain" },
+  { id:"familiar",     icon:"🏠", color:"#8B7A5B", desc:{fr:"Vie quotidienne domestique — scènes d'intérieur",en:"Domestic everyday life — interior scenes",es:"Vida cotidiana doméstica — escenas de interior",it:"Vita quotidiana domestica — scene d'interno"},                    hint:"domestic interior family everyday life home genre room" },
+  { id:"nudes",        icon:"🌸", color:"#9B7A7A", desc:{fr:"Nu féminin classique — la femme dans l'art universel",en:"Classical female nude — woman in universal art",es:"Desnudo femenino clásico — la mujer en el arte universal",it:"Nudo femminile classico — la donna nell'arte universale"},  hint:"nude female Venus goddess classical mythology figure woman" },
+  { id:"esoterico",    icon:"🔮", color:"#5B5B8B", desc:{fr:"Art occulte — alchimie, Rose-Croix, Varo et ésotérisme",en:"Occult art — alchemy, Rosicrucian, Varo and esoteric knowledge",es:"Arte oculto — alquimia, rosacruz, Varo y conocimiento esotérico",it:"Arte occulta — alchimia, rosacroce, Varo e conoscenza esoterica"},hint:"esoteric occult alchemy Rosicrucian mysticism symbolic hidden knowledge Varo" },
+  { id:"sacro",        icon:"⛪", color:"#8B7A4A", desc:{fr:"Baroque mondial — foi, saints, anges et art sacré",en:"World baroque — faith, saints, angels and sacred art",es:"Barroco mundial — fe, santos, ángeles y arte sacro",it:"Barocco mondiale — fede, santi, angeli e arte sacra"},          hint:"religious baroque sacred faith saints angels Madonna Christ altarpiece" },
+  { id:"arquitetura",  icon:"🏛", color:"#6B6B5B", desc:{fr:"L'architecture comme sujet — édifices, ponts, constructions",en:"Architecture as subject — buildings, bridges, constructions in focus",es:"La arquitectura como tema — edificios, puentes, construcciones",it:"L'architettura come soggetto — edifici, ponti, costruzioni in primo piano"},hint:"architecture building bridge church cathedral palace construction exterior" },
+  { id:"povo",         icon:"👥", color:"#7A6B5B", desc:{fr:"Gens du peuple — la vie quotidienne en contexte",en:"Common people — everyday life in specific context",es:"Gente del pueblo — vida cotidiana en contexto específico",it:"Gente del popolo — vita quotidiana in contesto specifico"},      hint:"peasant workers people folk context activity scene labor market crowd" },
+  { id:"luz_sol",      icon:"☀️", color:"#A08B4A", desc:{fr:"La lumière du soleil — dans le ciel, les gens et les paysages",en:"Sunlight — in the sky, on people, landscapes and architecture",es:"La luz del sol — en el cielo, personas, paisajes y arquitectura",it:"La luce del sole — nel cielo, persone, paesaggi e architettura"},hint:"sunlight sunshine luminism golden light sky landscape people" },
+  { id:"cores",        icon:"🌈", color:"#7B5B9B", desc:{fr:"La couleur comme langage — fauvisme, impressionnisme, pop art",en:"Color as language — Fauvism, Impressionism, Pop Art",es:"El color como lenguaje — fauvismo, impresionismo, pop art",it:"Il colore come linguaggio — Fauvismo, Impressionismo, Pop Art"},hint:"fauvism impressionism pop art color language Matisse Monet Warhol Basquiat vibrant" },
+  { id:"cidades",      icon:"🌊", color:"#3A3A6E", desc:{fr:"Émotion — l'abstraction comme réalité émotionnelle",en:"Emotion — abstraction as emotional reality",es:"Emoción — la abstracción como realidad emocional",it:"Emozione — l'astrazione come realtà emotiva"},                    hint:"abstract expressionism Kandinsky Pollock Rothko Malevich color form reality" },
+  { id:"fase",         icon:"🧠", color:"#5B8B7B", desc:{fr:"Psyché — rêve et illusion d'optique, artistes du XXe siècle",en:"Psyché — dream and optical illusion, 20th century artists",es:"Psyché — sueño e ilusión óptica, artistas del siglo XX",it:"Psyché — sogno e illusione ottica, artisti del XX secolo"},    hint:"surrealism dream optical illusion Dalí Magritte De Chirico Vasarely 20th century" },
+  { id:"femininas",    icon:"🎨", color:"#9B5B7B", desc:{fr:"Artistes femmes — Frida, Tarsila et les grandes créatrices",en:"Women artists — Frida, Tarsila and the great female creators",es:"Artistas mujeres — Frida, Tarsila y las grandes creadoras",it:"Artiste donne — Frida, Tarsila e le grandi creatrici"},        hint:"female woman artist painter Frida Kahlo Tarsila Amaral Cassatt Morisot" },
 ];
 
 // ─── Lua ──────────────────────────────────────────────────────────────────────
