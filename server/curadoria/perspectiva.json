@@ -1,6 +1,50 @@
 [
   {
     "ala": "perspectiva",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "George Hendrik Breitner",
+    "titulo": "The Damrak, Amsterdam",
+    "ano": 1903,
+    "search_q": "Breitner Damrak Amsterdam canal city street Dutch impression",
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Ernst Ludwig Kirchner",
+    "titulo": "Street, Dresden",
+    "ano": 1908,
+    "search_q": "Kirchner Street Dresden expressionist urban depth perspective",
+    "importancia": "iconica",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Gustave Caillebotte",
+    "titulo": "Paris Street, Rainy Day",
+    "ano": 1877,
+    "search_q": "Caillebotte Paris Street Rainy Day perspective boulevard urban",
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Giorgio de Chirico",
+    "titulo": "Mystery and Melancholy of a Street",
+    "ano": 1914,
+    "search_q": "De Chirico Mystery Street shadow arcade depth unknown",
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "perspectiva",
     "api": "rijksmuseum",
     "api_id": "SK-A-2012",
     "autor": "Pieter Jansz Saenredam",
