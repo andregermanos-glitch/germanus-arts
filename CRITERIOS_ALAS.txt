@@ -1,0 +1,25 @@
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GERMANUS.Art — CRITÉRIOS FIXOS DAS 18 ALAS (definidos com André Germano)
+// ═══════════════════════════════════════════════════════════════════════════
+// retratos:      Bustos e configuração clássica de retrato — pessoa real ou não
+// pessoas_reais: Pessoa identificável, corpo todo ou em ação, inclui história
+// cidades:       Cenas urbanas — vida na rua e na cidade
+// perspectiva:   Lugares NÃO identificáveis onde a perspectiva é a linguagem
+// objetos:       Todos os objetos — INCLUI natureza morta/natura morta
+// lugares:       Lugares RECONHECÍVEIS — o usuário sabe onde é ao primeiro olhar
+// natureza:      Natureza desconhecida — SEM natureza morta, SEM lugares famosos
+// familiar:      Cotidiano doméstico — SEM pessoa em contexto específico/atividade
+// nudes:         Nu feminino clássico — a mulher como tema universal da arte
+// esoterico:     Conhecimento oculto — alquimia, Rosa-Cruz, Varo, budismo esotérico
+// sacro:         Barroco mundial — fé, santos, anjos, arte sacra de toda tradição
+// arquitetura:   Prédio, ponte, construção como DESTAQUE — não cidade conhecida
+// povo:          Gente em contexto/atividade específica — a vida social cotidiana
+// luz_sol:       Luz do sol em qualquer sujeito — céu, pessoas, paisagem, chão
+// cores:         Cor como LINGUAGEM — Fauvismo + Impressionismo + Pop Art
+// emocao:        Abstracionismo — cor/forma EMERGINDO como realidade emocional
+// fase (Psyché): Sonho como tema + ilusão de ótica — artistas do século XX
+// femininas:     A artista mulher — Frida Kahlo, Tarsila do Amaral protagonistas
+// ───────────────────────────────────────────────────────────────────────────
+// REGRA GERAL: apenas pinturas — sem gravuras, fotos ou desenhos antigos
+// ═══════════════════════════════════════════════════════════════════════════
