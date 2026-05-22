@@ -2,35 +2,38 @@
   {
     "ala": "pessoas_reais",
     "api": "rijksmuseum",
-    "api_id": "SK-A-226",
+    "api_id": null,
     "autor": "Michiel Jansz van Mierevelt",
     "titulo": "William the Silent, Prince of Orange",
     "ano": 1607,
+    "search_creator": "Michiel van Mierevelt",
+    "search_title": "William Silent Prince",
     "importancia": "iconica",
-    "origem": "Países Baixos",
-    "institution": "Rijksmuseum, Amsterdã"
+    "origem": "Países Baixos"
   },
   {
     "ala": "pessoas_reais",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4838",
+    "api_id": null,
     "autor": "Jan de Baen",
     "titulo": "Johan de Witt and Cornelis de Witt",
     "ano": 1670,
+    "search_creator": "Jan de Baen",
+    "search_title": "Johan de Witt",
     "importancia": "iconica",
-    "origem": "Países Baixos",
-    "institution": "Rijksmuseum, Amsterdã"
+    "origem": "Países Baixos"
   },
   {
     "ala": "pessoas_reais",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4085",
+    "api_id": null,
     "autor": "Ferdinand Bol",
     "titulo": "Michiel de Ruyter as Lieutenant-Admiral",
     "ano": 1667,
+    "search_creator": "Ferdinand Bol",
+    "search_title": "Michiel de Ruyter",
     "importancia": "iconica",
-    "origem": "Países Baixos",
-    "institution": "Rijksmuseum, Amsterdã"
+    "origem": "Países Baixos"
   },
   {
     "ala": "pessoas_reais",
@@ -39,54 +42,58 @@
     "autor": "Rembrandt van Rijn",
     "titulo": "Aristotle with a Bust of Homer",
     "ano": 1653,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Rembrandt_Aristotle_with_a_Bust_of_Homer.jpg?width=400",
+    "search_creator": "Rembrandt van Rijn",
+    "search_title": "Aristotle Homer",
     "importancia": "iconica",
-    "origem": "Países Baixos",
-    "institution": "Metropolitan Museum, Nova York"
+    "origem": "Países Baixos"
   },
   {
     "ala": "pessoas_reais",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4885",
+    "api_id": null,
     "autor": "Rembrandt van Rijn",
     "titulo": "Portrait of Johannes Wtenbogaert",
     "ano": 1633,
+    "search_creator": "Rembrandt van Rijn",
+    "search_title": "Johannes Wtenbogaert",
     "importancia": "alta",
-    "origem": "Países Baixos",
-    "institution": "Rijksmuseum, Amsterdã"
+    "origem": "Países Baixos"
   },
   {
     "ala": "pessoas_reais",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4736",
+    "api_id": null,
     "autor": "Frans Hals",
     "titulo": "Portrait of René Descartes",
     "ano": 1649,
+    "search_creator": "Frans Hals",
+    "search_title": "René Descartes",
     "importancia": "iconica",
-    "origem": "Países Baixos",
-    "institution": "Rijksmuseum, Amsterdã"
+    "origem": "Países Baixos"
   },
   {
     "ala": "pessoas_reais",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4771",
+    "api_id": null,
     "autor": "Jan Lievens",
     "titulo": "Portrait of Constantijn Huygens",
     "ano": 1629,
+    "search_creator": "Jan Lievens",
+    "search_title": "Constantijn Huygens",
     "importancia": "alta",
-    "origem": "Países Baixos",
-    "institution": "Rijksmuseum, Amsterdã"
+    "origem": "Países Baixos"
   },
   {
     "ala": "pessoas_reais",
     "api": "rijksmuseum",
-    "api_id": "SK-A-4835",
+    "api_id": null,
     "autor": "Gerard ter Borch",
     "titulo": "Portrait of Michiel Adriaensz de Ruyter",
     "ano": 1667,
+    "search_creator": "Gerard ter Borch",
+    "search_title": "Michiel de Ruyter",
     "importancia": "alta",
-    "origem": "Países Baixos",
-    "institution": "Rijksmuseum, Amsterdã"
+    "origem": "Países Baixos"
   },
   {
     "ala": "pessoas_reais",
@@ -95,10 +102,10 @@
     "autor": "Adriaen van der Werff",
     "titulo": "Portrait of Gottfried Wilhelm Leibniz",
     "ano": 1703,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Leibniz_Bernhard_Christoph_Francke.jpg?width=400",
+    "search_creator": "Adriaen van der Werff",
+    "search_title": "Leibniz",
     "importancia": "alta",
-    "origem": "Países Baixos",
-    "institution": "Herzog Anton Ulrich-Museum, Braunschweig"
+    "origem": "Países Baixos"
   },
   {
     "ala": "pessoas_reais",
@@ -108,10 +115,9 @@
     "titulo": "Portrait of a Scholar",
     "ano": 1530,
     "search_creator": "Jan van Scorel",
-    "search_title": "Portrait Scholar",
+    "search_title": "Scholar",
     "importancia": "media",
-    "origem": "Países Baixos",
-    "institution": "Rijksmuseum, Amsterdã"
+    "origem": "Países Baixos"
   },
   {
     "ala": "pessoas_reais",
@@ -120,12 +126,22 @@
     "autor": "Gilbert Stuart",
     "titulo": "George Washington — Lansdowne Portrait",
     "ano": 1796,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Gilbert_Stuart_Williamstown_Portrait_of_George_Washington.jpg?width=400",
     "search_artist": "Gilbert Stuart",
-    "search_q": "Gilbert Stuart George Washington Lansdowne portrait president",
+    "search_q": "George Washington Lansdowne portrait president",
     "importancia": "iconica",
-    "origem": "EUA",
-    "institution": "Pennsylvania Academy of Fine Arts"
+    "origem": "EUA"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "harvard",
+    "api_id": null,
+    "autor": "Gilbert Stuart",
+    "titulo": "George Washington — Athenaeum Portrait",
+    "ano": 1796,
+    "search_artist": "Gilbert Stuart",
+    "search_q": "George Washington Athenaeum unfinished iconic",
+    "importancia": "iconica",
+    "origem": "EUA"
   },
   {
     "ala": "pessoas_reais",
@@ -134,12 +150,10 @@
     "autor": "John Singleton Copley",
     "titulo": "Paul Revere",
     "ano": 1768,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Paul_Revere-1768-Copley.jpg?width=400",
     "search_artist": "Copley",
-    "search_q": "Copley Paul Revere silversmith portrait American Revolution",
+    "search_q": "Paul Revere silversmith portrait American Revolution",
     "importancia": "iconica",
-    "origem": "EUA",
-    "institution": "Museum of Fine Arts, Boston"
+    "origem": "EUA"
   },
   {
     "ala": "pessoas_reais",
@@ -148,12 +162,22 @@
     "autor": "John Singleton Copley",
     "titulo": "Samuel Adams",
     "ano": 1772,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Samuel_Adams_by_John_Singleton_Copley.jpg?width=400",
     "search_artist": "Copley",
-    "search_q": "Copley Samuel Adams founding father patriot portrait",
+    "search_q": "Samuel Adams founding father patriot portrait",
     "importancia": "iconica",
-    "origem": "EUA",
-    "institution": "Museum of Fine Arts, Boston"
+    "origem": "EUA"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "harvard",
+    "api_id": null,
+    "autor": "Rembrandt Peale",
+    "titulo": "George Washington",
+    "ano": 1795,
+    "search_artist": "Rembrandt Peale",
+    "search_q": "George Washington Peale portrait patriae pater",
+    "importancia": "iconica",
+    "origem": "EUA"
   },
   {
     "ala": "pessoas_reais",
@@ -162,12 +186,10 @@
     "autor": "Jacques-Louis David",
     "titulo": "Portrait of Napoleon in his Study",
     "ano": 1812,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Jacques-Louis_David_-_The_Emperor_Napoleon_in_His_Study_at_the_Tuileries_-_Google_Art_Project_2.jpg?width=400",
     "search_artist": "David",
     "search_q": "Napoleon study portrait David candle night",
     "importancia": "iconica",
-    "origem": "França",
-    "institution": "National Gallery Washington"
+    "origem": "França"
   },
   {
     "ala": "pessoas_reais",
@@ -176,12 +198,10 @@
     "autor": "Jacques-Louis David",
     "titulo": "Portrait of Madame Récamier",
     "ano": 1800,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Jacques-Louis_David_-_Madame_R%C3%A9camier_-_Google_Art_Project.jpg?width=400",
     "search_artist": "David",
-    "search_q": "Madame Récamier reclining sofa portrait neoclassical",
+    "search_q": "Madame Récamier reclining sofa portrait famous",
     "importancia": "iconica",
-    "origem": "França",
-    "institution": "Musée du Louvre, Paris"
+    "origem": "França"
   },
   {
     "ala": "pessoas_reais",
@@ -190,12 +210,34 @@
     "autor": "Édouard Manet",
     "titulo": "Portrait of Émile Zola",
     "ano": 1868,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/%C3%89douard_Manet_-_Portrait_of_%C3%89mile_Zola.jpg?width=400",
     "search_artist": "Manet",
-    "search_q": "Manet Portrait Emile Zola writer desk Japanese",
+    "search_q": "Émile Zola portrait writer desk Manet",
     "importancia": "iconica",
-    "origem": "França",
-    "institution": "Musée d'Orsay, Paris"
+    "origem": "França"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "harvard",
+    "api_id": null,
+    "autor": "Paul Cézanne",
+    "titulo": "Portrait of Ambroise Vollard",
+    "ano": 1899,
+    "search_artist": "Cézanne",
+    "search_q": "Ambroise Vollard dealer portrait Cézanne",
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "harvard",
+    "api_id": null,
+    "autor": "Pablo Picasso",
+    "titulo": "Portrait of Gertrude Stein",
+    "ano": 1906,
+    "search_artist": "Picasso",
+    "search_q": "Gertrude Stein portrait cubist proto",
+    "importancia": "iconica",
+    "origem": "Espanha"
   },
   {
     "ala": "pessoas_reais",
@@ -204,12 +246,34 @@
     "autor": "Vincent van Gogh",
     "titulo": "Portrait of Dr. Paul Gachet",
     "ano": 1890,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Vincent_van_Gogh_-_Dr_Paul_Gachet_-_Google_Art_Project.jpg?width=400",
     "search_artist": "Van Gogh",
-    "search_q": "Van Gogh Portrait Paul Gachet melancholy foxglove",
+    "search_q": "Dr Paul Gachet portrait melancholy foxglove",
     "importancia": "iconica",
-    "origem": "Países Baixos",
-    "institution": "Musée d'Orsay, Paris"
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "harvard",
+    "api_id": null,
+    "autor": "Vincent van Gogh",
+    "titulo": "Self-Portrait with Bandaged Ear",
+    "ano": 1889,
+    "search_artist": "Van Gogh",
+    "search_q": "Van Gogh self portrait bandaged ear Japanese",
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "harvard",
+    "api_id": null,
+    "autor": "Thomas Sully",
+    "titulo": "Queen Victoria",
+    "ano": 1838,
+    "search_artist": "Sully",
+    "search_q": "Queen Victoria young portrait American painter",
+    "importancia": "iconica",
+    "origem": "EUA"
   },
   {
     "ala": "pessoas_reais",
@@ -218,12 +282,22 @@
     "autor": "Ilya Repin",
     "titulo": "Portrait of Leo Tolstoy",
     "ano": 1887,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Ilya_Efimovich_Repin_%281844-1930%29_-_Portrait_of_Leo_Tolstoy_%281887%29.jpg?width=400",
     "search_artist": "Repin",
-    "search_q": "Repin Leo Tolstoy portrait Russian writer beard",
+    "search_q": "Leo Tolstoy portrait Russian writer beard",
     "importancia": "iconica",
-    "origem": "Rússia",
-    "institution": "Galeria Tretyakov, Moscou"
+    "origem": "Rússia"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "harvard",
+    "api_id": null,
+    "autor": "Ilya Repin",
+    "titulo": "Portrait of Modest Mussorgsky",
+    "ano": 1881,
+    "search_artist": "Repin",
+    "search_q": "Mussorgsky composer portrait disheveled",
+    "importancia": "iconica",
+    "origem": "Rússia"
   },
   {
     "ala": "pessoas_reais",
@@ -232,12 +306,22 @@
     "autor": "Lucas Cranach the Elder",
     "titulo": "Portrait of Martin Luther",
     "ano": 1529,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Lucas_Cranach_d.%C3%84._-_Martin_Luther%2C_1528_%28Veste_Coburg%29.jpg?width=400",
     "search_artist": "Cranach",
-    "search_q": "Cranach Martin Luther portrait Reformation Protestant",
+    "search_q": "Martin Luther portrait Reformation Protestant",
     "importancia": "iconica",
-    "origem": "Alemanha",
-    "institution": "Germanisches Nationalmuseum, Nuremberg"
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "harvard",
+    "api_id": null,
+    "autor": "Lucas Cranach the Elder",
+    "titulo": "Portrait of Philip Melanchthon",
+    "ano": 1543,
+    "search_artist": "Cranach",
+    "search_q": "Philip Melanchthon portrait Lutheran scholar",
+    "importancia": "alta",
+    "origem": "Alemanha"
   },
   {
     "ala": "pessoas_reais",
@@ -246,12 +330,10 @@
     "autor": "Thomas Gainsborough",
     "titulo": "Mr and Mrs William Hallett — The Morning Walk",
     "ano": 1785,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Morning_walk_gainsborough.jpg?width=400",
     "search_artist": "Gainsborough",
-    "search_q": "Gainsborough Morning Walk Hallett English portrait landscape",
+    "search_q": "Mr Mrs Hallett Morning Walk English portrait",
     "importancia": "iconica",
-    "origem": "Reino Unido",
-    "institution": "National Gallery, Londres"
+    "origem": "Reino Unido"
   },
   {
     "ala": "pessoas_reais",
@@ -260,11 +342,10 @@
     "autor": "Hans Holbein the Younger",
     "titulo": "Henry VIII",
     "ano": 1540,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Hans_Holbein_d._J._-_Portr%C3%A4t_Heinrichs_VIII._-_Thyssen-Bornemisza.jpg?width=400",
-    "search_q": "Holbein Henry VIII king iconic frontal powerful",
+    "search_q": "Holbein Henry VIII king powerful iconic",
     "importancia": "iconica",
     "origem": "Alemanha",
-    "institution": "Thyssen-Bornemisza, Madri"
+    "institution": "National Portrait Gallery London"
   },
   {
     "ala": "pessoas_reais",
@@ -273,11 +354,10 @@
     "autor": "Hans Holbein the Younger",
     "titulo": "Sir Thomas More",
     "ano": 1527,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Hans_Holbein%2C_the_Younger_-_Sir_Thomas_More_-_1527.jpg?width=400",
-    "search_q": "Holbein Thomas More scholar Lord Chancellor martyr",
+    "search_q": "Holbein Thomas More scholar martyr Lord Chancellor",
     "importancia": "iconica",
     "origem": "Alemanha",
-    "institution": "Frick Collection, Nova York"
+    "institution": "Frick Collection"
   },
   {
     "ala": "pessoas_reais",
@@ -286,11 +366,10 @@
     "autor": "Hans Holbein the Younger",
     "titulo": "Christina of Denmark",
     "ano": 1538,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Holbein-christina_of_denmark.jpg?width=400",
-    "search_q": "Holbein Christina Denmark Duchess Milan marriage proposal",
+    "search_q": "Holbein Christina Denmark marriage proposal Henry VIII",
     "importancia": "iconica",
     "origem": "Alemanha",
-    "institution": "National Gallery, Londres"
+    "institution": "National Gallery London"
   },
   {
     "ala": "pessoas_reais",
@@ -299,11 +378,10 @@
     "autor": "Hyacinthe Rigaud",
     "titulo": "Louis XIV",
     "ano": 1701,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Louis_XIV_of_France.jpg?width=400",
     "search_q": "Rigaud Louis XIV Sun King ermine coronation robes",
     "importancia": "iconica",
     "origem": "França",
-    "institution": "Musée du Louvre, Paris"
+    "institution": "Musée du Louvre"
   },
   {
     "ala": "pessoas_reais",
@@ -312,11 +390,22 @@
     "autor": "Diego Velázquez",
     "titulo": "Pope Innocent X",
     "ano": 1650,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Velasquez-Innocent-X.jpg?width=400",
-    "search_q": "Velázquez Pope Innocent X red powerful penetrating gaze",
+    "search_q": "Velázquez Pope Innocent X red powerful gaze",
     "importancia": "iconica",
     "origem": "Espanha",
-    "institution": "Galleria Doria Pamphilj, Roma"
+    "institution": "Galleria Doria Pamphilj Roma"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Diego Velázquez",
+    "titulo": "Portrait of Philip IV in Armour",
+    "ano": 1628,
+    "search_q": "Velázquez Philip IV armour king Spain",
+    "importancia": "iconica",
+    "origem": "Espanha",
+    "institution": "Museo del Prado"
   },
   {
     "ala": "pessoas_reais",
@@ -325,11 +414,10 @@
     "autor": "Raphael",
     "titulo": "Pope Julius II",
     "ano": 1511,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pope_Julius_II.jpg?width=400",
-    "search_q": "Raphael Pope Julius II beard warrior pope founder",
+    "search_q": "Raphael Pope Julius II beard warrior pope",
     "importancia": "iconica",
     "origem": "Itália",
-    "institution": "National Gallery, Londres"
+    "institution": "National Gallery London"
   },
   {
     "ala": "pessoas_reais",
@@ -338,11 +426,10 @@
     "autor": "Raphael",
     "titulo": "Pope Leo X with Two Cardinals",
     "ano": 1518,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Raphael_-_Pope_Leo_X_with_Cardinals_Giulio_de%27_Medici_and_Luigi_de%27_Rossi_-_Google_Art_Project.jpg?width=400",
-    "search_q": "Raphael Pope Leo X Cardinals Medici Uffizi",
+    "search_q": "Raphael Pope Leo X two Cardinals Medici",
     "importancia": "iconica",
     "origem": "Itália",
-    "institution": "Uffizi, Florença"
+    "institution": "Uffizi Firenze"
   },
   {
     "ala": "pessoas_reais",
@@ -351,11 +438,22 @@
     "autor": "Tiziano Vecellio",
     "titulo": "Charles V at the Battle of Mühlberg",
     "ano": 1548,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tizian_081.jpg?width=400",
-    "search_q": "Titian Charles V Mühlberg equestrian emperor Prado",
+    "search_q": "Titian Charles V Mühlberg equestrian emperor",
     "importancia": "iconica",
     "origem": "Itália",
-    "institution": "Musée du Prado, Madri"
+    "institution": "Museo del Prado"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Tiziano Vecellio",
+    "titulo": "Francis I",
+    "ano": 1538,
+    "search_q": "Titian Francis I King France profile",
+    "importancia": "iconica",
+    "origem": "Itália",
+    "institution": "Musée du Louvre"
   },
   {
     "ala": "pessoas_reais",
@@ -364,11 +462,22 @@
     "autor": "Leonardo da Vinci",
     "titulo": "Lady with an Ermine",
     "ano": 1490,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Lady_with_an_Ermine_-_Leonardo_da_Vinci_-_Google_Art_Project.jpg?width=400",
-    "search_q": "Leonardo Lady Ermine Cecilia Gallerani Milan ermine",
+    "search_q": "Leonardo Lady Ermine Cecilia Gallerani Milan",
     "importancia": "iconica",
     "origem": "Itália",
-    "institution": "Muzeum Czartoryskich, Cracóvia"
+    "institution": "Czartoryski Museum Kraków"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Leonardo da Vinci",
+    "titulo": "Ginevra de' Benci",
+    "ano": 1476,
+    "search_q": "Leonardo Ginevra de Benci juniper banker's wife",
+    "importancia": "iconica",
+    "origem": "Itália",
+    "institution": "National Gallery Washington"
   },
   {
     "ala": "pessoas_reais",
@@ -377,11 +486,22 @@
     "autor": "Anthony van Dyck",
     "titulo": "Charles I at the Hunt",
     "ano": 1635,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Anthony_van_Dyck_-_Charles_I_at_the_Hunt_-_WGA07412.jpg?width=400",
-    "search_q": "Van Dyck Charles I Hunt relaxed king informal outdoor",
+    "search_q": "Van Dyck Charles I Hunt relaxed king English",
     "importancia": "iconica",
     "origem": "Bélgica",
-    "institution": "Musée du Louvre, Paris"
+    "institution": "Musée du Louvre"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Anthony van Dyck",
+    "titulo": "Charles I in Three Positions",
+    "ano": 1635,
+    "search_q": "Van Dyck Charles I Three Positions study sculptor",
+    "importancia": "iconica",
+    "origem": "Bélgica",
+    "institution": "Royal Collection"
   },
   {
     "ala": "pessoas_reais",
@@ -390,11 +510,22 @@
     "autor": "Francisco Goya",
     "titulo": "Charles IV of Spain and His Family",
     "ano": 1800,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Goya_Charles_IV_of_Spain_and_His_Family.jpg?width=400",
-    "search_q": "Goya Charles IV Spain Family royal group portrait",
+    "search_q": "Goya Charles IV Spain Family royal portrait group",
     "importancia": "iconica",
     "origem": "Espanha",
-    "institution": "Musée du Prado, Madri"
+    "institution": "Museo del Prado"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Francisco Goya",
+    "titulo": "The Duke of Wellington",
+    "ano": 1812,
+    "search_q": "Goya Duke Wellington portrait British general",
+    "importancia": "iconica",
+    "origem": "Espanha",
+    "institution": "National Gallery London"
   },
   {
     "ala": "pessoas_reais",
@@ -403,11 +534,10 @@
     "autor": "Jacques-Louis David",
     "titulo": "The Death of Marat",
     "ano": 1793,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Death_of_Marat_by_David.jpg?width=400",
-    "search_q": "David Death Marat bathtub martyr Revolution Charlotte",
+    "search_q": "David Death Marat bathtub martyr revolution",
     "importancia": "iconica",
     "origem": "França",
-    "institution": "Musées Royaux des Beaux-Arts, Bruxelas"
+    "institution": "Musées Royaux Beaux-Arts Bruxelles"
   },
   {
     "ala": "pessoas_reais",
@@ -416,11 +546,10 @@
     "autor": "Jean-Auguste-Dominique Ingres",
     "titulo": "Napoleon on His Imperial Throne",
     "ano": 1806,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Ingres%2C_Napoleon_on_his_Imperial_throne.jpg?width=400",
-    "search_q": "Ingres Napoleon Imperial Throne frontal god-like power",
+    "search_q": "Ingres Napoleon Imperial Throne frontal God-like",
     "importancia": "iconica",
     "origem": "França",
-    "institution": "Musée de l'Armée, Paris"
+    "institution": "Musée de l'Armée Paris"
   },
   {
     "ala": "pessoas_reais",
@@ -429,11 +558,46 @@
     "autor": "Albrecht Dürer",
     "titulo": "Emperor Maximilian I",
     "ano": 1519,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Emperor_Maximilian_I%2C_by_Albrecht_D%C3%BCrer%2C_1519.jpg?width=400",
-    "search_q": "Dürer Emperor Maximilian I Holy Roman Habsburg portrait",
+    "search_q": "Dürer Emperor Maximilian I Holy Roman portrait",
     "importancia": "iconica",
     "origem": "Alemanha",
-    "institution": "Kunsthistorisches Museum, Viena"
+    "institution": "Kunsthistorisches Museum"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Jean Fouquet",
+    "titulo": "Charles VII of France",
+    "ano": 1450,
+    "search_q": "Fouquet Charles VII France portrait early three-quarter",
+    "importancia": "iconica",
+    "origem": "França",
+    "institution": "Musée du Louvre"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "François Clouet",
+    "titulo": "Francis I of France on Horseback",
+    "ano": 1540,
+    "search_q": "Clouet Francis I France equestrian royal",
+    "importancia": "iconica",
+    "origem": "França",
+    "institution": "Uffizi Firenze"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Peter Paul Rubens",
+    "titulo": "Portrait of King Philip IV of Spain",
+    "ano": 1628,
+    "search_q": "Rubens Philip IV Spain king young portrait",
+    "importancia": "iconica",
+    "origem": "Bélgica",
+    "institution": "Museo del Prado"
   },
   {
     "ala": "pessoas_reais",
@@ -442,11 +606,34 @@
     "autor": "Rembrandt van Rijn",
     "titulo": "Portrait of Jan Six",
     "ano": 1654,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Rembrandt_van_Rijn_-_Portrait_of_Jan_Six.jpg?width=400",
     "search_q": "Rembrandt Jan Six Amsterdam patrician patron masterpiece",
     "importancia": "iconica",
     "origem": "Países Baixos",
-    "institution": "Six Collection, Amsterdã"
+    "institution": "Six Collection Amsterdam"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Henri Fantin-Latour",
+    "titulo": "A Studio in the Batignolles",
+    "ano": 1870,
+    "search_q": "Fantin-Latour Studio Batignolles Manet Renoir Monet Zola",
+    "importancia": "iconica",
+    "origem": "França",
+    "institution": "Musée d'Orsay"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Gustave Courbet",
+    "titulo": "The Painter's Studio",
+    "ano": 1855,
+    "search_q": "Courbet Painter Studio real allegory seven years life",
+    "importancia": "iconica",
+    "origem": "França",
+    "institution": "Musée d'Orsay"
   },
   {
     "ala": "pessoas_reais",
@@ -455,11 +642,10 @@
     "autor": "Édouard Manet",
     "titulo": "Music in the Tuileries Gardens",
     "ano": 1862,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Edouard_Manet_-_Music_in_the_Tuileries_Gardens_-_NG3260.jpg?width=400",
-    "search_q": "Manet Music Tuileries Gardens identified figures Baudelaire crowd",
+    "search_q": "Manet Music Tuileries Gardens identified figures Baudelaire",
     "importancia": "iconica",
     "origem": "França",
-    "institution": "National Gallery, Londres"
+    "institution": "National Gallery London"
   },
   {
     "ala": "pessoas_reais",
@@ -468,10 +654,33 @@
     "autor": "Ivan Kramskoi",
     "titulo": "Portrait of Leo Tolstoy",
     "ano": 1873,
-    "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kramskoy_Portrait_of_Tolstoy.jpg?width=400",
-    "search_q": "Kramskoi Tolstoy portrait Russian Tretyakov beard classic",
+    "search_q": "Kramskoi Tolstoy portrait Russian literature beard",
     "importancia": "iconica",
     "origem": "Rússia",
-    "institution": "Galeria Tretyakov, Moscou"
+    "institution": "Tretyakov Gallery"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Oskar Kokoschka",
+    "titulo": "Portrait of Adolf Loos",
+    "ano": 1909,
+    "search_q": "Kokoschka Adolf Loos architect expressionist portrait",
+    "importancia": "alta",
+    "origem": "Áustria",
+    "institution": "Neue Nationalgalerie Berlin"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "europeana",
+    "api_id": null,
+    "autor": "Félix Vallotton",
+    "titulo": "Portrait of Gertrude Stein",
+    "ano": 1907,
+    "search_q": "Vallotton Gertrude Stein writer collector portrait",
+    "importancia": "alta",
+    "origem": "Suíça",
+    "institution": "Kunsthaus Zürich"
   }
 ]
