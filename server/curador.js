@@ -189,13 +189,15 @@ async function searchHarvardByTitle(artist, title, key) {
 // ─── Indexa uma obra no PostgreSQL ────────────────────────────────────────────
 // ─── hasMetadata — rejeita obras sem título, artista ou URL ──────────────────
 function hasMetadata(resultado) {
-  const title  = (resultado.title  || "").trim();
-  const artist = (resultado.artist || "").trim();
+  if (!resultado) return false;  // ← guard contra null
+  const title  = (resultado.title   || "").trim();
+  const artist = (resultado.artist  || "").trim();
   const url    = (resultado.imageUrl || "").trim();
 
   if (!url) return false;
-  if (!title || title.toLowerCase() === "sem título") return false;
-  if (!artist || artist.toLowerCase() === "desconhecido" || artist.toLowerCase() === "unknown") return false;
+  if (!title  || title.toLowerCase()  === "sem título")   return false;
+  if (!artist || artist.toLowerCase() === "desconhecido"
+              || artist.toLowerCase() === "unknown")       return false;
   return true;
 }
 
