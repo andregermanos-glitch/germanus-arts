@@ -1,0 +1,1928 @@
+[
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Kandinsky improvisation garden love painting",
+    "autor": "Wassily Kandinsky",
+    "titulo": "Improvisation 27 (Garden of Love II)",
+    "ano": 1912,
+    "importancia": "iconica",
+    "origem": "Rússia"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Franz Marc blue horses painting",
+    "autor": "Franz Marc",
+    "titulo": "The Large Blue Horses",
+    "ano": 1911,
+    "importancia": "iconica",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Marsden Hartley German officer painting",
+    "autor": "Marsden Hartley",
+    "titulo": "Portrait of a German Officer",
+    "ano": 1914,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Georgia O'Keeffe black iris painting",
+    "autor": "Georgia O'Keeffe",
+    "titulo": "Black Iris",
+    "ano": 1926,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Lyonel Feininger Gelmeroda church painting",
+    "autor": "Lyonel Feininger",
+    "titulo": "Gelmeroda",
+    "ano": 1936,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Stuart Davis lucky strike painting",
+    "autor": "Stuart Davis",
+    "titulo": "Lucky Strike",
+    "ano": 1921,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Arthur Dove fog horns abstract painting",
+    "autor": "Arthur Dove",
+    "titulo": "Fog Horns",
+    "ano": 1929,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "John Marin Brooklyn Bridge painting",
+    "autor": "John Marin",
+    "titulo": "Brooklyn Bridge",
+    "ano": 1913,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Robert Delaunay simultaneous windows painting",
+    "autor": "Robert Delaunay",
+    "titulo": "Simultaneous Windows on the City",
+    "ano": 1912,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Piet Mondrian composition yellow blue painting",
+    "autor": "Piet Mondrian",
+    "titulo": "Composition with Yellow, Blue, and Red",
+    "ano": 1942,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  }
+]
+[
+  {
+    "ala": "cores",
+    "api": "aic",
+    "aic_id": 27992,
+    "autor": "Georges Seurat",
+    "titulo": "A Sunday on La Grande Jatte",
+    "ano": 1886,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "search_q": "Gauguin Ia Orana Maria Tahiti painting",
+    "autor": "Paul Gauguin",
+    "titulo": "Ia Orana Maria",
+    "ano": 1891,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "search_q": "Van Gogh wheat field cypresses painting",
+    "autor": "Vincent van Gogh",
+    "titulo": "Wheat Field with Cypresses",
+    "ano": 1889,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "search_q": "Van Gogh self portrait straw hat painting",
+    "autor": "Vincent van Gogh",
+    "titulo": "Self-Portrait with a Straw Hat",
+    "ano": 1887,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "search_q": "Gauguin tahitian women beach painting",
+    "autor": "Paul Gauguin",
+    "titulo": "Two Tahitian Women",
+    "ano": 1899,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "search_q": "Cézanne card players painting",
+    "autor": "Paul Cézanne",
+    "titulo": "The Card Players",
+    "ano": 1890,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "search_q": "Matisse nasturtiums painting dance",
+    "autor": "Henri Matisse",
+    "titulo": "Nasturtiums with the Painting Dance",
+    "ano": 1912,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "search_q": "Picasso girl mirror painting",
+    "autor": "Pablo Picasso",
+    "titulo": "Girl before a Mirror",
+    "ano": 1932,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "search_q": "Seurat models circus painting",
+    "autor": "Georges Seurat",
+    "titulo": "Circus Sideshow",
+    "ano": 1888,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "search_q": "Paul Signac boats harbour painting",
+    "autor": "Paul Signac",
+    "titulo": "The Bonaventure Pine",
+    "ano": 1893,
+    "importancia": "alta",
+    "origem": "França"
+  }
+]
+[
+  {
+    "ala": "esoterico",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Henry_Fuseli_-_The_Nightmare.JPG/400px-Henry_Fuseli_-_The_Nightmare.JPG",
+    "autor": "Henry Fuseli",
+    "titulo": "The Nightmare",
+    "ano": 1781,
+    "importancia": "iconica",
+    "origem": "Suíça"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Gustave Moreau Oedipus Sphinx painting",
+    "autor": "Gustave Moreau",
+    "titulo": "Oedipus and the Sphinx",
+    "ano": 1864,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Odilon Redon cyclops painting",
+    "autor": "Odilon Redon",
+    "titulo": "The Cyclops",
+    "ano": 1898,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "William Blake Jacob ladder painting",
+    "autor": "William Blake",
+    "titulo": "Jacob's Dream",
+    "ano": 1805,
+    "importancia": "alta",
+    "origem": "Inglaterra"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Franz Stuck sin painting",
+    "autor": "Franz von Stuck",
+    "titulo": "The Sin",
+    "ano": 1893,
+    "importancia": "alta",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Moreau apparition salome painting",
+    "autor": "Gustave Moreau",
+    "titulo": "The Apparition",
+    "ano": 1876,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Böcklin island dead painting",
+    "autor": "Arnold Böcklin",
+    "titulo": "Island of the Dead",
+    "ano": 1883,
+    "importancia": "iconica",
+    "origem": "Suíça"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Redon vase flowers painting symbolic",
+    "autor": "Odilon Redon",
+    "titulo": "Vase of Flowers",
+    "ano": 1905,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Elihu Vedder questioner sphinx painting",
+    "autor": "Elihu Vedder",
+    "titulo": "The Questioner of the Sphinx",
+    "ano": 1863,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "John La Farge peonies wind rain painting",
+    "autor": "John La Farge",
+    "titulo": "Peonies Blown in the Wind",
+    "ano": 1880,
+    "importancia": "media",
+    "origem": "EUA"
+  }
+]
+[
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Vermeer young woman water pitcher painting",
+    "autor": "Johannes Vermeer",
+    "titulo": "Young Woman with a Water Pitcher",
+    "ano": 1662,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Vermeer woman lute painting",
+    "autor": "Johannes Vermeer",
+    "titulo": "A Maidservant Pouring Milk",
+    "ano": 1660,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Metsu sick child painting",
+    "autor": "Gabriel Metsu",
+    "titulo": "The Sick Child",
+    "ano": 1665,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Nicolas Maes old woman dozing bible painting",
+    "autor": "Nicolas Maes",
+    "titulo": "Old Woman Dozing",
+    "ano": 1655,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Jan Steen merry family painting",
+    "autor": "Jan Steen",
+    "titulo": "The Merry Family",
+    "ano": 1668,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "ter Borch letter woman painting",
+    "autor": "Gerard ter Borch",
+    "titulo": "A Young Woman at Her Toilet with a Maid",
+    "ano": 1651,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Vuillard mother sister interior painting",
+    "autor": "Édouard Vuillard",
+    "titulo": "The Mother and Sister of the Artist",
+    "ano": 1893,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Hooch courtyard interior house painting",
+    "autor": "Pieter de Hooch",
+    "titulo": "Interior with Two Women at a Linen Chest",
+    "ano": 1663,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Brekelenkam tailor shop interior painting",
+    "autor": "Quiringh van Brekelenkam",
+    "titulo": "Interior of a Tailor's Shop",
+    "ano": 1653,
+    "importancia": "media",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Renoir mother child family painting",
+    "autor": "Pierre-Auguste Renoir",
+    "titulo": "Madame Charpentier and Her Children",
+    "ano": 1878,
+    "importancia": "iconica",
+    "origem": "França"
+  }
+]
+[
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Giorgio de Chirico anxious journey painting",
+    "autor": "Giorgio de Chirico",
+    "titulo": "The Anxious Journey",
+    "ano": 1913,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Giorgio de Chirico ariadne painting",
+    "autor": "Giorgio de Chirico",
+    "titulo": "Ariadne",
+    "ano": 1913,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Paul Klee cat bird painting",
+    "autor": "Paul Klee",
+    "titulo": "Cat and Bird",
+    "ano": 1928,
+    "importancia": "iconica",
+    "origem": "Suíça"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Yves Tanguy rapidity sleep painting",
+    "autor": "Yves Tanguy",
+    "titulo": "The Rapidity of Sleep",
+    "ano": 1945,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Pavel Tchelitchew hide seek painting",
+    "autor": "Pavel Tchelitchew",
+    "titulo": "Hide-and-Seek",
+    "ano": 1942,
+    "importancia": "iconica",
+    "origem": "Rússia"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Matta vertigo Eros painting",
+    "autor": "Roberto Matta",
+    "titulo": "The Vertigo of Eros",
+    "ano": 1944,
+    "importancia": "alta",
+    "origem": "Chile"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Dorothea Tanning birthday painting surreal",
+    "autor": "Dorothea Tanning",
+    "titulo": "Birthday",
+    "ano": 1942,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Kay Sage no passing surreal painting",
+    "autor": "Kay Sage",
+    "titulo": "No Passing",
+    "ano": 1954,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "De Chirico mystery melancholy street painting",
+    "autor": "Giorgio de Chirico",
+    "titulo": "Mystery and Melancholy of a Street",
+    "ano": 1914,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Dali landscape painting surreal",
+    "autor": "Salvador Dali",
+    "titulo": "The Persistence of Memory",
+    "ano": 1931,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  }
+]
+[
+  {
+    "ala": "femininas",
+    "api": "aic",
+    "aic_id": 111442,
+    "autor": "Mary Cassatt",
+    "titulo": "The Child's Bath",
+    "ano": 1893,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "aic",
+    "aic_id": 16790,
+    "autor": "Mary Cassatt",
+    "titulo": "Woman in Black at the Opera",
+    "ano": 1879,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Elisabeth Vigée Le Brun self portrait straw hat painting",
+    "autor": "Elisabeth Louise Vigée Le Brun",
+    "titulo": "Self-Portrait in a Straw Hat",
+    "ano": 1782,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Berthe Morisot summer day painting",
+    "autor": "Berthe Morisot",
+    "titulo": "Summer's Day",
+    "ano": 1879,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Rosa Bonheur horse fair painting",
+    "autor": "Rosa Bonheur",
+    "titulo": "The Horse Fair",
+    "ano": 1853,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Mary Cassatt young women boating painting",
+    "autor": "Mary Cassatt",
+    "titulo": "Young Women Picking Fruit",
+    "ano": 1892,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Cecilia Beaux portrait painting",
+    "autor": "Cecilia Beaux",
+    "titulo": "Ernesta",
+    "ano": 1894,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Marie Laurencin group artists painting",
+    "autor": "Marie Laurencin",
+    "titulo": "Group of Artists",
+    "ano": 1908,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Suzanne Valadon nude painting",
+    "autor": "Suzanne Valadon",
+    "titulo": "Nude Lying on a Couch",
+    "ano": 1928,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Artemisia Gentileschi Judith painting",
+    "autor": "Artemisia Gentileschi",
+    "titulo": "Self-Portrait as a Lute Player",
+    "ano": 1616,
+    "importancia": "iconica",
+    "origem": "Itália"
+  }
+]
+[
+  {
+    "ala": "historico",
+    "api": "met",
+    "met_id": 11417,
+    "autor": "Emanuel Leutze",
+    "titulo": "Washington Crossing the Delaware",
+    "ano": 1851,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "search_q": "David death socrates painting",
+    "autor": "Jacques-Louis David",
+    "titulo": "The Death of Socrates",
+    "ano": 1787,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "search_q": "Rubens triumph Henry painting",
+    "autor": "Peter Paul Rubens",
+    "titulo": "The Triumph of Henry IV",
+    "ano": 1630,
+    "importancia": "alta",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "search_q": "West death general Wolfe painting",
+    "autor": "Benjamin West",
+    "titulo": "The Death of General Wolfe",
+    "ano": 1770,
+    "importancia": "iconica",
+    "origem": "Inglaterra"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "search_q": "Ingres Napoleon throne painting",
+    "autor": "Jean-Auguste-Dominique Ingres",
+    "titulo": "Napoleon on His Imperial Throne",
+    "ano": 1806,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "search_q": "Gros Napoleon plague Jaffa painting",
+    "autor": "Antoine-Jean Gros",
+    "titulo": "Napoleon at the Plague-House of Jaffa",
+    "ano": 1804,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "search_q": "Leutze Westward the Course of Empire painting",
+    "autor": "Emanuel Leutze",
+    "titulo": "Westward the Course of Empire Takes Its Way",
+    "ano": 1862,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "search_q": "Rubens Henri portrait Marie Medici painting",
+    "autor": "Peter Paul Rubens",
+    "titulo": "Portrait of Henry IV of France",
+    "ano": 1628,
+    "importancia": "alta",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "search_q": "Vanderlyn ariadne naxos painting",
+    "autor": "John Vanderlyn",
+    "titulo": "Ariadne Asleep on the Island of Naxos",
+    "ano": 1814,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "search_q": "Trumbull declaration independence painting",
+    "autor": "John Trumbull",
+    "titulo": "The Declaration of Independence",
+    "ano": 1786,
+    "importancia": "iconica",
+    "origem": "EUA"
+  }
+]
+# GERMANUS.Art — Curadoria JSONs v2
+Gerado em 23/05/2026 | 182 obras em 18 alas
+
+## Estrutura dos JSONs
+
+Cada obra tem 3 formatos possíveis, em ordem de prioridade no curador.js:
+
+### 1. ID direto Met (melhor — 100% fiável)
+```json
+{ "met_id": 11417, "api": "met", ... }
+```
+
+### 2. ID direto AIC (melhor — 100% fiável)
+```json
+{ "aic_id": 27992, "api": "aic", ... }
+```
+
+### 3. URL Wikimedia (bom — bypass completo de API)
+```json
+{ "image_url": "https://upload.wikimedia.org/...", "api": "wikimedia", ... }
+```
+
+### 4. search_q (cascata Met → Cleveland → AIC → Europeana)
+```json
+{ "search_q": "Rembrandt self-portrait painting", "api": "met", ... }
+```
+
+## IDs diretos incluídos (confirmados)
+
+| Ala | Obra | ID |
+|-----|------|-----|
+| historico | Washington Crossing the Delaware | met_id: 11417 |
+| perspectiva | Paris Street; Rainy Day (Caillebotte) | aic_id: 20684 |
+| luz_sol | Water Lilies (Monet 1906) | aic_id: 16568 |
+| cores | A Sunday on La Grande Jatte (Seurat) | aic_id: 27992 |
+| femininas | The Child's Bath (Cassatt) | aic_id: 111442 |
+| femininas | Woman in Black at the Opera (Cassatt) | aic_id: 16790 |
+| retratos | Juan de Pareja (Velázquez) | met_id: 437394 |
+
+## Como adicionar mais IDs diretos (recomendado)
+
+Para cada obra com `search_q`, pode enriquecer com ID direto:
+
+```bash
+# AIC — buscar por título/artista:
+curl "https://api.artic.edu/api/v1/artworks/search?q=Rembrandt+self+portrait&fields=id,title,artist_display,is_public_domain&limit=5"
+
+# Met — buscar por título/artista:
+curl "https://collectionapi.metmuseum.org/public/collection/v1/search?hasImages=true&q=Rembrandt+self+portrait"
+# → pegar objectID, depois:
+curl "https://collectionapi.metmuseum.org/public/collection/v1/objects/{ID}"
+# → confirmar: isPublicDomain=true e primaryImage não vazio
+```
+
+## Deploy
+
+```sql
+-- No Railway Postgres, ANTES de fazer commit:
+DELETE FROM artworks WHERE source = 'curadoria';
+```
+
+Depois: **Commit → Push → Redeploy no Railway**
+
+O curador.js re-indexa automaticamente ao subir.
+
+## Wikimedia URLs incluídas (6 obras)
+
+URLs computadas com MD5 correto. Se alguma retornar 404, o job 
+`validateAndCleanImages` (24h) a marcará como NULL e o curador 
+retentará na próxima rodada. Inofensivo.
+
+
+[
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Canaletto Grand Canal Venice painting",
+    "autor": "Canaletto",
+    "titulo": "The Grand Canal in Venice",
+    "ano": 1740,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Monet Houses Parliament London painting",
+    "autor": "Claude Monet",
+    "titulo": "The Houses of Parliament, London",
+    "ano": 1903,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Pissarro Boulevard Montmartre night painting",
+    "autor": "Camille Pissarro",
+    "titulo": "Boulevard Montmartre at Night",
+    "ano": 1897,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Canaletto Piazza San Marco Venice painting",
+    "autor": "Canaletto",
+    "titulo": "The Piazza San Marco",
+    "ano": 1720,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Guardi Venice bacino San Marco painting",
+    "autor": "Francesco Guardi",
+    "titulo": "Venice from the Bacino di San Marco",
+    "ano": 1770,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Monet Rouen Cathedral painting",
+    "autor": "Claude Monet",
+    "titulo": "Rouen Cathedral: The Portal",
+    "ano": 1894,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Bruegel Tower Babel painting",
+    "autor": "Pieter Bruegel the Elder",
+    "titulo": "The Tower of Babel",
+    "ano": 1563,
+    "importancia": "iconica",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Pissarro Rue Saint-Honore painting",
+    "autor": "Camille Pissarro",
+    "titulo": "The Boulevard Montmartre on a Winter Morning",
+    "ano": 1897,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Monet Argenteuil Bridge painting",
+    "autor": "Claude Monet",
+    "titulo": "The Bridge at Argenteuil",
+    "ano": 1874,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Koninck panoramic landscape Holland painting",
+    "autor": "Philips Koninck",
+    "titulo": "An Extensive Landscape with a Road by a Ruin",
+    "ano": 1655,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  }
+]
+[
+  {
+    "ala": "luz_sol",
+    "api": "aic",
+    "aic_id": 16568,
+    "autor": "Claude Monet",
+    "titulo": "Water Lilies",
+    "ano": 1906,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Monet cliff walk Etretat painting",
+    "autor": "Claude Monet",
+    "titulo": "The Cliff Walk at Étretat",
+    "ano": 1882,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Monet haystacks summer painting",
+    "autor": "Claude Monet",
+    "titulo": "Haystacks: Autumn",
+    "ano": 1891,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Renoir girl watering can painting",
+    "autor": "Pierre-Auguste Renoir",
+    "titulo": "A Girl with a Watering Can",
+    "ano": 1876,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Monet boating Argenteuil painting",
+    "autor": "Claude Monet",
+    "titulo": "Boating on the Epte",
+    "ano": 1890,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Homer blue boat watercolor painting",
+    "autor": "Winslow Homer",
+    "titulo": "Sloop, Nassau",
+    "ano": 1899,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Pissarro apple picking harvest painting",
+    "autor": "Camille Pissarro",
+    "titulo": "The Apple Pickers",
+    "ano": 1886,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Renoir luncheon boating party painting",
+    "autor": "Pierre-Auguste Renoir",
+    "titulo": "A Young Girl Bathing",
+    "ano": 1892,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Monet garden Argenteuil painting",
+    "autor": "Claude Monet",
+    "titulo": "Garden at Sainte-Adresse",
+    "ano": 1867,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Childe Hassam sunny summer painting",
+    "autor": "Childe Hassam",
+    "titulo": "The South Ledges, Appledore",
+    "ano": 1913,
+    "importancia": "alta",
+    "origem": "EUA"
+  }
+]
+[
+  {
+    "ala": "natureza",
+    "api": "met",
+    "search_q": "Thomas Cole Oxbow Connecticut painting",
+    "autor": "Thomas Cole",
+    "titulo": "The Oxbow",
+    "ano": 1836,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "search_q": "Frederic Church Heart Andes painting",
+    "autor": "Frederic Edwin Church",
+    "titulo": "Heart of the Andes",
+    "ano": 1859,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "search_q": "Albert Bierstadt Sierra Nevada landscape painting",
+    "autor": "Albert Bierstadt",
+    "titulo": "The Rocky Mountains, Lander's Peak",
+    "ano": 1863,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "search_q": "Corot forest landscape painting",
+    "autor": "Jean-Baptiste-Camille Corot",
+    "titulo": "Hagar in the Wilderness",
+    "ano": 1835,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "search_q": "Winslow Homer northeaster sea painting",
+    "autor": "Winslow Homer",
+    "titulo": "Northeaster",
+    "ano": 1895,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "search_q": "Martin Johnson Heade approaching thunder storm painting",
+    "autor": "Martin Johnson Heade",
+    "titulo": "Approaching Thunder Storm",
+    "ano": 1859,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "search_q": "Asher Durand landscape pastoral painting",
+    "autor": "Asher B. Durand",
+    "titulo": "Kindred Spirits",
+    "ano": 1849,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "search_q": "George Inness landscape painting",
+    "autor": "George Inness",
+    "titulo": "The Lackawanna Valley",
+    "ano": 1855,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "search_q": "Constable Salisbury Cathedral landscape painting",
+    "autor": "John Constable",
+    "titulo": "Salisbury Cathedral from the Bishop's Grounds",
+    "ano": 1825,
+    "importancia": "iconica",
+    "origem": "Inglaterra"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "search_q": "Kensett lake George landscape painting",
+    "autor": "John Frederick Kensett",
+    "titulo": "Lake George",
+    "ano": 1869,
+    "importancia": "alta",
+    "origem": "EUA"
+  }
+]
+[
+  {
+    "ala": "nudes",
+    "api": "met",
+    "search_q": "Alexandre Cabanel birth Venus painting",
+    "autor": "Alexandre Cabanel",
+    "titulo": "The Birth of Venus",
+    "ano": 1863,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "search_q": "Lucas Cranach Venus painting",
+    "autor": "Lucas Cranach the Elder",
+    "titulo": "Venus",
+    "ano": 1532,
+    "importancia": "iconica",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "nudes",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Jean-Auguste-Dominique_Ingres_-_The_Grande_Odalisque_-_WGA11841.jpg/400px-Jean-Auguste-Dominique_Ingres_-_The_Grande_Odalisque_-_WGA11841.jpg",
+    "autor": "Jean-Auguste-Dominique Ingres",
+    "titulo": "La Grande Odalisque",
+    "ano": 1814,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "search_q": "Titian Venus Adonis painting",
+    "autor": "Titian",
+    "titulo": "Venus and Adonis",
+    "ano": 1560,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "search_q": "Bouguereau nymphs satyr painting",
+    "autor": "William-Adolphe Bouguereau",
+    "titulo": "Nymphs and Satyr",
+    "ano": 1873,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "search_q": "Rubens graces three nude painting",
+    "autor": "Peter Paul Rubens",
+    "titulo": "Three Graces",
+    "ano": 1635,
+    "importancia": "iconica",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "search_q": "Boucher reclining nude woman painting",
+    "autor": "François Boucher",
+    "titulo": "Reclining Girl",
+    "ano": 1752,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "search_q": "Ingres source nude woman painting",
+    "autor": "Jean-Auguste-Dominique Ingres",
+    "titulo": "The Source",
+    "ano": 1856,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "search_q": "Manet olympia nude reclining painting",
+    "autor": "Édouard Manet",
+    "titulo": "Olympia",
+    "ano": 1863,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "search_q": "Courbet woman stream nude painting",
+    "autor": "Gustave Courbet",
+    "titulo": "Woman with a Parrot",
+    "ano": 1866,
+    "importancia": "alta",
+    "origem": "França"
+  }
+]
+[
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Chardin soap bubbles painting",
+    "autor": "Jean-Baptiste-Siméon Chardin",
+    "titulo": "Soap Bubbles",
+    "ano": 1733,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Chardin kitchen still life painting",
+    "autor": "Jean-Baptiste-Siméon Chardin",
+    "titulo": "Kitchen Still Life",
+    "ano": 1755,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Heem vase flowers still life painting",
+    "autor": "Jan Davidsz. de Heem",
+    "titulo": "Vase of Flowers",
+    "ano": 1660,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Ruysch flower still life painting",
+    "autor": "Rachel Ruysch",
+    "titulo": "Flower Still Life",
+    "ano": 1726,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Claesz still life skull quill painting",
+    "autor": "Pieter Claesz",
+    "titulo": "Still Life with a Skull and a Writing Quill",
+    "ano": 1628,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Cézanne still life apples painting",
+    "autor": "Paul Cézanne",
+    "titulo": "Still Life with Apples and a Pot of Primroses",
+    "ano": 1890,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Manet peonies flowers painting",
+    "autor": "Édouard Manet",
+    "titulo": "Peonies",
+    "ano": 1864,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Heda pewter still life painting",
+    "autor": "Willem Claesz. Heda",
+    "titulo": "Still Life with a Pewter Flagon",
+    "ano": 1640,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Fantin-Latour roses flowers painting",
+    "autor": "Henri Fantin-Latour",
+    "titulo": "Roses",
+    "ano": 1880,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Kalf still life nautilus cup painting",
+    "autor": "Willem Kalf",
+    "titulo": "Still Life with a Late Ming Ginger Jar",
+    "ano": 1669,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  }
+]
+[
+  {
+    "ala": "perspectiva",
+    "api": "aic",
+    "aic_id": 20684,
+    "autor": "Gustave Caillebotte",
+    "titulo": "Paris Street; Rainy Day",
+    "ano": 1877,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Vermeer young woman water pitcher painting",
+    "autor": "Johannes Vermeer",
+    "titulo": "Young Woman with a Water Pitcher",
+    "ano": 1662,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Vermeer woman lute painting",
+    "autor": "Johannes Vermeer",
+    "titulo": "Woman with a Lute",
+    "ano": 1664,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Hooch courtyard woman maid painting",
+    "autor": "Pieter de Hooch",
+    "titulo": "A Woman and Her Maid in a Courtyard",
+    "ano": 1660,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Saenredam church interior painting",
+    "autor": "Pieter Saenredam",
+    "titulo": "Interior of the Buurkerk at Utrecht",
+    "ano": 1645,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Pannini picture gallery Rome painting",
+    "autor": "Giovanni Paolo Pannini",
+    "titulo": "Picture Gallery with Views of Modern Rome",
+    "ano": 1757,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "van der Heyden city street canal painting",
+    "autor": "Jan van der Heyden",
+    "titulo": "A View of the Westerkerk, Amsterdam",
+    "ano": 1670,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "De Witte church interior painting",
+    "autor": "Emanuel de Witte",
+    "titulo": "Interior of a Protestant Gothic Church",
+    "ano": 1660,
+    "importancia": "media",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Canaletto stonemasons yard Venice painting",
+    "autor": "Canaletto",
+    "titulo": "The Grand Canal with the Rialto Bridge",
+    "ano": 1730,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Ter Borch letter interior painting",
+    "autor": "Gerard ter Borch",
+    "titulo": "The Letter",
+    "ano": 1660,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  }
+]
+[
+  {
+    "ala": "pessoas_reais",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Madame_X_(Madame_Pierre_Gautreau),_John_Singer_Sargent,_1884_(unfree_frame_cropped).jpg/400px-Madame_X_(Madame_Pierre_Gautreau),_John_Singer_Sargent,_1884_(unfree_frame_cropped).jpg",
+    "autor": "John Singer Sargent",
+    "titulo": "Madame X",
+    "ano": 1884,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Las_Meninas.jpg/400px-Las_Meninas.jpg",
+    "autor": "Diego Velázquez",
+    "titulo": "Las Meninas",
+    "ano": 1656,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "met",
+    "search_q": "Goya Manuel Osorio Zuñiga painting",
+    "autor": "Francisco Goya",
+    "titulo": "Manuel Osorio Manrique de Zuñiga",
+    "ano": 1790,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "met",
+    "search_q": "Manet fifer painting",
+    "autor": "Édouard Manet",
+    "titulo": "The Fifer",
+    "ano": 1866,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "met",
+    "search_q": "Gainsborough Mrs Elliott painting",
+    "autor": "Thomas Gainsborough",
+    "titulo": "Mrs. Grace Dalrymple Elliott",
+    "ano": 1782,
+    "importancia": "alta",
+    "origem": "Inglaterra"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "met",
+    "search_q": "Courbet young ladies village painting",
+    "autor": "Gustave Courbet",
+    "titulo": "The Young Ladies of the Village",
+    "ano": 1851,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "met",
+    "search_q": "Whistler arrangement grey black painting",
+    "autor": "James McNeill Whistler",
+    "titulo": "Arrangement in Grey and Black No. 1",
+    "ano": 1871,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "met",
+    "search_q": "Manet espada costume painting",
+    "autor": "Édouard Manet",
+    "titulo": "Mademoiselle V. in the Costume of an Espada",
+    "ano": 1862,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "met",
+    "search_q": "Sargent portrait woman painting",
+    "autor": "John Singer Sargent",
+    "titulo": "Mrs. Fiske Warren",
+    "ano": 1903,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "pessoas_reais",
+    "api": "met",
+    "search_q": "Renoir Madame Charpentier children painting",
+    "autor": "Pierre-Auguste Renoir",
+    "titulo": "Madame Georges Charpentier and Her Children",
+    "ano": 1878,
+    "importancia": "iconica",
+    "origem": "França"
+  }
+]
+[
+  {
+    "ala": "povo",
+    "api": "met",
+    "search_q": "Bruegel harvesters peasants painting",
+    "autor": "Pieter Bruegel the Elder",
+    "titulo": "The Harvesters",
+    "ano": 1565,
+    "importancia": "iconica",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "search_q": "Winslow Homer snap whip children painting",
+    "autor": "Winslow Homer",
+    "titulo": "Snap the Whip",
+    "ano": 1872,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "search_q": "Honoré Daumier third class carriage painting",
+    "autor": "Honoré Daumier",
+    "titulo": "The Third-Class Carriage",
+    "ano": 1865,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "search_q": "Thomas Eakins Max Schmitt sculling painting",
+    "autor": "Thomas Eakins",
+    "titulo": "Max Schmitt in a Single Scull",
+    "ano": 1871,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "search_q": "Jan Steen wedding village painting",
+    "autor": "Jan Steen",
+    "titulo": "Merry Company on a Terrace",
+    "ano": 1670,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "search_q": "Bastien-Lepage hay making painting",
+    "autor": "Jules Bastien-Lepage",
+    "titulo": "Hay Making",
+    "ano": 1877,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "search_q": "Courbet stone breakers workers painting",
+    "autor": "Gustave Courbet",
+    "titulo": "The Quarry",
+    "ano": 1857,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "search_q": "Eastman Johnson old Kentucky home painting",
+    "autor": "Eastman Johnson",
+    "titulo": "A Ride for Liberty",
+    "ano": 1862,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "search_q": "Winslow Homer cotton pickers painting",
+    "autor": "Winslow Homer",
+    "titulo": "The Cotton Pickers",
+    "ano": 1876,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "search_q": "George Caleb Bingham boatmen painting",
+    "autor": "George Caleb Bingham",
+    "titulo": "Fur Traders Descending the Missouri",
+    "ano": 1845,
+    "importancia": "iconica",
+    "origem": "EUA"
+  }
+]
+[
+  {
+    "ala": "retratos",
+    "api": "met",
+    "met_id": 437394,
+    "autor": "Diego Rodríguez de Silva y Velázquez",
+    "titulo": "Juan de Pareja",
+    "ano": 1650,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "retratos",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Rogier_van_der_Weyden_-_Portrait_of_a_Lady_-_National_Gallery_of_Art.jpg/400px-Rogier_van_der_Weyden_-_Portrait_of_a_Lady_-_National_Gallery_of_Art.jpg",
+    "autor": "Rogier van der Weyden",
+    "titulo": "Portrait of a Lady",
+    "ano": 1460,
+    "importancia": "iconica",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "search_q": "Rembrandt self-portrait painting",
+    "autor": "Rembrandt van Rijn",
+    "titulo": "Self-Portrait",
+    "ano": 1660,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "search_q": "Hans Memling portrait young man painting",
+    "autor": "Hans Memling",
+    "titulo": "Portrait of a Young Man",
+    "ano": 1478,
+    "importancia": "alta",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "search_q": "El Greco portrait cardinal painting",
+    "autor": "El Greco",
+    "titulo": "Portrait of a Cardinal",
+    "ano": 1600,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "search_q": "Ingres portrait Leblanc painting",
+    "autor": "Jean-Auguste-Dominique Ingres",
+    "titulo": "Portrait of Madame Leblanc",
+    "ano": 1823,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "search_q": "Giovanni Bellini portrait young man painting",
+    "autor": "Giovanni Bellini",
+    "titulo": "Portrait of a Young Man",
+    "ano": 1510,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "search_q": "Lucas Cranach portrait woman painting",
+    "autor": "Lucas Cranach the Elder",
+    "titulo": "Portrait of a Woman",
+    "ano": 1525,
+    "importancia": "media",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "search_q": "Titian portrait man armor painting",
+    "autor": "Titian",
+    "titulo": "Portrait of a Man in Armor",
+    "ano": 1550,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "search_q": "Anthony van Dyck self-portrait painting",
+    "autor": "Anthony van Dyck",
+    "titulo": "Self-Portrait",
+    "ano": 1641,
+    "importancia": "alta",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "search_q": "Frans Hals portrait man painting",
+    "autor": "Frans Hals",
+    "titulo": "Portrait of a Man",
+    "ano": 1650,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "search_q": "Degas woman chrysanthemums painting",
+    "autor": "Edgar Degas",
+    "titulo": "A Woman with Chrysanthemums",
+    "ano": 1865,
+    "importancia": "iconica",
+    "origem": "França"
+  }
+]
+[
+  {
+    "ala": "sacro",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/El_Greco_-_View_of_Toledo_-_Google_Art_Project.jpg/400px-El_Greco_-_View_of_Toledo_-_Google_Art_Project.jpg",
+    "autor": "El Greco",
+    "titulo": "View of Toledo",
+    "ano": 1599,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "El Greco adoration shepherds painting",
+    "autor": "El Greco",
+    "titulo": "The Adoration of the Shepherds",
+    "ano": 1612,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Fra Filippo Lippi Madonna Child enthroned painting",
+    "autor": "Fra Filippo Lippi",
+    "titulo": "Madonna and Child Enthroned",
+    "ano": 1440,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Giovanni Bellini Madonna Child painting",
+    "autor": "Giovanni Bellini",
+    "titulo": "Madonna and Child",
+    "ano": 1490,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Murillo immaculate conception painting",
+    "autor": "Bartolomé Esteban Murillo",
+    "titulo": "The Immaculate Conception of the Escorial",
+    "ano": 1678,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Raphael Madonna child painting",
+    "autor": "Raphael",
+    "titulo": "Madonna and Child Enthroned with Saints",
+    "ano": 1504,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Guercino Moses tablets painting",
+    "autor": "Guercino",
+    "titulo": "Moses with the Tablets of the Law",
+    "ano": 1621,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Hans Memling Last Judgment painting",
+    "autor": "Hans Memling",
+    "titulo": "The Last Judgment",
+    "ano": 1470,
+    "importancia": "iconica",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "El Greco Toledo landscape painting",
+    "autor": "El Greco",
+    "titulo": "The Vision of Saint John",
+    "ano": 1610,
+    "importancia": "alta",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Carlo Dolci saint painting",
+    "autor": "Carlo Dolci",
+    "titulo": "Saint John the Evangelist in the Desert",
+    "ano": 1640,
+    "importancia": "media",
+    "origem": "Itália"
+  }
+]
+[
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "search_q": "Pannini ancient Rome interior painting",
+    "autor": "Giovanni Paolo Pannini",
+    "titulo": "Ancient Rome",
+    "ano": 1757,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "search_q": "Pannini modern Rome painting",
+    "autor": "Giovanni Paolo Pannini",
+    "titulo": "Modern Rome",
+    "ano": 1757,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "search_q": "Hubert Robert ruins fountain painting",
+    "autor": "Hubert Robert",
+    "titulo": "The Fountains",
+    "ano": 1787,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "search_q": "Hubert Robert old temple ruins painting",
+    "autor": "Hubert Robert",
+    "titulo": "The Old Temple",
+    "ano": 1787,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "search_q": "Thomas Cole architect dream painting",
+    "autor": "Thomas Cole",
+    "titulo": "The Architect's Dream",
+    "ano": 1840,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "search_q": "Canaletto Thames city London painting",
+    "autor": "Canaletto",
+    "titulo": "The Thames from the Terrace of Somerset House",
+    "ano": 1746,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "search_q": "Lyonel Feininger architecture church painting",
+    "autor": "Lyonel Feininger",
+    "titulo": "Gelmeroda",
+    "ano": 1936,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "search_q": "Charles Sheeler American Landscape painting",
+    "autor": "Charles Sheeler",
+    "titulo": "American Landscape",
+    "ano": 1930,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "search_q": "Saarinen cathedral church painting",
+    "autor": "John Marin",
+    "titulo": "Brooklyn Bridge",
+    "ano": 1912,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "search_q": "Stuart Davis architecture painting",
+    "autor": "Stuart Davis",
+    "titulo": "Report from Rockport",
+    "ano": 1940,
+    "importancia": "media",
+    "origem": "EUA"
+  }
+]
