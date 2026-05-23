@@ -1,14 +1,14 @@
-// server/server.js — Germanus.Art Backend (versão corrigida)
+// server/server.js — Germanus.Art Backend (versão final corrigida)
 require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 const express  = require("express");
 const cors     = require("cors");
-const fs       = require("fs");  // ← ADICIONADO
+const fs       = require("fs");
 const path     = require("path");
 const { Pool } = require("pg");
 const { searchAll } = require("./museums");
 const { indexarCuradoria } = require("./curador");
 const { expandirAla }      = require("./expansor");
-const { iniciarSemeador, semearArtista } = require("./semeador");  // ← ADICIONADO semearArtista
+const { iniciarSemeador, semearArtista } = require("./semeador");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -76,9 +76,9 @@ const ALA_TERMS = {
 // Cache em memória
 const memCache = new Map();
 const CACHE_TTL = 300000;
-const CACHE_BATCH = 20;
+const CACHE_BATCH = 50;  // AUMENTADO: 20 -> 50 imagens por vez
 const CACHE_DELAY = 10 * 60 * 1000;
-const CACHE_PERIOD = 5 * 60 * 1000;
+const CACHE_PERIOD = 2 * 60 * 1000;  // AUMENTADO: 5min -> 2min
 const CLEANUP_BATCH = 100;
 const CLEANUP_DELAY = 5 * 60 * 1000;
 const CLEANUP_PERIOD = 24 * 60 * 60 * 1000;
@@ -252,7 +252,7 @@ async function downloadAndCacheImages() {
           [row.id]
         );
       }
-      await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(r, 200));
     }
     if (saved > 0) console.log(`📦 Cache concluído — ${saved}/${r.rows.length} imagens`);
   } catch (e) { console.error("[downloadAndCacheImages]", e.message); }
@@ -354,8 +354,10 @@ async function initDB() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🚀 ROTA PARA FORÇAR SEMEADOR AGORA MESMO
+// 🚀 ROTAS ESPECIAIS (FORA da função start)
 // ═══════════════════════════════════════════════════════════════════════════
+
+// Forçar Semeador agora
 app.get("/api/semeador/agora", async (req, res) => {
   try {
     const sementes = JSON.parse(fs.readFileSync(path.join(__dirname, "sementes.json"), "utf-8"));
@@ -370,6 +372,118 @@ app.get("/api/semeador/agora", async (req, res) => {
     }
     
     res.json({ ok: true, obras_adicionadas: total });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Forçar cache de imagens em massa
+app.get("/api/cache/forcar", async (req, res) => {
+  try {
+    const limite = parseInt(req.query.limit) || 200;
+    const ala = req.query.ala || null;
+    
+    let query = `
+      SELECT id, image_url FROM artworks
+      WHERE image_url IS NOT NULL AND image_url != ''
+        AND (image_data IS NULL OR image_cached_at = 0)
+        AND (download_attempts IS NULL OR download_attempts < 3)
+    `;
+    const params = [];
+    
+    if (ala) {
+      query += ` AND ala_id = $1 LIMIT $2`;
+      params.push(ala, limite);
+    } else {
+      query += ` LIMIT $1`;
+      params.push(limite);
+    }
+    
+    const r = await pool.query(query, params);
+    if (r.rows.length === 0) {
+      return res.json({ message: "Nenhuma imagem pendente", total: 0 });
+    }
+    
+    console.log(`🚀 Forçando cache de ${r.rows.length} imagens...`);
+    let baixadas = 0;
+    let falhas = 0;
+    
+    for (const row of r.rows) {
+      try {
+        const resposta = await fetch(row.image_url, {
+          signal: AbortSignal.timeout(15000),
+          headers: { "User-Agent": "GermanusArt/1.0 (cache-forcer)" }
+        });
+        
+        if (!resposta.ok) {
+          falhas++;
+          continue;
+        }
+        
+        const contentType = resposta.headers.get("content-type") || "image/jpeg";
+        if (!contentType.startsWith("image/")) {
+          falhas++;
+          continue;
+        }
+        
+        const buffer = await resposta.arrayBuffer();
+        if (buffer.byteLength < 5000) {
+          falhas++;
+          continue;
+        }
+        
+        await pool.query(
+          `UPDATE artworks 
+           SET image_data = $1, image_mime = $2, image_cached_at = $3,
+               download_attempts = 0
+           WHERE id = $4`,
+          [Buffer.from(buffer), contentType, Math.floor(Date.now() / 1000), row.id]
+        );
+        baixadas++;
+        
+        if (baixadas % 20 === 0) {
+          console.log(`📥 ${baixadas}/${r.rows.length} imagens baixadas...`);
+        }
+        
+        await new Promise(r => setTimeout(r, 100));
+        
+      } catch (err) {
+        falhas++;
+        await pool.query(
+          `UPDATE artworks SET download_attempts = COALESCE(download_attempts, 0) + 1 WHERE id = $1`,
+          [row.id]
+        );
+      }
+    }
+    
+    res.json({
+      ok: true,
+      processadas: r.rows.length,
+      baixadas: baixadas,
+      falhas: falhas,
+      mensagem: `${baixadas} imagens baixadas com sucesso!`
+    });
+    
+  } catch(e) {
+    console.error("[cache/forcar]", e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Status detalhado do cache
+app.get("/api/cache/detalhado", async (req, res) => {
+  try {
+    const r = await pool.query(`
+      SELECT 
+        COUNT(*) as total_obras,
+        COUNT(*) FILTER (WHERE image_data IS NOT NULL) as imagens_cache,
+        COUNT(*) FILTER (WHERE image_url IS NOT NULL AND image_url != '' AND image_data IS NULL) as imagens_pendentes,
+        COUNT(*) FILTER (WHERE download_attempts >= 3) as imagens_falhas,
+        ROUND(COALESCE(SUM(pg_column_size(image_data)), 0) / 1048576.0, 2) as tamanho_mb
+      FROM artworks
+      WHERE image_url IS NOT NULL AND image_url != ''
+    `);
+    res.json(r.rows[0]);
   } catch(e) {
     res.status(500).json({ error: e.message });
   }
