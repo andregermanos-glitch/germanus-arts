@@ -2,12 +2,13 @@
 require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 const express  = require("express");
 const cors     = require("cors");
+const fs       = require("fs");  // ← ADICIONADO
 const path     = require("path");
 const { Pool } = require("pg");
 const { searchAll } = require("./museums");
 const { indexarCuradoria } = require("./curador");
 const { expandirAla }      = require("./expansor");
-const { iniciarSemeador }  = require("./semeador");
+const { iniciarSemeador, semearArtista } = require("./semeador");  // ← ADICIONADO semearArtista
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -352,6 +353,28 @@ async function initDB() {
   console.log("✅ PostgreSQL pronto");
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 🚀 ROTA PARA FORÇAR SEMEADOR AGORA MESMO
+// ═══════════════════════════════════════════════════════════════════════════
+app.get("/api/semeador/agora", async (req, res) => {
+  try {
+    const sementes = JSON.parse(fs.readFileSync(path.join(__dirname, "sementes.json"), "utf-8"));
+    let total = 0;
+    
+    for (const [ala, artistas] of Object.entries(sementes)) {
+      for (const artista of artistas) {
+        const n = await semearArtista(pool, artista, ala);
+        total += n;
+        await new Promise(r => setTimeout(r, 200));
+      }
+    }
+    
+    res.json({ ok: true, obras_adicionadas: total });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ─── Rotas da API ────────────────────────────────────────────────────────────
 app.get("/api/status", async (req, res) => {
   let artCount = 0;
@@ -466,25 +489,7 @@ async function start() {
   setTimeout(() => { validateAndCleanImages(); setInterval(validateAndCleanImages, CLEANUP_PERIOD); }, CLEANUP_DELAY);
   setTimeout(() => { downloadAndCacheImages(); setInterval(downloadAndCacheImages, CACHE_PERIOD); }, CACHE_DELAY);
   setTimeout(() => { fetchWikipediaSummaries(); setInterval(fetchWikipediaSummaries, 8 * 60 * 1000); }, 15 * 60 * 1000);
-  // FORÇAR SEMEADOR AGORA MESMO
-app.get("/api/semeador/agora", async (req, res) => {
-  try {
-    const sementes = JSON.parse(fs.readFileSync(path.join(__dirname, "sementes.json"), "utf-8"));
-    let total = 0;
-    
-    for (const [ala, artistas] of Object.entries(sementes)) {
-      for (const artista of artistas) {
-        const n = await semearArtista(pool, artista, ala);
-        total += n;
-        await new Promise(r => setTimeout(r, 200)); // 200ms entre artistas
-      }
-    }
-    
-    res.json({ ok: true, obras_adicionadas: total });
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+  
   app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
 }
 
