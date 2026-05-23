@@ -7,7 +7,7 @@ const { Pool } = require("pg");
 const { searchAll } = require("./museums");
 const { indexarCuradoria } = require("./curador");
 const { expandirAla }      = require("./expansor");
-
+const { iniciarSemeador } = require("./semeador");
 // Hint de busca por ala (usado pelo expansor)
 const ALA_HINTS = {
   retratos:      "portrait bust figure man woman classical painting face",
@@ -630,6 +630,21 @@ async function validateAndCleanImages() {
 initDB().then(async () => {
   // Indexa curadoria fixa (obras icônicas por ala) — só na primeira vez
   indexarCuradoria(pool, KEYS).catch(e => console.error("Curadoria erro:", e.message));
+// Semeador em massa — inicia 30s após boot, repete a cada 12h
+iniciarSemeador(pool);
+initDB().then(async () => {
+
+  // Indexa curadoria fixa (obras icônicas por ala)
+  indexarCuradoria(pool, KEYS).catch(e => console.error("Curadoria erro:", e.message));
+
+  // Semeador em massa — 360 artistas × 8 obras ≈ 2880 obras
+  iniciarSemeador(pool);
+
+  // Limpeza periódica de URLs mortas
+  setTimeout(() => {
+    validateAndCleanImages();
+    setInterval(validateAndCleanImages, CLEANUP_PERIOD);
+  }, CLEANUP_DELAY);
 
   // Limpeza periódica de URLs mortas
   setTimeout(() => {
