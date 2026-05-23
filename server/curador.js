@@ -471,24 +471,33 @@ async function resolverObra(obra, keys) {
   }
 
   // ── Fallbacks por busca de texto ────────────────────────────────────────────
-  // VALIDAÇÃO OBRIGATÓRIA: artista encontrado tem de corresponder ao esperado.
-  // Sem isto, "Dalí Scream" pode devolver Munch ou qualquer outro artista.
+  // VALIDAÇÃO: quando há artista E título → exige correspondência de ambos
+  // Quando só há artista → valida apenas artista
+  // Quando não há artista → rejeita qualquer resultado (melhor nada que imagem errada)
   const q = obra.search_q || `${obra.autor} ${obra.titulo}`;
+  const modoValidacao = (obra.autor && obra.titulo) ? "titulo_artista"
+                      : obra.autor                  ? "artista"
+                      : "rejeitar"; // sem artista = não aceitar resultado incerto
 
-  // 5. Met Museum por texto + validação de artista
+  if (modoValidacao === "rejeitar") {
+    // Sem artista definido → qualquer resultado de texto seria imagem errada
+    return null;
+  }
+
+  // 5. Met Museum por texto + validação artista+título
   const met = await searchMet(q);
-  if (met && validarResultado(obra, met, "artista")) return met;
-  if (met) console.log(`  ⚠ Met rejeitado (artista): esperado "${obra.autor}", encontrado "${met.artist}"`);
+  if (met && validarResultado(obra, met, modoValidacao)) return met;
+  if (met) console.log(`  ⚠ Met rejeitado: esperado "${obra.autor} / ${obra.titulo}", encontrado "${met.artist} / ${met.title}"`);
 
-  // 6. AIC por texto + validação de artista
+  // 6. AIC por texto + validação artista+título
   const aic = await searchAIC(q);
-  if (aic && validarResultado(obra, aic, "artista")) return aic;
-  if (aic) console.log(`  ⚠ AIC rejeitado (artista): esperado "${obra.autor}", encontrado "${aic.artist}"`);
+  if (aic && validarResultado(obra, aic, modoValidacao)) return aic;
+  if (aic) console.log(`  ⚠ AIC rejeitado: esperado "${obra.autor} / ${obra.titulo}", encontrado "${aic.artist} / ${aic.title}"`);
 
-  // 7. Cleveland por texto + validação de artista
+  // 7. Cleveland por texto + validação artista+título
   const cle = await searchCleveland(q);
-  if (cle && validarResultado(obra, cle, "artista")) return cle;
-  if (cle) console.log(`  ⚠ Cleveland rejeitado (artista): esperado "${obra.autor}", encontrado "${cle.artist}"`);
+  if (cle && validarResultado(obra, cle, modoValidacao)) return cle;
+  if (cle) console.log(`  ⚠ Cleveland rejeitado: esperado "${obra.autor} / ${obra.titulo}", encontrado "${cle.artist} / ${cle.title}"`);
 
   // 8. Rijksmuseum por título + validação de artista
   if (obra.api === "rijksmuseum" && obra.search_creator) {
