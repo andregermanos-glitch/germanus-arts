@@ -599,7 +599,14 @@ async function validateAndCleanImages() {
             signal: AbortSignal.timeout(4000),
           });
           if (res.status === 404) {
-            await pool.query("DELETE FROM artworks WHERE id=$1", [row.id]);
+            // Marcar URL como inválida — NÃO apagar a obra do banco
+            // Sem image_url, o curador pode re-indexar e encontrar URL alternativa
+            await pool.query(
+              `UPDATE artworks
+               SET image_url = NULL, image_data = NULL, image_cached_at = 0
+               WHERE id = $1`,
+              [row.id]
+            );
             removed++;
           }
         } catch {
@@ -610,7 +617,7 @@ async function validateAndCleanImages() {
     }
 
     if (removed > 0) {
-      console.log(`🔍 Validação concluída — ${removed} obras 404 removidas de ${checked} verificadas`);
+      console.log(`🔍 Validação concluída — ${removed} URLs inválidas limpas (obra preservada) de ${checked} verificadas`);
     } else {
       console.log(`🔍 Validação concluída — ${checked} obras OK`);
     }
