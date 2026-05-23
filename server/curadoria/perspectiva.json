@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "perspectiva",
+    "api": "aic",
+    "aic_id": 20684,
+    "autor": "Gustave Caillebotte",
+    "titulo": "Paris Street; Rainy Day",
+    "ano": 1877,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Vermeer young woman water pitcher painting",
+    "autor": "Johannes Vermeer",
+    "titulo": "Young Woman with a Water Pitcher",
+    "ano": 1662,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Vermeer woman lute painting",
+    "autor": "Johannes Vermeer",
+    "titulo": "Woman with a Lute",
+    "ano": 1664,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Hooch courtyard woman maid painting",
+    "autor": "Pieter de Hooch",
+    "titulo": "A Woman and Her Maid in a Courtyard",
+    "ano": 1660,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Saenredam church interior painting",
+    "autor": "Pieter Saenredam",
+    "titulo": "Interior of the Buurkerk at Utrecht",
+    "ano": 1645,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Pannini picture gallery Rome painting",
+    "autor": "Giovanni Paolo Pannini",
+    "titulo": "Picture Gallery with Views of Modern Rome",
+    "ano": 1757,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "van der Heyden city street canal painting",
+    "autor": "Jan van der Heyden",
+    "titulo": "A View of the Westerkerk, Amsterdam",
+    "ano": 1670,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "De Witte church interior painting",
+    "autor": "Emanuel de Witte",
+    "titulo": "Interior of a Protestant Gothic Church",
+    "ano": 1660,
+    "importancia": "media",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Canaletto stonemasons yard Venice painting",
+    "autor": "Canaletto",
+    "titulo": "The Grand Canal with the Rialto Bridge",
+    "ano": 1730,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "search_q": "Ter Borch letter interior painting",
+    "autor": "Gerard ter Borch",
+    "titulo": "The Letter",
+    "ano": 1660,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  }
+]

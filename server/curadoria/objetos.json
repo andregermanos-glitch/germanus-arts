@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Chardin soap bubbles painting",
+    "autor": "Jean-Baptiste-Siméon Chardin",
+    "titulo": "Soap Bubbles",
+    "ano": 1733,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Chardin kitchen still life painting",
+    "autor": "Jean-Baptiste-Siméon Chardin",
+    "titulo": "Kitchen Still Life",
+    "ano": 1755,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Heem vase flowers still life painting",
+    "autor": "Jan Davidsz. de Heem",
+    "titulo": "Vase of Flowers",
+    "ano": 1660,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Ruysch flower still life painting",
+    "autor": "Rachel Ruysch",
+    "titulo": "Flower Still Life",
+    "ano": 1726,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Claesz still life skull quill painting",
+    "autor": "Pieter Claesz",
+    "titulo": "Still Life with a Skull and a Writing Quill",
+    "ano": 1628,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Cézanne still life apples painting",
+    "autor": "Paul Cézanne",
+    "titulo": "Still Life with Apples and a Pot of Primroses",
+    "ano": 1890,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Manet peonies flowers painting",
+    "autor": "Édouard Manet",
+    "titulo": "Peonies",
+    "ano": 1864,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Heda pewter still life painting",
+    "autor": "Willem Claesz. Heda",
+    "titulo": "Still Life with a Pewter Flagon",
+    "ano": 1640,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Fantin-Latour roses flowers painting",
+    "autor": "Henri Fantin-Latour",
+    "titulo": "Roses",
+    "ano": 1880,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "search_q": "Kalf still life nautilus cup painting",
+    "autor": "Willem Kalf",
+    "titulo": "Still Life with a Late Ming Ginger Jar",
+    "ano": 1669,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "esoterico",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Henry_Fuseli_-_The_Nightmare.JPG/400px-Henry_Fuseli_-_The_Nightmare.JPG",
+    "autor": "Henry Fuseli",
+    "titulo": "The Nightmare",
+    "ano": 1781,
+    "importancia": "iconica",
+    "origem": "Suíça"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Gustave Moreau Oedipus Sphinx painting",
+    "autor": "Gustave Moreau",
+    "titulo": "Oedipus and the Sphinx",
+    "ano": 1864,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Odilon Redon cyclops painting",
+    "autor": "Odilon Redon",
+    "titulo": "The Cyclops",
+    "ano": 1898,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "William Blake Jacob ladder painting",
+    "autor": "William Blake",
+    "titulo": "Jacob's Dream",
+    "ano": 1805,
+    "importancia": "alta",
+    "origem": "Inglaterra"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Franz Stuck sin painting",
+    "autor": "Franz von Stuck",
+    "titulo": "The Sin",
+    "ano": 1893,
+    "importancia": "alta",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Moreau apparition salome painting",
+    "autor": "Gustave Moreau",
+    "titulo": "The Apparition",
+    "ano": 1876,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Böcklin island dead painting",
+    "autor": "Arnold Böcklin",
+    "titulo": "Island of the Dead",
+    "ano": 1883,
+    "importancia": "iconica",
+    "origem": "Suíça"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Redon vase flowers painting symbolic",
+    "autor": "Odilon Redon",
+    "titulo": "Vase of Flowers",
+    "ano": 1905,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "Elihu Vedder questioner sphinx painting",
+    "autor": "Elihu Vedder",
+    "titulo": "The Questioner of the Sphinx",
+    "ano": 1863,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "search_q": "John La Farge peonies wind rain painting",
+    "autor": "John La Farge",
+    "titulo": "Peonies Blown in the Wind",
+    "ano": 1880,
+    "importancia": "media",
+    "origem": "EUA"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "femininas",
+    "api": "aic",
+    "aic_id": 111442,
+    "autor": "Mary Cassatt",
+    "titulo": "The Child's Bath",
+    "ano": 1893,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "aic",
+    "aic_id": 16790,
+    "autor": "Mary Cassatt",
+    "titulo": "Woman in Black at the Opera",
+    "ano": 1879,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Elisabeth Vigée Le Brun self portrait straw hat painting",
+    "autor": "Elisabeth Louise Vigée Le Brun",
+    "titulo": "Self-Portrait in a Straw Hat",
+    "ano": 1782,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Berthe Morisot summer day painting",
+    "autor": "Berthe Morisot",
+    "titulo": "Summer's Day",
+    "ano": 1879,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Rosa Bonheur horse fair painting",
+    "autor": "Rosa Bonheur",
+    "titulo": "The Horse Fair",
+    "ano": 1853,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Mary Cassatt young women boating painting",
+    "autor": "Mary Cassatt",
+    "titulo": "Young Women Picking Fruit",
+    "ano": 1892,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Cecilia Beaux portrait painting",
+    "autor": "Cecilia Beaux",
+    "titulo": "Ernesta",
+    "ano": 1894,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Marie Laurencin group artists painting",
+    "autor": "Marie Laurencin",
+    "titulo": "Group of Artists",
+    "ano": 1908,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Suzanne Valadon nude painting",
+    "autor": "Suzanne Valadon",
+    "titulo": "Nude Lying on a Couch",
+    "ano": 1928,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "search_q": "Artemisia Gentileschi Judith painting",
+    "autor": "Artemisia Gentileschi",
+    "titulo": "Self-Portrait as a Lute Player",
+    "ano": 1616,
+    "importancia": "iconica",
+    "origem": "Itália"
+  }
+]

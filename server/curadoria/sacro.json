@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "sacro",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/El_Greco_-_View_of_Toledo_-_Google_Art_Project.jpg/400px-El_Greco_-_View_of_Toledo_-_Google_Art_Project.jpg",
+    "autor": "El Greco",
+    "titulo": "View of Toledo",
+    "ano": 1599,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "El Greco adoration shepherds painting",
+    "autor": "El Greco",
+    "titulo": "The Adoration of the Shepherds",
+    "ano": 1612,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Fra Filippo Lippi Madonna Child enthroned painting",
+    "autor": "Fra Filippo Lippi",
+    "titulo": "Madonna and Child Enthroned",
+    "ano": 1440,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Giovanni Bellini Madonna Child painting",
+    "autor": "Giovanni Bellini",
+    "titulo": "Madonna and Child",
+    "ano": 1490,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Murillo immaculate conception painting",
+    "autor": "Bartolomé Esteban Murillo",
+    "titulo": "The Immaculate Conception of the Escorial",
+    "ano": 1678,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Raphael Madonna child painting",
+    "autor": "Raphael",
+    "titulo": "Madonna and Child Enthroned with Saints",
+    "ano": 1504,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Guercino Moses tablets painting",
+    "autor": "Guercino",
+    "titulo": "Moses with the Tablets of the Law",
+    "ano": 1621,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Hans Memling Last Judgment painting",
+    "autor": "Hans Memling",
+    "titulo": "The Last Judgment",
+    "ano": 1470,
+    "importancia": "iconica",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "El Greco Toledo landscape painting",
+    "autor": "El Greco",
+    "titulo": "The Vision of Saint John",
+    "ano": 1610,
+    "importancia": "alta",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "sacro",
+    "api": "met",
+    "search_q": "Carlo Dolci saint painting",
+    "autor": "Carlo Dolci",
+    "titulo": "Saint John the Evangelist in the Desert",
+    "ano": 1640,
+    "importancia": "media",
+    "origem": "Itália"
+  }
+]

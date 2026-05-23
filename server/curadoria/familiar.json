@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Vermeer young woman water pitcher painting",
+    "autor": "Johannes Vermeer",
+    "titulo": "Young Woman with a Water Pitcher",
+    "ano": 1662,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Vermeer woman lute painting",
+    "autor": "Johannes Vermeer",
+    "titulo": "A Maidservant Pouring Milk",
+    "ano": 1660,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Metsu sick child painting",
+    "autor": "Gabriel Metsu",
+    "titulo": "The Sick Child",
+    "ano": 1665,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Nicolas Maes old woman dozing bible painting",
+    "autor": "Nicolas Maes",
+    "titulo": "Old Woman Dozing",
+    "ano": 1655,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Jan Steen merry family painting",
+    "autor": "Jan Steen",
+    "titulo": "The Merry Family",
+    "ano": 1668,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "ter Borch letter woman painting",
+    "autor": "Gerard ter Borch",
+    "titulo": "A Young Woman at Her Toilet with a Maid",
+    "ano": 1651,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Vuillard mother sister interior painting",
+    "autor": "Édouard Vuillard",
+    "titulo": "The Mother and Sister of the Artist",
+    "ano": 1893,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Hooch courtyard interior house painting",
+    "autor": "Pieter de Hooch",
+    "titulo": "Interior with Two Women at a Linen Chest",
+    "ano": 1663,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Brekelenkam tailor shop interior painting",
+    "autor": "Quiringh van Brekelenkam",
+    "titulo": "Interior of a Tailor's Shop",
+    "ano": 1653,
+    "importancia": "media",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "search_q": "Renoir mother child family painting",
+    "autor": "Pierre-Auguste Renoir",
+    "titulo": "Madame Charpentier and Her Children",
+    "ano": 1878,
+    "importancia": "iconica",
+    "origem": "França"
+  }
+]
