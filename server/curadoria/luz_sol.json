@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "luz_sol",
+    "api": "aic",
+    "aic_id": 16568,
+    "autor": "Claude Monet",
+    "titulo": "Water Lilies",
+    "ano": 1906,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Monet cliff walk Etretat painting",
+    "autor": "Claude Monet",
+    "titulo": "The Cliff Walk at Étretat",
+    "ano": 1882,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Monet haystacks summer painting",
+    "autor": "Claude Monet",
+    "titulo": "Haystacks: Autumn",
+    "ano": 1891,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Renoir girl watering can painting",
+    "autor": "Pierre-Auguste Renoir",
+    "titulo": "A Girl with a Watering Can",
+    "ano": 1876,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Monet boating Argenteuil painting",
+    "autor": "Claude Monet",
+    "titulo": "Boating on the Epte",
+    "ano": 1890,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Homer blue boat watercolor painting",
+    "autor": "Winslow Homer",
+    "titulo": "Sloop, Nassau",
+    "ano": 1899,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Pissarro apple picking harvest painting",
+    "autor": "Camille Pissarro",
+    "titulo": "The Apple Pickers",
+    "ano": 1886,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Renoir luncheon boating party painting",
+    "autor": "Pierre-Auguste Renoir",
+    "titulo": "A Young Girl Bathing",
+    "ano": 1892,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Monet garden Argenteuil painting",
+    "autor": "Claude Monet",
+    "titulo": "Garden at Sainte-Adresse",
+    "ano": 1867,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "search_q": "Childe Hassam sunny summer painting",
+    "autor": "Childe Hassam",
+    "titulo": "The South Ledges, Appledore",
+    "ano": 1913,
+    "importancia": "alta",
+    "origem": "EUA"
+  }
+]

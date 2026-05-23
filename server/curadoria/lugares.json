@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Canaletto Grand Canal Venice painting",
+    "autor": "Canaletto",
+    "titulo": "The Grand Canal in Venice",
+    "ano": 1740,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Monet Houses Parliament London painting",
+    "autor": "Claude Monet",
+    "titulo": "The Houses of Parliament, London",
+    "ano": 1903,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Pissarro Boulevard Montmartre night painting",
+    "autor": "Camille Pissarro",
+    "titulo": "Boulevard Montmartre at Night",
+    "ano": 1897,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Canaletto Piazza San Marco Venice painting",
+    "autor": "Canaletto",
+    "titulo": "The Piazza San Marco",
+    "ano": 1720,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Guardi Venice bacino San Marco painting",
+    "autor": "Francesco Guardi",
+    "titulo": "Venice from the Bacino di San Marco",
+    "ano": 1770,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Monet Rouen Cathedral painting",
+    "autor": "Claude Monet",
+    "titulo": "Rouen Cathedral: The Portal",
+    "ano": 1894,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Bruegel Tower Babel painting",
+    "autor": "Pieter Bruegel the Elder",
+    "titulo": "The Tower of Babel",
+    "ano": 1563,
+    "importancia": "iconica",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Pissarro Rue Saint-Honore painting",
+    "autor": "Camille Pissarro",
+    "titulo": "The Boulevard Montmartre on a Winter Morning",
+    "ano": 1897,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Monet Argenteuil Bridge painting",
+    "autor": "Claude Monet",
+    "titulo": "The Bridge at Argenteuil",
+    "ano": 1874,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "search_q": "Koninck panoramic landscape Holland painting",
+    "autor": "Philips Koninck",
+    "titulo": "An Extensive Landscape with a Road by a Ruin",
+    "ano": 1655,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  }
+]

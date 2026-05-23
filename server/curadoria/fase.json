@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Giorgio de Chirico anxious journey painting",
+    "autor": "Giorgio de Chirico",
+    "titulo": "The Anxious Journey",
+    "ano": 1913,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Giorgio de Chirico ariadne painting",
+    "autor": "Giorgio de Chirico",
+    "titulo": "Ariadne",
+    "ano": 1913,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Paul Klee cat bird painting",
+    "autor": "Paul Klee",
+    "titulo": "Cat and Bird",
+    "ano": 1928,
+    "importancia": "iconica",
+    "origem": "Suíça"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Yves Tanguy rapidity sleep painting",
+    "autor": "Yves Tanguy",
+    "titulo": "The Rapidity of Sleep",
+    "ano": 1945,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Pavel Tchelitchew hide seek painting",
+    "autor": "Pavel Tchelitchew",
+    "titulo": "Hide-and-Seek",
+    "ano": 1942,
+    "importancia": "iconica",
+    "origem": "Rússia"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Matta vertigo Eros painting",
+    "autor": "Roberto Matta",
+    "titulo": "The Vertigo of Eros",
+    "ano": 1944,
+    "importancia": "alta",
+    "origem": "Chile"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Dorothea Tanning birthday painting surreal",
+    "autor": "Dorothea Tanning",
+    "titulo": "Birthday",
+    "ano": 1942,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Kay Sage no passing surreal painting",
+    "autor": "Kay Sage",
+    "titulo": "No Passing",
+    "ano": 1954,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "De Chirico mystery melancholy street painting",
+    "autor": "Giorgio de Chirico",
+    "titulo": "Mystery and Melancholy of a Street",
+    "ano": 1914,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "search_q": "Dali landscape painting surreal",
+    "autor": "Salvador Dali",
+    "titulo": "The Persistence of Memory",
+    "ano": 1931,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  }
+]

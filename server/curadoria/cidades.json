@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Kandinsky improvisation garden love painting",
+    "autor": "Wassily Kandinsky",
+    "titulo": "Improvisation 27 (Garden of Love II)",
+    "ano": 1912,
+    "importancia": "iconica",
+    "origem": "Rússia"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Franz Marc blue horses painting",
+    "autor": "Franz Marc",
+    "titulo": "The Large Blue Horses",
+    "ano": 1911,
+    "importancia": "iconica",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Marsden Hartley German officer painting",
+    "autor": "Marsden Hartley",
+    "titulo": "Portrait of a German Officer",
+    "ano": 1914,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Georgia O'Keeffe black iris painting",
+    "autor": "Georgia O'Keeffe",
+    "titulo": "Black Iris",
+    "ano": 1926,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Lyonel Feininger Gelmeroda church painting",
+    "autor": "Lyonel Feininger",
+    "titulo": "Gelmeroda",
+    "ano": 1936,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Stuart Davis lucky strike painting",
+    "autor": "Stuart Davis",
+    "titulo": "Lucky Strike",
+    "ano": 1921,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Arthur Dove fog horns abstract painting",
+    "autor": "Arthur Dove",
+    "titulo": "Fog Horns",
+    "ano": 1929,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "John Marin Brooklyn Bridge painting",
+    "autor": "John Marin",
+    "titulo": "Brooklyn Bridge",
+    "ano": 1913,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Robert Delaunay simultaneous windows painting",
+    "autor": "Robert Delaunay",
+    "titulo": "Simultaneous Windows on the City",
+    "ano": 1912,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Piet Mondrian composition yellow blue painting",
+    "autor": "Piet Mondrian",
+    "titulo": "Composition with Yellow, Blue, and Red",
+    "ano": 1942,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  }
+]
