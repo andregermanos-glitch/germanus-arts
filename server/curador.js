@@ -23,22 +23,114 @@ const get = async (url, headers = {}) => {
 };
 
 // ─── 1. Rijksmuseum IIIF por api_id ──────────────────────────────────────────
+// ─── Helpers Linked Art (nova API Rijksmuseum) ────────────────────────────────
+
+// Procura recursivamente qualquer URL do iiif.micr.io no JSON Linked Art
+function findMicrioUrl(obj, depth = 0) {
+  if (depth > 12) return null;
+  if (typeof obj === "string") {
+    if (obj.includes("iiif.micr.io")) return obj;
+    return null;
+  }
+  if (Array.isArray(obj)) {
+    for (const item of obj) { const r = findMicrioUrl(item, depth+1); if (r) return r; }
+  } else if (obj && typeof obj === "object") {
+    for (const val of Object.values(obj)) { const r = findMicrioUrl(val, depth+1); if (r) return r; }
+  }
+  return null;
+}
+
+function extractLabelLA(field) {
+  if (!field) return null;
+  if (typeof field === "string") return field;
+  if (Array.isArray(field)) {
+    for (const x of field) {
+      if (typeof x === "string") return x;
+      if (x?.content) return x.content;
+      if (x?.value)   return x.value;
+    }
+  }
+  if (typeof field === "object") {
+    return field.en?.[0] || field.nl?.[0] || Object.values(field)[0]?.[0] || null;
+  }
+  return null;
+}
+
+function extractArtistLA(md) {
+  // Linked Art: produced_by.carried_out_by[0]._label ou label
+  const pb  = md.produced_by;
+  if (!pb) return null;
+  const cob = pb.carried_out_by || [];
+  if (!cob.length) return null;
+  return extractLabelLA(cob[0]._label || cob[0].label) || null;
+}
+
+// ─── 1. Rijksmuseum por api_id — nova API (Search → Linked Art → iiif.micr.io)
 async function fetchRijksById(apiId) {
   try {
-    const m = await get(`https://www.rijksmuseum.nl/api/iiif/${apiId}/manifest/json`);
-    const lbl    = m.label || apiId;
-    const title  = typeof lbl === "string" ? lbl : (lbl?.en?.[0] || lbl?.nl?.[0] || apiId);
-    const meta   = m.metadata || [];
-    const cf     = meta.find(x => /maker|artist/i.test(x.label || ""));
-    const artist = cf?.value || "Rijksmuseum";
-    const date   = meta.find(x => /date/i.test(x.label || ""))?.value || "";
-    return {
-      imageUrl: `https://iiif.rijksmuseum.nl/iiif/${apiId}/full/400,/0/default.jpg`,
-      museum: "Rijksmuseum, Amsterdã, Países Baixos",
-      title, artist, date,
-      api_id: apiId,
-    };
-  } catch { return null; }
+    // ── Passo 1: Search API com objectNumber (novo parâmetro directo) ─────────
+    const sr = await fetch(
+      `https://data.rijksmuseum.nl/search/collection?objectNumber=${encodeURIComponent(apiId)}&imageAvailable=true`,
+      { signal: AbortSignal.timeout(8000), headers: { Accept: "application/json" } }
+    );
+    if (sr.ok) {
+      const sd    = await sr.json();
+      const item  = (sd.orderedItems || [])[0];
+      const lodId = item?.id; // "https://id.rijksmuseum.nl/200415501"
+
+      if (lodId) {
+        // ── Passo 2: Resolver → Linked Art JSON ──────────────────────────────
+        const numId = lodId.split("/").at(-1);
+        const mr = await fetch(
+          `https://data.rijksmuseum.nl/${numId}`,
+          { signal: AbortSignal.timeout(8000), headers: { Accept: "application/ld+json" } }
+        );
+        if (mr.ok) {
+          const md = await mr.json();
+          // ── Passo 3: Extrair URL iiif.micr.io recursivamente ─────────────
+          const micrioRaw = findMicrioUrl(md);
+          if (micrioRaw) {
+            const imageUrl = micrioRaw
+              .replace("/info.json", "/full/!800,800/0/default.jpg")
+              .replace("/manifest", "/full/!800,800/0/default.jpg");
+            const title  = extractLabelLA(md._label || md.label || md.identified_by) || apiId;
+            const artist = extractArtistLA(md) || "Rijksmuseum";
+            return { imageUrl, title, artist, date: "", museum: "Rijksmuseum, Amsterdã, Países Baixos", api_id: apiId };
+          }
+        }
+      }
+    }
+
+    // ── Fallback A: manifesto IIIF antigo (pode ainda funcionar) ─────────────
+    const mf = await fetch(
+      `https://www.rijksmuseum.nl/api/iiif/${apiId}/manifest/json`,
+      { signal: AbortSignal.timeout(6000) }
+    );
+    if (mf.ok) {
+      const m      = await mf.json();
+      const canvas = m.sequences?.[0]?.canvases?.[0];
+      const imgRes = canvas?.images?.[0]?.resource;
+      const imgSvc = imgRes?.service?.["@id"];
+      const imgId  = imgRes?.["@id"];
+      const imageUrl = imgId || (imgSvc ? `${imgSvc}/full/400,/0/default.jpg` : null);
+      if (imageUrl) {
+        const lbl    = m.label;
+        const title  = typeof lbl === "string" ? lbl : (lbl?.en?.[0] || lbl?.nl?.[0] || apiId);
+        const meta   = m.metadata || [];
+        const ac     = meta.find(x => /maker|artist|kunstenaar/i.test(x.label || ""));
+        const date   = meta.find(x => /date|datum/i.test(x.label || ""))?.value || "";
+        return { imageUrl, title, artist: ac?.value || "", date, museum: "Rijksmuseum, Amsterdã, Países Baixos", api_id: apiId };
+      }
+    }
+
+    // ── Fallback B: imagem IIIF directa (servidor antigo pode ainda responder)
+    const directUrl = `https://iiif.rijksmuseum.nl/iiif/${apiId}/full/400,/0/default.jpg`;
+    return { imageUrl: directUrl, title: apiId, artist: "Rijksmuseum", date: "", museum: "Rijksmuseum, Amsterdã, Países Baixos", api_id: apiId };
+
+  } catch (e) {
+    console.log(`  [Rijks] ${apiId}: ${e.message}`);
+    return null;
+  }
 }
 
 // ─── 2. Harvard por api_id ────────────────────────────────────────────────────
@@ -147,19 +239,44 @@ async function searchEuropeana(searchQ, key) {
 // ─── Rijksmuseum search por título (fallback) ─────────────────────────────────
 async function searchRijksByTitle(creator, title) {
   try {
+    // Nova API: sem chave, parâmetros em inglês e holandês
     const params = new URLSearchParams({
       type: "painting", imageAvailable: "true",
       creator: creator.split(" ").slice(0, 2).join(" "),
     });
-    const d = await get(
+    if (title) params.set("title", title.split(" ").slice(0, 3).join(" "));
+    const sr = await fetch(
       `https://data.rijksmuseum.nl/search/collection?${params}`,
-      { Accept: "application/ld+json, application/json" }
+      { signal: AbortSignal.timeout(8000), headers: { Accept: "application/json" } }
     );
-    for (const item of (d.orderedItems || []).slice(0, 5)) {
-      const objNum = (item.id || "").split("/").at(-1);
-      if (!objNum) continue;
-      const result = await fetchRijksById(objNum);
-      if (result) return { ...result, api_id: objNum };
+    if (!sr.ok) return null;
+    const d = await sr.json();
+
+    // Resolver os primeiros 3 resultados para obter imagens
+    for (const item of (d.orderedItems || []).slice(0, 3)) {
+      const numId = (item.id || "").split("/").at(-1);
+      if (!numId) continue;
+      // Tentar obter Linked Art diretamente (novo formato)
+      try {
+        const mr = await fetch(
+          `https://data.rijksmuseum.nl/${numId}`,
+          { signal: AbortSignal.timeout(6000), headers: { Accept: "application/ld+json" } }
+        );
+        if (!mr.ok) continue;
+        const md = await mr.json();
+        const micrioRaw = findMicrioUrl(md);
+        if (micrioRaw) {
+          const imageUrl = micrioRaw.replace("/info.json", "/full/!800,800/0/default.jpg");
+          return {
+            imageUrl,
+            title:    extractLabelLA(md._label || md.label) || title,
+            artist:   extractArtistLA(md) || creator,
+            date:     "",
+            museum:   "Rijksmuseum, Amsterdã, Países Baixos",
+            api_id:   numId,
+          };
+        }
+      } catch {}
     }
   } catch {}
   return null;
@@ -265,6 +382,56 @@ async function fetchAICById(aicId) {
   } catch { return null; }
 }
 
+// ─── Validação de correspondência artista/título ─────────────────────────────
+// Garante que o resultado das buscas de texto corresponde à obra procurada
+// Sem isto, "Vermeer Milkmaid" pode devolver qualquer Vermeer — ou pior
+
+function normalizar(str) {
+  return (str || "").toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")  // remove acentos
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ").trim();
+}
+
+function palavrasChave(str) {
+  // Remove stop words e devolve palavras com >3 caracteres
+  const stopWords = new Set(["the","and","for","with","from","into","this","that",
+    "les","des","une","dans","avec","sur","por","con","para","delle","della","nel"]);
+  return normalizar(str).split(" ").filter(w => w.length > 3 && !stopWords.has(w));
+}
+
+function artistaCorresponde(esperado, encontrado) {
+  if (!esperado) return true;  // sem restrição de artista
+  const palavrasEsp = palavrasChave(esperado);
+  const normEncontrado = normalizar(encontrado);
+  // Pelo menos um apelido/nome do artista esperado deve aparecer no encontrado
+  return palavrasEsp.some(p => normEncontrado.includes(p));
+}
+
+function tituloCorresponde(esperado, encontrado, threshold = 0.4) {
+  if (!esperado) return true;  // sem restrição de título
+  const palavrasEsp = palavrasChave(esperado);
+  if (palavrasEsp.length === 0) return true;
+  const normEncontrado = normalizar(encontrado);
+  // Percentagem de palavras-chave do título esperado presentes no encontrado
+  const match = palavrasEsp.filter(p => normEncontrado.includes(p)).length;
+  return (match / palavrasEsp.length) >= threshold;
+}
+
+function validarResultado(obra, resultado, modo = "artista") {
+  if (!resultado) return false;
+  if (modo === "artista") {
+    // Para buscas de texto genéricas: artista tem de corresponder
+    return artistaCorresponde(obra.autor, resultado.artist);
+  }
+  if (modo === "titulo_artista") {
+    // Para Europeana (menos fiável): exige correspondência de artista E algum título
+    return artistaCorresponde(obra.autor, resultado.artist) &&
+           tituloCorresponde(obra.titulo, resultado.title);
+  }
+  return true;
+}
+
 // ─── Resolve imagem de uma obra (cascata de 6 fontes) ────────────────────────
 async function resolverObra(obra, keys) {
   // 0. image_url direto no JSON (mais confiável, sem chamada de API)
@@ -303,37 +470,43 @@ async function resolverObra(obra, keys) {
     if (r) return r;
   }
 
-  // ── Fallbacks por busca de texto (menos confiáveis) ──────────────────────────
+  // ── Fallbacks por busca de texto ────────────────────────────────────────────
+  // VALIDAÇÃO OBRIGATÓRIA: artista encontrado tem de corresponder ao esperado.
+  // Sem isto, "Dalí Scream" pode devolver Munch ou qualquer outro artista.
   const q = obra.search_q || `${obra.autor} ${obra.titulo}`;
 
-  // 5. Met Museum por texto
+  // 5. Met Museum por texto + validação de artista
   const met = await searchMet(q);
-  if (met) return met;
+  if (met && validarResultado(obra, met, "artista")) return met;
+  if (met) console.log(`  ⚠ Met rejeitado (artista): esperado "${obra.autor}", encontrado "${met.artist}"`);
 
-  // 6. AIC por texto
+  // 6. AIC por texto + validação de artista
   const aic = await searchAIC(q);
-  if (aic) return aic;
+  if (aic && validarResultado(obra, aic, "artista")) return aic;
+  if (aic) console.log(`  ⚠ AIC rejeitado (artista): esperado "${obra.autor}", encontrado "${aic.artist}"`);
 
-  // 7. Cleveland por texto
+  // 7. Cleveland por texto + validação de artista
   const cle = await searchCleveland(q);
-  if (cle) return cle;
+  if (cle && validarResultado(obra, cle, "artista")) return cle;
+  if (cle) console.log(`  ⚠ Cleveland rejeitado (artista): esperado "${obra.autor}", encontrado "${cle.artist}"`);
 
-  // 8. Rijksmuseum por título (último recurso Rijks sem api_id)
+  // 8. Rijksmuseum por título + validação de artista
   if (obra.api === "rijksmuseum" && obra.search_creator) {
     const r = await searchRijksByTitle(obra.search_creator, obra.search_title || "");
-    if (r) return r;
+    if (r && validarResultado(obra, r, "artista")) return r;
   }
 
-  // 9. Harvard por título
+  // 9. Harvard por título + validação de artista
   if (obra.api === "harvard" && !obra.api_id) {
     const r = await searchHarvardByTitle(obra.search_artist || obra.autor, obra.search_q || obra.titulo, keys.harvard);
-    if (r) return r;
+    if (r && validarResultado(obra, r, "artista")) return r;
   }
 
-  // 10. Europeana
+  // 10. Europeana: exige correspondência de artista E título (fonte menos fiável)
   if (obra.api === "europeana") {
     const r = await searchEuropeana(obra.search_q || obra.titulo, keys.europeana);
-    if (r) return r;
+    if (r && validarResultado(obra, r, "titulo_artista")) return r;
+    if (r) console.log(`  ⚠ Europeana rejeitada: esperado "${obra.autor} / ${obra.titulo}", encontrado "${r.artist} / ${r.title}"`);
   }
 
   return null;
