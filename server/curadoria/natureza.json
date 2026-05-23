@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "natureza",
+    "api": "met",
+    "met_id": 10497,
+    "autor": "Thomas Cole",
+    "titulo": "The Oxbow",
+    "ano": 1836,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "met_id": 10481,
+    "autor": "Frederic Edwin Church",
+    "titulo": "Heart of the Andes",
+    "ano": 1859,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "met_id": 11134,
+    "autor": "Winslow Homer",
+    "titulo": "Northeaster",
+    "ano": 1895,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "met_id": 12706,
+    "autor": "Martin Johnson Heade",
+    "titulo": "Approaching Thunder Storm",
+    "ano": 1859,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "autor": "Albert Bierstadt",
+    "titulo": "",
+    "search_q": "Albert Bierstadt landscape painting",
+    "ano": 1863,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "autor": "George Inness",
+    "titulo": "",
+    "search_q": "George Inness landscape painting",
+    "ano": 1855,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "autor": "John Constable",
+    "titulo": "",
+    "search_q": "John Constable landscape painting",
+    "ano": 1831,
+    "importancia": "iconica",
+    "origem": "Inglaterra"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "autor": "Jean-Baptiste-Camille Corot",
+    "titulo": "",
+    "search_q": "Corot landscape forest painting",
+    "ano": 1864,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "autor": "John Frederick Kensett",
+    "titulo": "",
+    "search_q": "Kensett lake landscape painting",
+    "ano": 1869,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "natureza",
+    "api": "met",
+    "autor": "Asher B. Durand",
+    "titulo": "",
+    "search_q": "Asher Durand landscape painting",
+    "ano": 1849,
+    "importancia": "iconica",
+    "origem": "EUA"
+  }
+]

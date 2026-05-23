@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "cores",
+    "api": "aic",
+    "aic_id": 27992,
+    "autor": "Georges Seurat",
+    "titulo": "A Sunday on La Grande Jatte",
+    "ano": 1886,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "autor": "Paul Gauguin",
+    "titulo": "",
+    "search_q": "Gauguin Tahiti Ia Orana painting",
+    "ano": 1891,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "autor": "Vincent van Gogh",
+    "titulo": "",
+    "search_q": "Van Gogh wheat field cypresses painting",
+    "ano": 1889,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "autor": "Vincent van Gogh",
+    "titulo": "",
+    "search_q": "Van Gogh self portrait straw hat painting",
+    "ano": 1887,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "autor": "Paul Gauguin",
+    "titulo": "",
+    "search_q": "Gauguin tahitian women painting",
+    "ano": 1899,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "autor": "Paul Cézanne",
+    "titulo": "",
+    "search_q": "Cézanne card players painting",
+    "ano": 1890,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "autor": "Henri Matisse",
+    "titulo": "",
+    "search_q": "Matisse nasturtiums dance painting",
+    "ano": 1912,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "autor": "Pablo Picasso",
+    "titulo": "",
+    "search_q": "Picasso girl mirror painting",
+    "ano": 1932,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "autor": "Georges Seurat",
+    "titulo": "",
+    "search_q": "Seurat circus sideshow painting",
+    "ano": 1888,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "cores",
+    "api": "met",
+    "autor": "Paul Signac",
+    "titulo": "",
+    "search_q": "Signac boats harbour painting",
+    "ano": 1893,
+    "importancia": "alta",
+    "origem": "França"
+  }
+]

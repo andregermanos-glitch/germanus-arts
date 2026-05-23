@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "lugares",
+    "api": "met",
+    "autor": "Canaletto",
+    "titulo": "",
+    "search_q": "Canaletto Grand Canal Venice painting",
+    "ano": 1740,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "autor": "Claude Monet",
+    "titulo": "",
+    "search_q": "Monet Houses Parliament London painting",
+    "ano": 1903,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "autor": "Camille Pissarro",
+    "titulo": "",
+    "search_q": "Pissarro Boulevard Montmartre night painting",
+    "ano": 1897,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "autor": "Francesco Guardi",
+    "titulo": "",
+    "search_q": "Guardi Venice bacino painting",
+    "ano": 1770,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "autor": "Claude Monet",
+    "titulo": "",
+    "search_q": "Monet Rouen Cathedral painting",
+    "ano": 1894,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_(Vienna)_-_Google_Art_Project_-_edited.jpg/400px-Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_(Vienna)_-_Google_Art_Project_-_edited.jpg",
+    "autor": "Pieter Bruegel the Elder",
+    "titulo": "The Tower of Babel",
+    "ano": 1563,
+    "importancia": "iconica",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "autor": "Camille Pissarro",
+    "titulo": "",
+    "search_q": "Pissarro Boulevard Montmartre morning painting",
+    "ano": 1897,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "autor": "Claude Monet",
+    "titulo": "",
+    "search_q": "Monet Argenteuil bridge painting",
+    "ano": 1874,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "autor": "Philips Koninck",
+    "titulo": "",
+    "search_q": "Koninck panoramic landscape Holland painting",
+    "ano": 1655,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "lugares",
+    "api": "met",
+    "autor": "Meindert Hobbema",
+    "titulo": "",
+    "search_q": "Hobbema Avenue Middelharnis painting",
+    "ano": 1689,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  }
+]

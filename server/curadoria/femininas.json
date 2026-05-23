@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "femininas",
+    "api": "aic",
+    "aic_id": 111442,
+    "autor": "Mary Cassatt",
+    "titulo": "The Child's Bath",
+    "ano": 1893,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "aic",
+    "aic_id": 16790,
+    "autor": "Mary Cassatt",
+    "titulo": "Woman in Black at the Opera",
+    "ano": 1879,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "autor": "Elisabeth Louise Vigée Le Brun",
+    "titulo": "",
+    "search_q": "Vigée Le Brun self portrait painting",
+    "ano": 1782,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "autor": "Berthe Morisot",
+    "titulo": "",
+    "search_q": "Berthe Morisot summer day painting",
+    "ano": 1879,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "autor": "Rosa Bonheur",
+    "titulo": "",
+    "search_q": "Rosa Bonheur horse fair painting",
+    "ano": 1853,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "autor": "Mary Cassatt",
+    "titulo": "",
+    "search_q": "Mary Cassatt young women fruit painting",
+    "ano": 1892,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "autor": "Cecilia Beaux",
+    "titulo": "",
+    "search_q": "Cecilia Beaux portrait painting",
+    "ano": 1894,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "autor": "Marie Laurencin",
+    "titulo": "",
+    "search_q": "Marie Laurencin group artists painting",
+    "ano": 1908,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "autor": "Suzanne Valadon",
+    "titulo": "",
+    "search_q": "Suzanne Valadon nude painting",
+    "ano": 1928,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "femininas",
+    "api": "met",
+    "autor": "Artemisia Gentileschi",
+    "titulo": "",
+    "search_q": "Artemisia Gentileschi Judith painting",
+    "ano": 1616,
+    "importancia": "iconica",
+    "origem": "Itália"
+  }
+]

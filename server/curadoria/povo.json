@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "povo",
+    "api": "met",
+    "met_id": 435809,
+    "autor": "Pieter Bruegel the Elder",
+    "titulo": "The Harvesters",
+    "ano": 1565,
+    "importancia": "iconica",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "autor": "Winslow Homer",
+    "titulo": "",
+    "search_q": "Winslow Homer snap whip children painting",
+    "ano": 1872,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "autor": "Honoré Daumier",
+    "titulo": "",
+    "search_q": "Daumier third class carriage painting",
+    "ano": 1865,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "autor": "Thomas Eakins",
+    "titulo": "",
+    "search_q": "Eakins Max Schmitt sculling painting",
+    "ano": 1871,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "autor": "Jan Steen",
+    "titulo": "",
+    "search_q": "Jan Steen merry company terrace painting",
+    "ano": 1670,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "autor": "Jules Bastien-Lepage",
+    "titulo": "",
+    "search_q": "Bastien-Lepage hay making painting",
+    "ano": 1877,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "autor": "Eastman Johnson",
+    "titulo": "",
+    "search_q": "Eastman Johnson liberty ride painting",
+    "ano": 1862,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "autor": "Winslow Homer",
+    "titulo": "",
+    "search_q": "Winslow Homer cotton pickers painting",
+    "ano": 1876,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "autor": "George Caleb Bingham",
+    "titulo": "",
+    "search_q": "Bingham fur traders Missouri painting",
+    "ano": 1845,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "povo",
+    "api": "met",
+    "autor": "William Sidney Mount",
+    "titulo": "",
+    "search_q": "William Sidney Mount farmers painting",
+    "ano": 1835,
+    "importancia": "alta",
+    "origem": "EUA"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "historico",
+    "api": "met",
+    "met_id": 11417,
+    "autor": "Emanuel Leutze",
+    "titulo": "Washington Crossing the Delaware",
+    "ano": 1851,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "autor": "Jacques-Louis David",
+    "titulo": "",
+    "search_q": "David death socrates painting",
+    "ano": 1787,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "autor": "Peter Paul Rubens",
+    "titulo": "",
+    "search_q": "Rubens triumph Henri painting",
+    "ano": 1630,
+    "importancia": "alta",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "autor": "Benjamin West",
+    "titulo": "",
+    "search_q": "West death general Wolfe painting",
+    "ano": 1770,
+    "importancia": "iconica",
+    "origem": "Inglaterra"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "autor": "Jean-Auguste-Dominique Ingres",
+    "titulo": "",
+    "search_q": "Ingres Napoleon throne painting",
+    "ano": 1806,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "autor": "Antoine-Jean Gros",
+    "titulo": "",
+    "search_q": "Gros Napoleon plague Jaffa painting",
+    "ano": 1804,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "autor": "John Trumbull",
+    "titulo": "",
+    "search_q": "Trumbull declaration independence painting",
+    "ano": 1786,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "autor": "John Vanderlyn",
+    "titulo": "",
+    "search_q": "Vanderlyn ariadne naxos painting",
+    "ano": 1814,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "autor": "Emanuel Leutze",
+    "titulo": "",
+    "search_q": "Leutze westward empire painting",
+    "ano": 1862,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "historico",
+    "api": "met",
+    "autor": "Charles Willson Peale",
+    "titulo": "",
+    "search_q": "Peale staircase group painting",
+    "ano": 1795,
+    "importancia": "alta",
+    "origem": "EUA"
+  }
+]

@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "objetos",
+    "api": "met",
+    "autor": "Jean-Baptiste-Siméon Chardin",
+    "titulo": "",
+    "search_q": "Chardin soap bubbles still life painting",
+    "ano": 1733,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "autor": "Jan Davidsz. de Heem",
+    "titulo": "",
+    "search_q": "Jan de Heem vase flowers still life painting",
+    "ano": 1660,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "autor": "Rachel Ruysch",
+    "titulo": "",
+    "search_q": "Rachel Ruysch flower still life painting",
+    "ano": 1726,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "autor": "Pieter Claesz",
+    "titulo": "",
+    "search_q": "Pieter Claesz still life skull painting",
+    "ano": 1628,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "autor": "Paul Cézanne",
+    "titulo": "",
+    "search_q": "Cézanne still life apples painting",
+    "ano": 1890,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "autor": "Édouard Manet",
+    "titulo": "",
+    "search_q": "Manet peonies flowers painting",
+    "ano": 1864,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "autor": "Willem Claesz. Heda",
+    "titulo": "",
+    "search_q": "Heda pewter still life painting",
+    "ano": 1640,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "autor": "Henri Fantin-Latour",
+    "titulo": "",
+    "search_q": "Fantin-Latour roses flowers painting",
+    "ano": 1880,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "autor": "Willem Kalf",
+    "titulo": "",
+    "search_q": "Kalf still life nautilus painting",
+    "ano": 1669,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "objetos",
+    "api": "met",
+    "autor": "Jan Brueghel the Elder",
+    "titulo": "",
+    "search_q": "Jan Brueghel flowers painting",
+    "ano": 1606,
+    "importancia": "alta",
+    "origem": "Flandres"
+  }
+]

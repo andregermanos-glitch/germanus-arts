@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "luz_sol",
+    "api": "aic",
+    "aic_id": 16568,
+    "autor": "Claude Monet",
+    "titulo": "Water Lilies",
+    "ano": 1906,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "autor": "Claude Monet",
+    "titulo": "",
+    "search_q": "Monet haystacks summer painting",
+    "ano": 1891,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "autor": "Claude Monet",
+    "titulo": "",
+    "search_q": "Monet cliff walk Etretat painting",
+    "ano": 1882,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "autor": "Pierre-Auguste Renoir",
+    "titulo": "",
+    "search_q": "Renoir girl watering can painting",
+    "ano": 1876,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "autor": "Claude Monet",
+    "titulo": "",
+    "search_q": "Monet garden Sainte-Adresse painting",
+    "ano": 1867,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "autor": "Winslow Homer",
+    "titulo": "",
+    "search_q": "Winslow Homer boat sea painting",
+    "ano": 1892,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "autor": "Camille Pissarro",
+    "titulo": "",
+    "search_q": "Pissarro apple harvest painting",
+    "ano": 1886,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "autor": "Claude Monet",
+    "titulo": "",
+    "search_q": "Monet boating river painting",
+    "ano": 1890,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "autor": "Childe Hassam",
+    "titulo": "",
+    "search_q": "Childe Hassam summer painting",
+    "ano": 1890,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "luz_sol",
+    "api": "met",
+    "autor": "John Singer Sargent",
+    "titulo": "",
+    "search_q": "Sargent summer garden painting",
+    "ano": 1887,
+    "importancia": "alta",
+    "origem": "EUA"
+  }
+]

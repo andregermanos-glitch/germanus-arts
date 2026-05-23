@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "familiar",
+    "api": "met",
+    "met_id": 437869,
+    "autor": "Johannes Vermeer",
+    "titulo": "Young Woman with a Water Pitcher",
+    "ano": 1662,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "autor": "Gabriel Metsu",
+    "titulo": "",
+    "search_q": "Metsu sick child interior painting",
+    "ano": 1665,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "autor": "Nicolas Maes",
+    "titulo": "",
+    "search_q": "Nicolas Maes old woman interior painting",
+    "ano": 1655,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "autor": "Jan Steen",
+    "titulo": "",
+    "search_q": "Jan Steen merry family interior painting",
+    "ano": 1668,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "autor": "Gerard ter Borch",
+    "titulo": "",
+    "search_q": "ter Borch woman letter interior painting",
+    "ano": 1651,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "autor": "Édouard Vuillard",
+    "titulo": "",
+    "search_q": "Vuillard interior mother sister painting",
+    "ano": 1893,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "autor": "Pieter de Hooch",
+    "titulo": "",
+    "search_q": "Pieter de Hooch interior woman painting",
+    "ano": 1663,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "autor": "Pierre-Auguste Renoir",
+    "titulo": "",
+    "search_q": "Renoir mother child family interior painting",
+    "ano": 1878,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "autor": "Joachim Wtewael",
+    "titulo": "",
+    "search_q": "Wtewael kitchen scene painting",
+    "ano": 1605,
+    "importancia": "media",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "familiar",
+    "api": "met",
+    "autor": "Jean-Baptiste-Siméon Chardin",
+    "titulo": "",
+    "search_q": "Chardin kitchen interior painting",
+    "ano": 1755,
+    "importancia": "alta",
+    "origem": "França"
+  }
+]

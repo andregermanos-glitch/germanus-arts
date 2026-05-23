@@ -1,0 +1,122 @@
+[
+  {
+    "ala": "retratos",
+    "api": "met",
+    "met_id": 437394,
+    "autor": "Diego Velázquez",
+    "titulo": "Juan de Pareja",
+    "ano": 1650,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "retratos",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Rogier_van_der_Weyden_-_Portrait_of_a_Lady_-_National_Gallery_of_Art.jpg/400px-Rogier_van_der_Weyden_-_Portrait_of_a_Lady_-_National_Gallery_of_Art.jpg",
+    "autor": "Rogier van der Weyden",
+    "titulo": "Portrait of a Lady",
+    "ano": 1460,
+    "importancia": "iconica",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "autor": "Rembrandt van Rijn",
+    "titulo": "",
+    "search_q": "Rembrandt self-portrait painting",
+    "ano": 1660,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "autor": "Hans Memling",
+    "titulo": "",
+    "search_q": "Hans Memling portrait man painting",
+    "ano": 1478,
+    "importancia": "alta",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "autor": "El Greco",
+    "titulo": "",
+    "search_q": "El Greco portrait cardinal painting",
+    "ano": 1600,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "autor": "Jean-Auguste-Dominique Ingres",
+    "titulo": "",
+    "search_q": "Ingres portrait Leblanc painting",
+    "ano": 1823,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "autor": "Giovanni Bellini",
+    "titulo": "",
+    "search_q": "Giovanni Bellini portrait young man painting",
+    "ano": 1510,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "autor": "Lucas Cranach the Elder",
+    "titulo": "",
+    "search_q": "Lucas Cranach portrait woman painting",
+    "ano": 1525,
+    "importancia": "media",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "autor": "Titian",
+    "titulo": "",
+    "search_q": "Titian portrait man painting",
+    "ano": 1550,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "autor": "Anthony van Dyck",
+    "titulo": "",
+    "search_q": "Anthony van Dyck self-portrait painting",
+    "ano": 1641,
+    "importancia": "alta",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "autor": "Frans Hals",
+    "titulo": "",
+    "search_q": "Frans Hals portrait laughing man painting",
+    "ano": 1624,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "retratos",
+    "api": "met",
+    "autor": "Edgar Degas",
+    "titulo": "",
+    "search_q": "Degas woman chrysanthemums painting",
+    "ano": 1865,
+    "importancia": "iconica",
+    "origem": "França"
+  }
+]

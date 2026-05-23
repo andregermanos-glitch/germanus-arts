@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "cidades",
+    "api": "met",
+    "autor": "Wassily Kandinsky",
+    "titulo": "",
+    "search_q": "Kandinsky improvisation abstract painting",
+    "ano": 1912,
+    "importancia": "iconica",
+    "origem": "Rússia"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "autor": "Franz Marc",
+    "titulo": "",
+    "search_q": "Franz Marc blue horses painting",
+    "ano": 1911,
+    "importancia": "iconica",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "autor": "Marsden Hartley",
+    "titulo": "",
+    "search_q": "Marsden Hartley German officer painting",
+    "ano": 1914,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "autor": "Georgia O'Keeffe",
+    "titulo": "",
+    "search_q": "Georgia O'Keeffe black iris painting",
+    "ano": 1926,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "autor": "Lyonel Feininger",
+    "titulo": "",
+    "search_q": "Lyonel Feininger Gelmeroda painting",
+    "ano": 1936,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "autor": "Stuart Davis",
+    "titulo": "",
+    "search_q": "Stuart Davis lucky strike painting",
+    "ano": 1921,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "autor": "Arthur Dove",
+    "titulo": "",
+    "search_q": "Arthur Dove abstract painting",
+    "ano": 1929,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "autor": "John Marin",
+    "titulo": "",
+    "search_q": "John Marin abstract painting",
+    "ano": 1913,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "autor": "Robert Delaunay",
+    "titulo": "",
+    "search_q": "Robert Delaunay simultaneous windows painting",
+    "ano": 1912,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "cidades",
+    "api": "met",
+    "autor": "Piet Mondrian",
+    "titulo": "",
+    "search_q": "Piet Mondrian composition painting",
+    "ano": 1942,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  }
+]

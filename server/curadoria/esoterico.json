@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "esoterico",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Henry_Fuseli_-_The_Nightmare.JPG/400px-Henry_Fuseli_-_The_Nightmare.JPG",
+    "autor": "Henry Fuseli",
+    "titulo": "The Nightmare",
+    "ano": 1781,
+    "importancia": "iconica",
+    "origem": "Suíça"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "autor": "Gustave Moreau",
+    "titulo": "",
+    "search_q": "Gustave Moreau Oedipus Sphinx painting",
+    "ano": 1864,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "autor": "Odilon Redon",
+    "titulo": "",
+    "search_q": "Odilon Redon cyclops painting",
+    "ano": 1898,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "autor": "William Blake",
+    "titulo": "",
+    "search_q": "William Blake visionary painting",
+    "ano": 1805,
+    "importancia": "alta",
+    "origem": "Inglaterra"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "autor": "Gustave Moreau",
+    "titulo": "",
+    "search_q": "Gustave Moreau apparition salome painting",
+    "ano": 1876,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "autor": "Arnold Böcklin",
+    "titulo": "",
+    "search_q": "Böcklin island dead painting",
+    "ano": 1883,
+    "importancia": "iconica",
+    "origem": "Suíça"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "autor": "Franz von Stuck",
+    "titulo": "",
+    "search_q": "Franz Stuck sin painting",
+    "ano": 1893,
+    "importancia": "alta",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "autor": "Elihu Vedder",
+    "titulo": "",
+    "search_q": "Elihu Vedder questioner sphinx painting",
+    "ano": 1863,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "autor": "Fernand Khnopff",
+    "titulo": "",
+    "search_q": "Khnopff symbolist painting",
+    "ano": 1891,
+    "importancia": "alta",
+    "origem": "Bélgica"
+  },
+  {
+    "ala": "esoterico",
+    "api": "met",
+    "autor": "Jean Delville",
+    "titulo": "",
+    "search_q": "Delville symbolist painting",
+    "ano": 1895,
+    "importancia": "alta",
+    "origem": "Bélgica"
+  }
+]

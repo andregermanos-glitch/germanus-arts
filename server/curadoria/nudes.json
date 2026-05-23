@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "nudes",
+    "api": "wikimedia",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Jean-Auguste-Dominique_Ingres_-_The_Grande_Odalisque_-_WGA11841.jpg/400px-Jean-Auguste-Dominique_Ingres_-_The_Grande_Odalisque_-_WGA11841.jpg",
+    "autor": "Jean-Auguste-Dominique Ingres",
+    "titulo": "La Grande Odalisque",
+    "ano": 1814,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "autor": "Lucas Cranach the Elder",
+    "titulo": "",
+    "search_q": "Lucas Cranach Venus nude painting",
+    "ano": 1532,
+    "importancia": "iconica",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "autor": "Titian",
+    "titulo": "",
+    "search_q": "Titian Venus nude painting",
+    "ano": 1560,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "autor": "William-Adolphe Bouguereau",
+    "titulo": "",
+    "search_q": "Bouguereau nude nymphs painting",
+    "ano": 1873,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "autor": "Peter Paul Rubens",
+    "titulo": "",
+    "search_q": "Rubens three graces nude painting",
+    "ano": 1635,
+    "importancia": "iconica",
+    "origem": "Flandres"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "autor": "François Boucher",
+    "titulo": "",
+    "search_q": "Boucher reclining nude painting",
+    "ano": 1752,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "autor": "Jean-Auguste-Dominique Ingres",
+    "titulo": "",
+    "search_q": "Ingres nude odalisque painting",
+    "ano": 1839,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "autor": "Gustave Courbet",
+    "titulo": "",
+    "search_q": "Courbet nude woman painting",
+    "ano": 1866,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "autor": "Alexandre Cabanel",
+    "titulo": "",
+    "search_q": "Cabanel Venus nude painting",
+    "ano": 1863,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "nudes",
+    "api": "met",
+    "autor": "Giorgione",
+    "titulo": "",
+    "search_q": "Giorgione sleeping Venus nude painting",
+    "ano": 1510,
+    "importancia": "iconica",
+    "origem": "Itália"
+  }
+]

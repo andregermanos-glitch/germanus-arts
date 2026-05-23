@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "perspectiva",
+    "api": "aic",
+    "aic_id": 20684,
+    "autor": "Gustave Caillebotte",
+    "titulo": "Paris Street; Rainy Day",
+    "ano": 1877,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "met_id": 437869,
+    "autor": "Johannes Vermeer",
+    "titulo": "Young Woman with a Water Pitcher",
+    "ano": 1662,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "autor": "Johannes Vermeer",
+    "titulo": "",
+    "search_q": "Vermeer woman lute interior painting",
+    "ano": 1664,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "autor": "Pieter de Hooch",
+    "titulo": "",
+    "search_q": "Pieter de Hooch courtyard interior painting",
+    "ano": 1660,
+    "importancia": "iconica",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "autor": "Pieter Saenredam",
+    "titulo": "",
+    "search_q": "Saenredam church interior painting",
+    "ano": 1645,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "autor": "Giovanni Paolo Pannini",
+    "titulo": "",
+    "search_q": "Pannini gallery Rome painting",
+    "ano": 1757,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "autor": "Jan van der Heyden",
+    "titulo": "",
+    "search_q": "van der Heyden city street canal painting",
+    "ano": 1670,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "autor": "Emanuel de Witte",
+    "titulo": "",
+    "search_q": "De Witte church interior painting",
+    "ano": 1660,
+    "importancia": "media",
+    "origem": "Países Baixos"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "autor": "Canaletto",
+    "titulo": "",
+    "search_q": "Canaletto interior stonemasons yard Venice painting",
+    "ano": 1728,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "perspectiva",
+    "api": "met",
+    "autor": "Gerard ter Borch",
+    "titulo": "",
+    "search_q": "ter Borch letter woman interior painting",
+    "ano": 1660,
+    "importancia": "alta",
+    "origem": "Países Baixos"
+  }
+]

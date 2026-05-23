@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "autor": "Giovanni Paolo Pannini",
+    "titulo": "",
+    "search_q": "Pannini ancient Rome interior painting",
+    "ano": 1757,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "autor": "Giovanni Paolo Pannini",
+    "titulo": "",
+    "search_q": "Pannini modern Rome painting",
+    "ano": 1757,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "autor": "Hubert Robert",
+    "titulo": "",
+    "search_q": "Hubert Robert ruins fountain painting",
+    "ano": 1787,
+    "importancia": "iconica",
+    "origem": "França"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "autor": "Hubert Robert",
+    "titulo": "",
+    "search_q": "Hubert Robert old temple ruins painting",
+    "ano": 1787,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "autor": "Thomas Cole",
+    "titulo": "",
+    "search_q": "Thomas Cole architect dream painting",
+    "ano": 1840,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "autor": "Canaletto",
+    "titulo": "",
+    "search_q": "Canaletto Thames London painting",
+    "ano": 1746,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "autor": "Lyonel Feininger",
+    "titulo": "",
+    "search_q": "Lyonel Feininger church architecture painting",
+    "ano": 1936,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "autor": "Charles Sheeler",
+    "titulo": "",
+    "search_q": "Charles Sheeler American Landscape painting",
+    "ano": 1930,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "autor": "John Marin",
+    "titulo": "",
+    "search_q": "John Marin Brooklyn Bridge painting",
+    "ano": 1913,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "arquitetura",
+    "api": "met",
+    "autor": "Stuart Davis",
+    "titulo": "",
+    "search_q": "Stuart Davis architecture painting",
+    "ano": 1940,
+    "importancia": "media",
+    "origem": "EUA"
+  }
+]

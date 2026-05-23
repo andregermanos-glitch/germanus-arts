@@ -1,0 +1,102 @@
+[
+  {
+    "ala": "fase",
+    "api": "met",
+    "autor": "Giorgio de Chirico",
+    "titulo": "",
+    "search_q": "Giorgio de Chirico anxious journey painting",
+    "ano": 1913,
+    "importancia": "iconica",
+    "origem": "Itália"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "autor": "Giorgio de Chirico",
+    "titulo": "",
+    "search_q": "Giorgio de Chirico ariadne painting",
+    "ano": 1913,
+    "importancia": "alta",
+    "origem": "Itália"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "autor": "Paul Klee",
+    "titulo": "",
+    "search_q": "Paul Klee cat bird painting",
+    "ano": 1928,
+    "importancia": "iconica",
+    "origem": "Suíça"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "autor": "Yves Tanguy",
+    "titulo": "",
+    "search_q": "Yves Tanguy surreal painting",
+    "ano": 1945,
+    "importancia": "alta",
+    "origem": "França"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "autor": "Pavel Tchelitchew",
+    "titulo": "",
+    "search_q": "Tchelitchew hide seek painting",
+    "ano": 1942,
+    "importancia": "iconica",
+    "origem": "Rússia"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "autor": "Roberto Matta",
+    "titulo": "",
+    "search_q": "Matta surreal painting",
+    "ano": 1944,
+    "importancia": "alta",
+    "origem": "Chile"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "autor": "Dorothea Tanning",
+    "titulo": "",
+    "search_q": "Dorothea Tanning surreal painting",
+    "ano": 1942,
+    "importancia": "iconica",
+    "origem": "EUA"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "autor": "Kay Sage",
+    "titulo": "",
+    "search_q": "Kay Sage surreal painting",
+    "ano": 1954,
+    "importancia": "alta",
+    "origem": "EUA"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "autor": "Max Ernst",
+    "titulo": "",
+    "search_q": "Max Ernst surreal painting",
+    "ano": 1921,
+    "importancia": "iconica",
+    "origem": "Alemanha"
+  },
+  {
+    "ala": "fase",
+    "api": "met",
+    "autor": "Salvador Dali",
+    "titulo": "",
+    "search_q": "Salvador Dali surreal painting",
+    "ano": 1931,
+    "importancia": "iconica",
+    "origem": "Espanha"
+  }
+]
