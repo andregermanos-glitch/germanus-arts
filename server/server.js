@@ -45,8 +45,19 @@ async function initDB() {
       date TEXT, medium TEXT, dimensions TEXT, origin TEXT, style TEXT,
       museum TEXT, description TEXT, credit TEXT, image_url TEXT,
       external_url TEXT, ala_id TEXT,
-      indexed_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
+      indexed_at     BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT,
+      image_data     BYTEA  DEFAULT NULL,
+      image_mime     TEXT   DEFAULT 'image/jpeg',
+      image_cached_at BIGINT DEFAULT 0
     );
+    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS image_data      BYTEA  DEFAULT NULL;
+    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS image_mime      TEXT   DEFAULT 'image/jpeg';
+    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS image_cached_at BIGINT DEFAULT 0;
+    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_en         TEXT   DEFAULT NULL;
+    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_fr         TEXT   DEFAULT NULL;
+    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_es         TEXT   DEFAULT NULL;
+    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_it         TEXT   DEFAULT NULL;
+    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_fetched_at BIGINT DEFAULT 0;
     CREATE TABLE IF NOT EXISTS search_cache (
       cache_key TEXT PRIMARY KEY, data TEXT NOT NULL,
       ts BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
@@ -128,10 +139,24 @@ async function searchLocal(q, alaId, limit) {
 }
 
 function mapRow(r) {
-  return { id:r.id, source:r.source, title:r.title, artist:r.artist, date:r.date,
+  // Imagem: usa rota local quando armazenada no banco — sem dependência externa
+  const imageUrl = (r.image_cached_at > 0)
+    ? `/api/image/${r.id}`
+    : r.image_url;
+  return {
+    id:r.id, source:r.source, title:r.title, artist:r.artist, date:r.date,
     medium:r.medium, dimensions:r.dimensions, origin:r.origin, style:r.style,
     museum:r.museum, description:r.description, credit:r.credit,
-    imageUrl:r.image_url, externalUrl:r.external_url, alaId:r.ala_id };
+    imageUrl, externalUrl:r.external_url, alaId:r.ala_id,
+    isCached: (r.image_cached_at > 0),
+    // Textos Wikipedia por idioma (aparecem no detalhe da obra)
+    wiki: {
+      en: r.wiki_en || null,
+      fr: r.wiki_fr || null,
+      es: r.wiki_es || null,
+      it: r.wiki_it || null,
+    }
+  };
 }
 
 // ─── searchCuradoria — 18 obras, sourceTrust, sem repetição 30 min ────────────
@@ -143,12 +168,14 @@ async function searchCuradoria(alaId, excludeIds = [], limit = 18) {
 
     if (excl.length > 0) {
       const r = await pool.query(
-        `SELECT * FROM artworks
+        `SELECT *, image_cached_at FROM artworks
          WHERE ala_id = $1
            AND source IN ('curadoria','expansao','algorithm+museums')
            AND image_url IS NOT NULL AND image_url != ''
            AND id != ALL($3::TEXT[])
-         ORDER BY ${sourceOrder}, RANDOM()
+         ORDER BY
+           (image_cached_at > 0) DESC,
+           ${sourceOrder}, RANDOM()
          LIMIT $2`,
         [alaId, limit, excl]
       );
@@ -156,11 +183,13 @@ async function searchCuradoria(alaId, excludeIds = [], limit = 18) {
     }
 
     const r2 = await pool.query(
-      `SELECT * FROM artworks
+      `SELECT *, image_cached_at FROM artworks
        WHERE ala_id = $1
          AND source IN ('curadoria','expansao','algorithm+museums')
          AND image_url IS NOT NULL AND image_url != ''
-       ORDER BY ${sourceOrder}, RANDOM()
+       ORDER BY
+         (image_cached_at > 0) DESC,
+         ${sourceOrder}, RANDOM()
        LIMIT $2`,
       [alaId, limit]
     );
@@ -277,12 +306,17 @@ app.get("/api/search", async (req, res) => {
 
   const excludeIds = exclude ? exclude.split(",").filter(Boolean) : [];
 
-  // ── Ala selecionada → sourceTrust + rotatividade 30 min, 18 obras ────────────
+  // ── Ala selecionada → APENAS banco de dados (sem API externa durante serving) ─
+  // O banco é a fonte única de verdade. APIs só são chamadas no processo de indexação.
   if (alaId) {
     const results = await searchCuradoria(alaId, excludeIds, 18);
-    if (results.length > 0)
-      return res.json({ source:"curadoria", total:results.length, results });
-    // fallback: continua pipeline se ala ainda não indexada
+    // Retorna o que o banco tem — mesmo que vazio (a ala ainda não foi indexada)
+    return res.json({
+      source: "database",
+      total:  results.length,
+      cached: results.filter(r => r.isCached).length,
+      results
+    });
   }
 
   const cacheKey = `${q}|${alaId||""}|${fromYear||""}|${toYear||""}`;
@@ -329,6 +363,184 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(distPath, "index.html"), err => {
     if (err) res.status(200).send("Germanus.Art online");
   });
+});
+
+// ─── Rota: servir imagem armazenada no banco ─────────────────────────────────
+// Funciona como CDN local — sem dependência de APIs externas
+// Cache-Control de 1 ano: imagem no banco não muda
+app.get("/api/image/:id", async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT image_data, image_mime FROM artworks
+       WHERE id = $1 AND image_data IS NOT NULL AND image_cached_at > 0`,
+      [req.params.id]
+    );
+    if (!r.rows[0]?.image_data) return res.status(404).send("Not cached");
+
+    res.set({
+      "Content-Type":  r.rows[0].image_mime || "image/jpeg",
+      "Cache-Control": "public, max-age=31536000, immutable",
+      "ETag":          `"${req.params.id}"`,
+    });
+
+    // Suporte a If-None-Match (browser cache)
+    if (req.headers["if-none-match"] === `"${req.params.id}"`)
+      return res.status(304).end();
+
+    res.send(r.rows[0].image_data);
+  } catch (e) {
+    console.error("[/api/image]", e.message);
+    res.status(500).send("Error");
+  }
+});
+
+// ─── Busca resumos Wikipedia em 4 idiomas ────────────────────────────────────
+// Wikipedia REST API: CC BY-SA — pode ser usado comercialmente com atribuição
+// Estratégia: busca por "título artista" na Wikipedia de cada idioma
+
+async function fetchWikiSummary(lang, query) {
+  try {
+    // 1. Busca o artigo mais relevante
+    const searchUrl = `https://${lang}.wikipedia.org/w/api.php?` +
+      `action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=1&origin=*`;
+    const sr = await fetch(searchUrl, { signal: AbortSignal.timeout(6000) });
+    const sd = await sr.json();
+    const hit = sd?.query?.search?.[0];
+    if (!hit) return null;
+
+    // 2. Busca o resumo do artigo encontrado
+    const summaryUrl = `https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(hit.title)}`;
+    const pr = await fetch(summaryUrl, { signal: AbortSignal.timeout(6000) });
+    if (!pr.ok) return null;
+    const pd = await pr.json();
+
+    // Retorna apenas o extract curto (intro da obra/artista)
+    return pd.extract ? pd.extract.slice(0, 600) : null;
+  } catch { return null; }
+}
+
+async function fetchWikipediaSummaries() {
+  try {
+    // Obras com imagem cached mas sem texto Wikipedia ainda
+    const r = await pool.query(
+      `SELECT id, title, artist FROM artworks
+       WHERE image_cached_at > 0
+         AND (wiki_en IS NULL OR wiki_fetched_at = 0)
+       ORDER BY indexed_at DESC
+       LIMIT 10`
+    );
+    if (r.rows.length === 0) return;
+
+    console.log(`📖 Wikipedia — buscando resumos para ${r.rows.length} obras...`);
+    let saved = 0;
+
+    for (const row of r.rows) {
+      const query = `${row.title} ${row.artist}`.trim();
+      const [en, fr, es, it] = await Promise.all([
+        fetchWikiSummary("en", query),
+        fetchWikiSummary("fr", query),
+        fetchWikiSummary("es", query),
+        fetchWikiSummary("it", query),
+      ]);
+
+      // Salva mesmo se alguns idiomas não encontraram — marca como processado
+      await pool.query(
+        `UPDATE artworks SET
+           wiki_en = $1, wiki_fr = $2, wiki_es = $3, wiki_it = $4,
+           wiki_fetched_at = $5
+         WHERE id = $6`,
+        [en, fr, es, it, Math.floor(Date.now() / 1000), row.id]
+      );
+
+      if (en || fr || es || it) saved++;
+      await new Promise(r => setTimeout(r, 500)); // respeitar rate limit Wikipedia
+    }
+
+    if (saved > 0) console.log(`📖 Wikipedia — ${saved} obras com texto salvo`);
+  } catch (e) {
+    console.error("[fetchWikipediaSummaries]", e.message);
+  }
+}
+
+// ─── Download e cache de imagens no banco ────────────────────────────────────
+// Roda em background, baixa 20 imagens por vez, prioriza obras mais recentes
+// Após o download, o mapRow() serve /api/image/:id — sem chamadas externas
+
+const CACHE_BATCH  = 20;                    // imagens por rodada
+const CACHE_DELAY  = 10 * 60 * 1000;       // 10 min após boot
+const CACHE_PERIOD =  5 * 60 * 1000;       // a cada 5 min
+
+async function downloadAndCacheImages() {
+  try {
+    const r = await pool.query(
+      `SELECT id, image_url, image_mime FROM artworks
+       WHERE image_url IS NOT NULL AND image_url != ''
+         AND (image_data IS NULL OR image_cached_at = 0)
+       ORDER BY indexed_at DESC
+       LIMIT $1`,
+      [CACHE_BATCH]
+    );
+    if (r.rows.length === 0) return;
+
+    console.log(`📦 Cache de imagens — baixando ${r.rows.length} obras...`);
+    let saved = 0;
+
+    for (const row of r.rows) {
+      try {
+        const res = await fetch(row.image_url, {
+          signal: AbortSignal.timeout(12000),
+          headers: { "User-Agent": "GermanusArt/1.0 (art curation platform)" },
+        });
+
+        if (!res.ok) continue;
+        const contentType = res.headers.get("content-type") || "image/jpeg";
+        if (!contentType.startsWith("image/")) continue;
+
+        const buf  = await res.arrayBuffer();
+        const size = buf.byteLength;
+        if (size < 2000) continue;   // descarta imagens < 2 KB (placeholders)
+
+        await pool.query(
+          `UPDATE artworks
+           SET image_data = $1, image_mime = $2, image_cached_at = $3
+           WHERE id = $4`,
+          [Buffer.from(buf), contentType, Math.floor(Date.now() / 1000), row.id]
+        );
+        saved++;
+      } catch {
+        // Falha silenciosa — tenta novamente na próxima rodada
+      }
+      // Pausa entre downloads para não sobrecarregar as CDNs externas
+      await new Promise(r => setTimeout(r, 400));
+    }
+
+    if (saved > 0)
+      console.log(`📦 Cache concluído — ${saved}/${r.rows.length} imagens armazenadas`);
+  } catch (e) {
+    console.error("[downloadAndCacheImages]", e.message);
+  }
+}
+
+// ─── Status de cache ──────────────────────────────────────────────────────────
+app.get("/api/cache/status", async (_req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT
+         COUNT(*) as total,
+         COUNT(*) FILTER (WHERE image_url IS NOT NULL AND image_url != '') as with_url,
+         COUNT(*) FILTER (WHERE image_cached_at > 0)  as images_cached,
+         COUNT(*) FILTER (WHERE wiki_fetched_at > 0)  as wiki_fetched,
+         COUNT(*) FILTER (WHERE wiki_en IS NOT NULL)  as wiki_en_ok,
+         ROUND(SUM(CASE WHEN image_data IS NOT NULL
+                   THEN pg_column_size(image_data) ELSE 0 END) / 1048576.0, 1) as image_mb,
+         ROUND(SUM(
+           COALESCE(length(wiki_en),0) + COALESCE(length(wiki_fr),0) +
+           COALESCE(length(wiki_es),0) + COALESCE(length(wiki_it),0)
+         ) / 1048576.0, 2) as wiki_mb
+       FROM artworks`
+    );
+    res.json({ ...r.rows[0], note:"images: /api/image/:id  |  wiki via mapRow" });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─── Limpeza periódica de imagens inválidas ───────────────────────────────────
@@ -401,6 +613,20 @@ initDB().then(async () => {
     validateAndCleanImages();
     setInterval(validateAndCleanImages, CLEANUP_PERIOD);
   }, CLEANUP_DELAY);
+
+  // Download e cache de imagens no banco — inicia 10 min após boot
+  setTimeout(() => {
+    downloadAndCacheImages();
+    setInterval(downloadAndCacheImages, CACHE_PERIOD);
+  }, CACHE_DELAY);
+
+  // Busca textos Wikipedia — inicia 15 min após boot (após primeiras imagens cached)
+  const WIKI_DELAY  = 15 * 60 * 1000;
+  const WIKI_PERIOD =  8 * 60 * 1000;
+  setTimeout(() => {
+    fetchWikipediaSummaries();
+    setInterval(fetchWikipediaSummaries, WIKI_PERIOD);
+  }, WIKI_DELAY);
 
   app.listen(PORT, () => {
     console.log(`
