@@ -396,7 +396,7 @@ function AlaBtn({ name, ala, active, onClick }) {
 }
 
 // ─── Card de obra ─────────────────────────────────────────────────────────────
-function Card({ art, onAdd, onRemove, inCollection, onNavigate, t }) {
+function Card({ art, onAdd, onRemove, inCollection, onNavigate, t, lang="fr" }) {
   const [open,setOpen]    = useState(false);
   const [imgErr,setImgErr]= useState(false);
   const [imgOk,setImgOk]  = useState(false);
@@ -443,19 +443,24 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, t }) {
           <div style={{ borderTop:"1px solid #f0ece4", paddingTop:9, display:"flex", flexDirection:"column", gap:5 }}>
             {art.dimensions&&<p style={{ margin:0, fontSize:10.5, color:"#bbb", fontFamily:"monospace" }}>{art.dimensions}</p>}
             {art.description&&<p style={{ margin:0, fontSize:13, color:"#444", lineHeight:1.65, fontFamily:"'Cormorant Garamond',serif" }}>{art.description}</p>}
-            {/* Texto Wikipedia no idioma selecionado */}
-            {art.wiki?.[lang]&&(
-              <div style={{ borderLeft:"2px solid #c4a46c", paddingLeft:8, margin:"4px 0" }}>
-                <p style={{ margin:0, fontSize:12.5, color:"#555", lineHeight:1.65,
-                  fontFamily:"'Cormorant Garamond',serif", fontStyle:"italic" }}>
-                  {art.wiki[lang]}
-                </p>
-                <p style={{ margin:"4px 0 0", fontSize:9, color:"#bbb",
-                  fontFamily:"Verdana,sans-serif", letterSpacing:1 }}>
-                  FONTE: WIKIPEDIA ({lang.toUpperCase()}) · CC BY-SA
-                </p>
-              </div>
-            )}
+            {/* Texto Wikipedia — idioma seleccionado com fallback para inglês */}
+            {art.wiki&&(art.wiki[lang||"fr"]||art.wiki.en||art.wiki.fr)&&(()=>{
+              const wLang = (lang&&art.wiki[lang]) ? lang : (art.wiki.en?"en":(art.wiki.fr?"fr":(art.wiki.es?"es":"it")));
+              const wText = art.wiki[wLang];
+              if (!wText) return null;
+              return (
+                <div style={{ borderLeft:"2px solid #c4a46c", paddingLeft:8, margin:"4px 0" }}>
+                  <p style={{ margin:0, fontSize:12.5, color:"#555", lineHeight:1.65,
+                    fontFamily:"'Cormorant Garamond',serif", fontStyle:"italic" }}>
+                    {wText}
+                  </p>
+                  <p style={{ margin:"4px 0 0", fontSize:9, color:"#bbb",
+                    fontFamily:"Verdana,sans-serif", letterSpacing:1 }}>
+                    FONTE: WIKIPEDIA ({wLang.toUpperCase()}) · CC BY-SA
+                  </p>
+                </div>
+              );
+            })()}
             {art.credit&&<p style={{ margin:0, fontSize:10, color:"#ccc", fontStyle:"italic" }}>{art.credit}</p>}
             {art.externalUrl&&<a href={art.externalUrl} target="_blank" rel="noreferrer" style={{ color:"#1a3a6e", fontSize:11, fontFamily:"monospace" }}>{t.wikiLink}</a>}
             {onNavigate&&(
@@ -701,7 +706,7 @@ export default function App() {
 
             {results.length>0&&(
               <div className="artworks-grid" style={{ display:"grid",gap:18 }}>
-                {results.map(a=><Card key={a.id} art={a} onAdd={add} inCollection={ids.has(a.id)} onNavigate={navigate} t={t}/>)}
+                {results.map(a=><Card key={a.id} art={a} lang={lang} onAdd={add} inCollection={ids.has(a.id)} onNavigate={navigate} t={t}/>)}
               </div>
             )}
 
@@ -737,7 +742,7 @@ export default function App() {
               :<>
                   <p style={{ fontSize:10,color:"#bbb",fontFamily:"Verdana,sans-serif",marginBottom:16 }}>{t.artworks(filtered.length)}</p>
                   <div className="artworks-grid" style={{ display:"grid",gap:18 }}>
-                    {filtered.map(a=><Card key={a.id} art={a} onRemove={remove} onNavigate={navigate} t={t}/>)}
+                    {filtered.map(a=><Card key={a.id} art={a} lang={lang} onRemove={remove} onNavigate={navigate} t={t}/>)}
                   </div>
                 </>
             }
