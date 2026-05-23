@@ -665,6 +665,199 @@ initDB().then(async () => {
     fetchWikipediaSummaries();
     setInterval(fetchWikipediaSummaries, WIKI_PERIOD);
   }, WIKI_DELAY);
+// ─────────────────────────────────────────────────────────────────────────────
+// ADICIONAR ao server.js — página de diagnóstico em /banco
+// Colocar ANTES da linha:  app.use(express.static(...))
+// ou antes do app.listen(...)
+// ─────────────────────────────────────────────────────────────────────────────
+
+app.get("/banco", async (req, res) => {
+  try {
+    // ── Stats por ala e source ────────────────────────────────────────────────
+    const statsAla = await pool.query(`
+      SELECT
+        ala_id,
+        source,
+        COUNT(*)                                          AS total,
+        COUNT(*) FILTER (WHERE image_url IS NOT NULL
+                           AND image_url != '')           AS com_url,
+        COUNT(*) FILTER (WHERE image_cached_at > 0)      AS com_cache,
+        COUNT(*) FILTER (WHERE image_url IS NULL
+                            OR image_url = '')            AS sem_imagem
+      FROM artworks
+      GROUP BY ala_id, source
+      ORDER BY ala_id, source
+    `);
+
+    // ── Total geral ───────────────────────────────────────────────────────────
+    const totais = await pool.query(`
+      SELECT
+        COUNT(*)                                           AS total,
+        COUNT(*) FILTER (WHERE image_url IS NOT NULL
+                           AND image_url != '')            AS com_url,
+        COUNT(*) FILTER (WHERE image_cached_at > 0)       AS com_cache,
+        COUNT(*) FILTER (WHERE image_url IS NULL
+                            OR image_url = '')             AS sem_imagem,
+        COUNT(DISTINCT artist)                             AS artistas,
+        COUNT(DISTINCT ala_id)                             AS alas
+      FROM artworks
+    `);
+
+    // ── Últimas 30 obras indexadas ────────────────────────────────────────────
+    const recentes = await pool.query(`
+      SELECT id, source, title, artist, ala_id,
+             image_url IS NOT NULL AND image_url != '' AS tem_url,
+             image_cached_at > 0                        AS tem_cache,
+             to_timestamp(indexed_at)::TEXT             AS quando
+      FROM artworks
+      ORDER BY indexed_at DESC
+      LIMIT 30
+    `);
+
+    // ── Obras sem imagem por ala ──────────────────────────────────────────────
+    const semImg = await pool.query(`
+      SELECT ala_id, COUNT(*) AS n
+      FROM artworks
+      WHERE image_url IS NULL OR image_url = ''
+      GROUP BY ala_id ORDER BY n DESC
+    `);
+
+    const t = totais.rows[0];
+
+    // ── HTML ──────────────────────────────────────────────────────────────────
+    const html = `<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GERMANUS.Art — Banco de Dados</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         background: #0f0f0f; color: #e0e0e0; padding: 24px; }
+  h1 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .sub { color: #888; font-size: 13px; margin-bottom: 24px; }
+  .cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+  .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px;
+          padding: 16px 20px; min-width: 130px; }
+  .card .val { font-size: 32px; font-weight: 700; color: #fff; line-height: 1; }
+  .card .lbl { font-size: 11px; color: #888; text-transform: uppercase;
+               letter-spacing: .5px; margin-top: 4px; }
+  .card.verde .val { color: #4ade80; }
+  .card.azul  .val { color: #60a5fa; }
+  .card.ambar .val { color: #fbbf24; }
+  .card.rosa  .val { color: #f472b6; }
+  h2 { font-size: 15px; font-weight: 600; color: #ccc; margin-bottom: 10px;
+       padding-bottom: 6px; border-bottom: 1px solid #2a2a2a; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 28px; }
+  th { text-align: left; padding: 8px 12px; background: #1a1a1a; color: #888;
+       font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; }
+  td { padding: 7px 12px; border-bottom: 1px solid #1e1e1e; color: #d0d0d0; }
+  tr:hover td { background: #181818; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 20px;
+          font-size: 11px; font-weight: 600; }
+  .pill.c { background: #14532d33; color: #4ade80; }
+  .pill.s { background: #78350f33; color: #fbbf24; }
+  .pill.e { background: #1e1b4b33; color: #a5b4fc; }
+  .pill.m { background: #4c1d9533; color: #c4b5fd; }
+  .bar-wrap { background: #1a1a1a; border-radius: 4px; height: 6px;
+              width: 80px; display: inline-block; vertical-align: middle; }
+  .bar { background: #4ade80; border-radius: 4px; height: 6px; }
+  .ts  { font-size: 11px; color: #555; }
+  .ok  { color: #4ade80; }
+  .nok { color: #f87171; }
+  .section { margin-bottom: 32px; }
+  @media(max-width:600px) { .cards { flex-direction: column; } }
+</style>
+</head>
+<body>
+
+<h1>GERMANUS.Art — Banco de Dados</h1>
+<div class="sub">Actualizado em: ${new Date().toLocaleString("pt-PT",{timeZone:"America/Sao_Paulo"})} (BRT)
+  &nbsp;·&nbsp; <a href="/banco" style="color:#60a5fa">↻ Actualizar</a></div>
+
+<!-- CARDS TOTAIS -->
+<div class="cards">
+  <div class="card"><div class="val">${t.total}</div><div class="lbl">Total obras</div></div>
+  <div class="card verde"><div class="val">${t.com_cache}</div><div class="lbl">Com imagem cached</div></div>
+  <div class="card azul"><div class="val">${t.com_url}</div><div class="lbl">Com URL</div></div>
+  <div class="card ambar"><div class="val">${t.sem_imagem}</div><div class="lbl">Sem imagem</div></div>
+  <div class="card rosa"><div class="val">${t.artistas}</div><div class="lbl">Artistas únicos</div></div>
+  <div class="card"><div class="val">${t.alas}</div><div class="lbl">Alas activas</div></div>
+</div>
+
+<!-- TABELA POR ALA -->
+<div class="section">
+<h2>Por ala e origem</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Ala</th><th>Origem</th><th>Total</th>
+      <th>Com URL</th><th>Cached</th><th>Sem imagem</th><th>Cobertura</th>
+    </tr>
+  </thead>
+  <tbody>
+  ${statsAla.rows.map(r => {
+    const pct = r.total > 0 ? Math.round(r.com_cache / r.total * 100) : 0;
+    const src = r.source === "curadoria" ? "c"
+              : r.source === "semeador"  ? "s"
+              : r.source === "expansao"  ? "e" : "m";
+    return `<tr>
+      <td><strong>${r.ala_id || "—"}</strong></td>
+      <td><span class="pill ${src}">${r.source}</span></td>
+      <td>${r.total}</td>
+      <td>${r.com_url}</td>
+      <td class="${r.com_cache > 0 ? "ok" : "nok"}">${r.com_cache}</td>
+      <td class="${r.sem_imagem > 0 ? "nok" : "ok"}">${r.sem_imagem}</td>
+      <td>
+        <div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>
+        &nbsp;${pct}%
+      </td>
+    </tr>`;
+  }).join("")}
+  </tbody>
+</table>
+</div>
+
+<!-- ULTIMAS 30 OBRAS -->
+<div class="section">
+<h2>Últimas 30 obras indexadas</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Título</th><th>Artista</th><th>Ala</th><th>Origem</th><th>URL</th><th>Cache</th><th>Quando</th>
+    </tr>
+  </thead>
+  <tbody>
+  ${recentes.rows.map(r => `<tr>
+    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+        title="${(r.title||"").replace(/"/g,"")}">${r.title || "—"}</td>
+    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+        title="${(r.artist||"").replace(/"/g,"")}">${r.artist || "—"}</td>
+    <td>${r.ala_id || "—"}</td>
+    <td><span class="pill ${r.source==="curadoria"?"c":r.source==="semeador"?"s":"m"}">${r.source}</span></td>
+    <td class="${r.tem_url?"ok":"nok"}">${r.tem_url ? "✓" : "✗"}</td>
+    <td class="${r.tem_cache?"ok":"nok"}">${r.tem_cache ? "✓" : "✗"}</td>
+    <td class="ts">${(r.quando||"").slice(0,16)}</td>
+  </tr>`).join("")}
+  </tbody>
+</table>
+</div>
+
+</body>
+</html>`;
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.send(html);
+  } catch (e) {
+    res.status(500).send(`<pre>Erro: ${e.message}\n${e.stack}</pre>`);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FIM DA ROTA — colocar ANTES do app.listen() no server.js
+// Aceder em: https://germanus-arts-production.up.railway.app/banco
+// ─────────────────────────────────────────────────────────────────────────────
 
   app.listen(PORT, () => {
     console.log(`
