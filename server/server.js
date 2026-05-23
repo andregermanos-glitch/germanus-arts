@@ -309,8 +309,10 @@ app.get("/api/search", async (req, res) => {
   // ── Ala selecionada → APENAS banco de dados (sem API externa durante serving) ─
   // O banco é a fonte única de verdade. APIs só são chamadas no processo de indexação.
   if (alaId) {
-    const results = await searchCuradoria(alaId, excludeIds, 18);
-    // Retorna o que o banco tem — mesmo que vazio (a ala ainda não foi indexada)
+    // Limite alto para curadoria — ver tudo o que está no banco por ala
+    // Em produção futura reduzir para 18 para rotatividade
+    const limit = parseInt(req.query.limit) || 500;
+    const results = await searchCuradoria(alaId, excludeIds, limit);
     return res.json({
       source: "database",
       total:  results.length,
@@ -498,7 +500,18 @@ async function downloadAndCacheImages() {
 
         const buf  = await res.arrayBuffer();
         const size = buf.byteLength;
-        if (size < 2000) continue;   // descarta imagens < 2 KB (placeholders)
+        if (size < 5000) continue;   // descarta imagens < 5 KB (placeholders/ícones)
+
+        // Verificar magic bytes — confirmar que é realmente uma imagem
+        const bytes = new Uint8Array(buf.slice(0, 4));
+        const isJPEG = bytes[0]===0xFF && bytes[1]===0xD8;
+        const isPNG  = bytes[0]===0x89 && bytes[1]===0x50;
+        const isWEBP = bytes[0]===0x52 && bytes[1]===0x49;
+        const isGIF  = bytes[0]===0x47 && bytes[1]===0x49;
+        if (!isJPEG && !isPNG && !isWEBP && !isGIF) {
+          console.log(`  ⚠ Ignorado (não é imagem): ${row.id}`);
+          continue;
+        }
 
         await pool.query(
           `UPDATE artworks
