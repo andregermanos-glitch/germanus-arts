@@ -57,7 +57,9 @@ async function initDB() {
     ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_fr         TEXT   DEFAULT NULL;
     ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_es         TEXT   DEFAULT NULL;
     ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_it         TEXT   DEFAULT NULL;
-    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_fetched_at BIGINT DEFAULT 0;
+    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_fetched_at    BIGINT DEFAULT 0;
+    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS download_attempts  INT    DEFAULT 0;
+    ALTER TABLE artworks ADD COLUMN IF NOT EXISTS last_attempt_at   BIGINT DEFAULT 0;
     CREATE TABLE IF NOT EXISTS search_cache (
       cache_key TEXT PRIMARY KEY, data TEXT NOT NULL,
       ts BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
@@ -478,7 +480,8 @@ async function downloadAndCacheImages() {
       `SELECT id, image_url, image_mime FROM artworks
        WHERE image_url IS NOT NULL AND image_url != ''
          AND (image_data IS NULL OR image_cached_at = 0)
-       ORDER BY indexed_at DESC
+         AND (download_attempts IS NULL OR download_attempts < 3)
+       ORDER BY RANDOM()
        LIMIT $1`,
       [CACHE_BATCH]
     );
