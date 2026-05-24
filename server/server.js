@@ -1,4 +1,4 @@
-// server/server.js — Germanus.Art Backend (versão final com Psyché)
+// server/server.js — Germanus.Art Backend (versão final com curadoria manual)
 require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 const express  = require("express");
 const cors     = require("cors");
@@ -283,11 +283,11 @@ async function initDB() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🚀 ROTAS DA API
+// 🚀 ROTAS DE CURADORIA MANUAL (CARREGAR OBRAS VIA JSON)
 // ═══════════════════════════════════════════════════════════════════════════
 
-// CARREGAR OBRAS SURREALISTAS DO psyche.json
-app.get("/api/psyche/carregar", async (req, res) => {
+// Carregar obras do psyche.json (Surrealismo/Psyché)
+app.get("/api/carregar/psyche", async (req, res) => {
   try {
     const psychePath = path.join(__dirname, "psyche.json");
     
@@ -301,39 +301,114 @@ app.get("/api/psyche/carregar", async (req, res) => {
     
     for (const obra of obras) {
       try {
-        const id = `psyche_${obra.api_id || obra.titulo.replace(/[^a-z0-9]/gi, '_').toLowerCase()}`;
+        const id = `psyche_${obra.api_id || obra.titulo?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || Date.now()}`;
         
         await pool.query(`
           INSERT INTO artworks (id, source, title, artist, date, museum, image_url, ala_id, credit)
-          VALUES ($1, 'curadoria', $2, $3, $4, $5, $6, $7, 'Curadoria Germanus.Art - Obras Surrealistas')
+          VALUES ($1, 'curadoria_manual', $2, $3, $4, $5, $6, 'fase', 'Curadoria manual - Obras Surrealistas')
           ON CONFLICT (id) DO UPDATE SET 
             title = EXCLUDED.title,
             artist = EXCLUDED.artist,
             image_url = EXCLUDED.image_url
-        `, [id, obra.titulo, obra.artista, obra.ano || "", obra.museu || "", obra.imageUrl, obra.ala || "fase"]);
+        `, [id, obra.titulo, obra.artista, obra.ano || "", obra.museu || "", obra.imageUrl]);
         
         adicionadas++;
         console.log(`  ✓ ${obra.titulo} - ${obra.artista}`);
         
       } catch(e) {
         erros++;
-        console.log(`  ✗ Erro ao adicionar ${obra.titulo}: ${e.message}`);
+        console.log(`  ✗ Erro: ${e.message}`);
       }
       await new Promise(r => setTimeout(r, 100));
     }
     
-    res.json({ 
-      ok: true, 
-      adicionadas, 
-      erros,
-      mensagem: `${adicionadas} obras surrealistas adicionadas à ala Psyché!`
-    });
+    res.json({ ok: true, adicionadas, erros, mensagem: `${adicionadas} obras adicionadas à Psyché!` });
     
   } catch(e) {
-    console.error("[psyche/carregar]", e.message);
+    console.error("[carregar/psyche]", e.message);
     res.status(500).json({ error: e.message });
   }
 });
+
+// Carregar obras do mestres.json (Obras-primas gerais)
+app.get("/api/carregar/mestres", async (req, res) => {
+  try {
+    const mestresPath = path.join(__dirname, "mestres.json");
+    
+    if (!fs.existsSync(mestresPath)) {
+      return res.status(404).json({ error: "Arquivo mestres.json não encontrado" });
+    }
+    
+    const obras = JSON.parse(fs.readFileSync(mestresPath, "utf-8"));
+    let adicionadas = 0;
+    let erros = 0;
+    
+    for (const obra of obras) {
+      try {
+        const id = `mestre_${obra.titulo?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || Date.now()}`;
+        const ala = obra.ala || "retratos";
+        
+        await pool.query(`
+          INSERT INTO artworks (id, source, title, artist, date, museum, image_url, ala_id, credit)
+          VALUES ($1, 'curadoria_manual', $2, $3, $4, $5, $6, $7, 'Curadoria manual - Obras-primas')
+          ON CONFLICT (id) DO UPDATE SET 
+            title = EXCLUDED.title,
+            artist = EXCLUDED.artist,
+            image_url = EXCLUDED.image_url
+        `, [id, obra.titulo, obra.artista, obra.ano || "", obra.museu || "", obra.imageUrl, ala]);
+        
+        adicionadas++;
+        console.log(`  ✓ ${obra.titulo} - ${obra.artista} (${ala})`);
+        
+      } catch(e) {
+        erros++;
+        console.log(`  ✗ Erro: ${e.message}`);
+      }
+      await new Promise(r => setTimeout(r, 100));
+    }
+    
+    res.json({ ok: true, adicionadas, erros, mensagem: `${adicionadas} obras-primas adicionadas!` });
+    
+  } catch(e) {
+    console.error("[carregar/mestres]", e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Rota genérica para carregar qualquer JSON
+app.get("/api/carregar/:nome", async (req, res) => {
+  try {
+    const nome = req.params.nome;
+    const filePath = path.join(__dirname, `${nome}.json`);
+    
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: `Arquivo ${nome}.json não encontrado` });
+    }
+    
+    const obras = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    let adicionadas = 0;
+    
+    for (const obra of obras) {
+      const id = `manual_${obra.titulo?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || Date.now()}_${Date.now()}`;
+      const ala = obra.ala || "geral";
+      
+      await pool.query(`
+        INSERT INTO artworks (id, source, title, artist, date, museum, image_url, ala_id)
+        VALUES ($1, 'curadoria_manual', $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (id) DO NOTHING
+      `, [id, obra.titulo, obra.artista, obra.ano || "", obra.museu || "", obra.imageUrl, ala]);
+      adicionadas++;
+    }
+    
+    res.json({ ok: true, arquivo: nome, adicionadas });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🚀 ROTAS DA API
+// ═══════════════════════════════════════════════════════════════════════════
 
 // Status
 app.get("/api/status", async (req, res) => {
@@ -346,19 +421,13 @@ app.get("/api/status", async (req, res) => {
 app.get("/api/search", async (req, res) => {
   const { q, alaId, exclude, limit = 50 } = req.query;
   
-  // Alias para psyche -> fase
   const finalAlaId = (alaId === "psyche") ? "fase" : alaId;
   
   if (finalAlaId) {
     try {
       const excludeIds = exclude ? exclude.split(",").filter(Boolean) : [];
       const results = await searchCuradoria(finalAlaId, excludeIds, parseInt(limit));
-      return res.json({ 
-        source: "database", 
-        total: results.length, 
-        results,
-        ala: finalAlaId
-      });
+      return res.json({ source: "database", total: results.length, results, ala: finalAlaId });
     } catch(e) {
       return res.status(500).json({ error: e.message });
     }
@@ -385,7 +454,7 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-// Expandir ala
+// Expandir ala (API externa)
 app.post("/api/curadoria/expandir", async (req, res) => {
   const ala = req.query.ala || req.body?.ala || "retratos";
   const n = parseInt(req.query.n || req.body?.n || "30");
@@ -502,6 +571,24 @@ app.get("/api/semeador/agora", async (req, res) => {
   }
 });
 
+// Status detalhado do cache
+app.get("/api/cache/detalhado", async (req, res) => {
+  try {
+    const r = await pool.query(`
+      SELECT 
+        COUNT(*) as total_obras,
+        COUNT(*) FILTER (WHERE image_cached_at > 0) as imagens_cache,
+        COUNT(*) FILTER (WHERE image_url IS NOT NULL AND image_url != '' AND image_cached_at = 0) as imagens_pendentes,
+        COUNT(*) FILTER (WHERE download_attempts >= 3) as imagens_falhas
+      FROM artworks
+      WHERE image_url IS NOT NULL AND image_url != ''
+    `);
+    res.json(r.rows[0]);
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Rota de diagnóstico
 app.get("/banco", async (req, res) => {
   try {
@@ -527,7 +614,12 @@ app.get("/banco", async (req, res) => {
 <tr><th>Ala</th><th>Fonte</th><th>Obras</th></tr>
 ${alas.rows.map(r => `<tr><td>${r.ala_id || 'sem ala'}</td><td>${r.source}</td><td>${r.n}</td></tr>`).join('')}
 </table>
-<p><a href="/">← Voltar ao site</a> | <a href="/api/cache/forcar?limit=200">Forçar cache</a> | <a href="/api/psyche/carregar">Carregar Psyché</a></p>
+<p>
+  <a href="/">← Voltar ao site</a> | 
+  <a href="/api/cache/forcar?limit=200">Forçar cache</a> |
+  <a href="/api/carregar/psyche">Carregar Psyché</a> |
+  <a href="/api/carregar/mestres">Carregar Mestres</a>
+</p>
 </body>
 </html>`;
     res.send(html);
@@ -553,19 +645,18 @@ async function start() {
   console.log("🌱 Iniciando semeador...");
   iniciarSemeador(pool);
   
-  // Cache de imagens
   setTimeout(() => {
     downloadAndCacheImages();
     setInterval(downloadAndCacheImages, CACHE_PERIOD);
   }, CACHE_DELAY);
   
-  // Limpeza
   setInterval(validateAndCleanImages, CLEANUP_PERIOD);
   
   app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
     console.log(`📊 Banco: /banco`);
-    console.log(`🎨 Psyché: /api/psyche/carregar`);
+    console.log(`🎨 Carregar Psyché: /api/carregar/psyche`);
+    console.log(`🎨 Carregar Mestres: /api/carregar/mestres`);
   });
 }
 
