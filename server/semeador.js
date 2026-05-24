@@ -1,26 +1,46 @@
-// server/semeador.js — Semeador de Obras em Massa
-// Lê sementes.json → busca até 8 obras por artista no Met, AIC e Cleveland
-// Corre em background, 1 artista de cada vez, com pausa entre pedidos
-// Meta: ~2880 obras no banco ao longo de 24h
-
+// server/semeador.js — Semeador de Obras em Massa (corrigido - sem HTTP 403)
 const fs   = require("fs");
 const path = require("path");
 
 const SEMENTES_PATH = path.join(__dirname, "sementes.json");
-const MAX_POR_ARTISTA = 8;   // obras máximas por artista
-const PAUSA_MS = 800;         // ms entre pedidos à API
-const CICLO_H  = 12;          // re-corre a cada 12h (apanha artistas ainda sem obras)
+const MAX_POR_ARTISTA = 8;
+const PAUSA_MS = 1500;        // AUMENTADO: 800 -> 1500ms (evita bloqueio)
+const CICLO_H  = 12;
 
-// ─── HTTP helper ──────────────────────────────────────────────────────────────
-const get = async (url, headers = {}) => {
-  const r = await fetch(url, { signal: AbortSignal.timeout(10000), headers });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
+// ─── Headers para evitar bloqueio ────────────────────────────────────────────
+const HEADERS = {
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  "Accept": "application/json",
+  "Accept-Language": "en-US,en;q=0.9",
+  "Accept-Encoding": "gzip, deflate, br"
+};
+
+// ─── HTTP helper com headers e retry ─────────────────────────────────────────
+const get = async (url, headers = {}, tentativa = 1) => {
+  try {
+    const r = await fetch(url, { 
+      signal: AbortSignal.timeout(15000), 
+      headers: { ...HEADERS, ...headers }
+    });
+    if (r.status === 403 && tentativa < 3) {
+      console.log(`    ⚠ HTTP 403, tentando novamente em 2s... (${tentativa}/3)`);
+      await sleep(2000);
+      return get(url, headers, tentativa + 1);
+    }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  } catch(e) {
+    if (tentativa < 3) {
+      await sleep(2000);
+      return get(url, headers, tentativa + 1);
+    }
+    throw e;
+  }
 };
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-// ─── Normalizar texto para comparação ─────────────────────────────────────────
+// ─── Normalizar texto ────────────────────────────────────────────────────────
 function norm(s) {
   return (s || "").toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -33,7 +53,7 @@ function artistaCorresponde(esperado, encontrado) {
   return palavras.some(p => n.includes(p));
 }
 
-// ─── Met Museum ───────────────────────────────────────────────────────────────
+// ─── Met Museum (com retry e fallback) ───────────────────────────────────────
 async function buscarMet(artista, maxN) {
   const resultados = [];
   try {
@@ -41,7 +61,7 @@ async function buscarMet(artista, maxN) {
     const s = await get(
       `https://collectionapi.metmuseum.org/public/collection/v1/search?hasImages=true&q=${q}`
     );
-    const ids = (s.objectIDs || []).slice(0, maxN * 3);
+    const ids = (s.objectIDs || []).slice(0, maxN * 4);
 
     for (const id of ids) {
       if (resultados.length >= maxN) break;
@@ -51,7 +71,6 @@ async function buscarMet(artista, maxN) {
         );
         if (!d.primaryImage || !d.isPublicDomain) continue;
 
-        // Só pinturas
         const dept  = (d.department || "").toLowerCase();
         const objnm = (d.objectName || "").toLowerCase();
         const medium = (d.medium || "").toLowerCase();
@@ -61,7 +80,6 @@ async function buscarMet(artista, maxN) {
             objnm.includes("drawing") || objnm.includes("vessel") ||
             (medium.includes("bronze") && !medium.includes("oil"))) continue;
 
-        // Validar artista
         if (!artistaCorresponde(artista, d.artistDisplayName || "")) continue;
 
         resultados.push({
@@ -73,16 +91,18 @@ async function buscarMet(artista, maxN) {
           api_id:   `met_${id}`,
           met_id:   id,
         });
-        await sleep(150);
-      } catch {}
+        await sleep(250);
+      } catch (e) {
+        if (!e.message?.includes("403")) console.log(`      [Met] erro: ${e.message}`);
+      }
     }
   } catch (e) {
-    console.log(`    [Met] ${artista}: ${e.message}`);
+    if (!e.message?.includes("403")) console.log(`    [Met] ${artista}: ${e.message}`);
   }
   return resultados;
 }
 
-// ─── Art Institute of Chicago ──────────────────────────────────────────────────
+// ─── Art Institute of Chicago ─────────────────────────────────────────────────
 async function buscarAIC(artista, maxN) {
   const resultados = [];
   try {
@@ -109,6 +129,7 @@ async function buscarAIC(artista, maxN) {
         api_id:   `aic_${obj.id}`,
         aic_id:   obj.id,
       });
+      await sleep(150);
     }
   } catch (e) {
     console.log(`    [AIC] ${artista}: ${e.message}`);
@@ -116,7 +137,7 @@ async function buscarAIC(artista, maxN) {
   return resultados;
 }
 
-// ─── Cleveland Museum of Art ───────────────────────────────────────────────────
+// ─── Cleveland Museum of Art ──────────────────────────────────────────────────
 async function buscarCleveland(artista, maxN) {
   const resultados = [];
   try {
@@ -138,6 +159,7 @@ async function buscarCleveland(artista, maxN) {
         date:     obj.creation_date || "",
         api_id:   `cle_${obj.id}`,
       });
+      await sleep(150);
     }
   } catch (e) {
     console.log(`    [Cle] ${artista}: ${e.message}`);
@@ -145,7 +167,7 @@ async function buscarCleveland(artista, maxN) {
   return resultados;
 }
 
-// ─── Gravar obra no banco ──────────────────────────────────────────────────────
+// ─── Gravar obra no banco ─────────────────────────────────────────────────────
 async function gravar(pool, obra, ala) {
   const { imageUrl, museum, title, artist, date, api_id } = obra;
   if (!imageUrl || !title || !artist) return false;
@@ -165,20 +187,20 @@ async function gravar(pool, obra, ala) {
   } catch { return false; }
 }
 
-// ─── Verificar se artista já foi semeado ──────────────────────────────────────
+// ─── Verificar se artista já foi semeado ─────────────────────────────────────
 async function artistaJaSemeado(pool, artista, ala) {
   try {
     const r = await pool.query(
       `SELECT COUNT(*) AS n FROM artworks
         WHERE ala_id = $1 AND source = 'semeador'
           AND artist ILIKE $2`,
-      [ala, `%${artista.split(" ").slice(-1)[0]}%`]  // apelido do artista
+      [ala, `%${artista.split(" ").slice(-1)[0]}%`]
     );
-    return parseInt(r.rows[0].n, 10) >= 3;  // se já tem ≥3 obras deste artista, skip
+    return parseInt(r.rows[0].n, 10) >= 3;
   } catch { return false; }
 }
 
-// ─── Semear um artista ────────────────────────────────────────────────────────
+// ─── Semear um artista ───────────────────────────────────────────────────────
 async function semearArtista(pool, artista, ala) {
   const jaFeito = await artistaJaSemeado(pool, artista, ala);
   if (jaFeito) return 0;
@@ -186,38 +208,34 @@ async function semearArtista(pool, artista, ala) {
   let ok = 0;
   const metade = Math.ceil(MAX_POR_ARTISTA / 2);
 
-  // Met: metade das obras
   const met = await buscarMet(artista, metade);
   for (const obra of met) {
     if (await gravar(pool, obra, ala)) ok++;
-    await sleep(100);
+    await sleep(150);
   }
 
-  // AIC: outra metade
   const aic = await buscarAIC(artista, metade);
   for (const obra of aic) {
     if (await gravar(pool, obra, ala)) ok++;
-    await sleep(100);
+    await sleep(150);
   }
 
-  // Cleveland: se ainda faltam obras
   if (ok < 3) {
     const cle = await buscarCleveland(artista, 3);
     for (const obra of cle) {
       if (await gravar(pool, obra, ala)) ok++;
-      await sleep(100);
+      await sleep(150);
     }
   }
 
   return ok;
 }
 
-// ─── Loop principal ───────────────────────────────────────────────────────────
+// ─── Loop principal ──────────────────────────────────────────────────────────
 async function correrCiclo(pool) {
   const sementes = JSON.parse(fs.readFileSync(SEMENTES_PATH, "utf-8"));
   let totalNovo = 0;
 
-  // Contar obras actuais no banco
   const antes = await pool.query(
     `SELECT COUNT(*) AS n FROM artworks WHERE source IN ('curadoria','semeador','expansao')`
   );
@@ -244,24 +262,22 @@ async function correrCiclo(pool) {
   console.log(`🌱 Semeador concluído — ${nDepois} obras no banco (+${nDepois - nAntes} novas)`);
 }
 
-// ─── Exportar função de arranque ──────────────────────────────────────────────
+// ─── Exportar ─────────────────────────────────────────────────────────────────
 async function iniciarSemeador(pool) {
-  // Primeira corrida: aguarda 30s após o servidor arrancar (deixa curadoria terminar)
   setTimeout(async () => {
     try { await correrCiclo(pool); } catch (e) {
       console.log(`🌱 Semeador erro: ${e.message}`);
     }
 
-    // Ciclos seguintes: a cada CICLO_H horas
     setInterval(async () => {
       try { await correrCiclo(pool); } catch (e) {
         console.log(`🌱 Semeador erro: ${e.message}`);
       }
     }, CICLO_H * 3600 * 1000);
 
-  }, 30 * 1000);
+  }, 60 * 1000); // Aumentado: 30s -> 60s
 
-  console.log(`🌱 Semeador agendado — primeira corrida em 30s, depois a cada ${CICLO_H}h`);
+  console.log(`🌱 Semeador agendado — primeira corrida em 60s, depois a cada ${CICLO_H}h`);
 }
 
-module.exports = { iniciarSemeador };
+module.exports = { iniciarSemeador, semearArtista };
