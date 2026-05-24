@@ -3,45 +3,56 @@
     "titulo": "The Starry Night",
     "artista": "Vincent van Gogh",
     "ano": "1889",
-    "museu": "Museum of Modern Art, New York",
-    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1024px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+    "museu": "MoMA New York",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/800px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
     "ala": "natureza"
   },
   {
     "titulo": "Mona Lisa",
     "artista": "Leonardo da Vinci",
-    "ano": "1503-1519",
-    "museu": "Louvre, Paris",
-    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/1024px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
+    "ano": "1503",
+    "museu": "Louvre Paris",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/800px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
     "ala": "retratos"
   },
   {
     "titulo": "The Scream",
     "artista": "Edvard Munch",
     "ano": "1893",
-    "museu": "National Gallery, Oslo",
-    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg/1024px-Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg",
+    "museu": "National Gallery Oslo",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg/800px-Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg",
     "ala": "fase"
   },
   {
     "titulo": "Girl with a Pearl Earring",
     "artista": "Johannes Vermeer",
     "ano": "1665",
-    "museu": "Mauritshuis, The Hague",
-    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/1024px-Meisje_met_de_parel.jpg",
+    "museu": "Mauritshuis The Hague",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/800px-Meisje_met_de_parel.jpg",
     "ala": "retratos"
   },
   {
     "titulo": "The Persistence of Memory",
     "artista": "Salvador Dali",
     "ano": "1931",
-    "museu": "MoMA, New York",
-    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/The_Persistence_of_Memory.jpg/1024px-The_Persistence_of_Memory.jpg",
+    "museu": "MoMA New York",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/The_Persistence_of_Memory.jpg/800px-The_Persistence_of_Memory.jpg",
     "ala": "fase"
   },
   {
     "titulo": "The Night Watch",
     "artista": "Rembrandt van Rijn",
     "ano": "1642",
-    "museu": "Rijksmuseum, Amsterdam",
-    "imageUrl
+    "museu": "Rijksmuseum Amsterdam",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/The_Night_Watch_-_HD.jpg/800px-The_Night_Watch_-_HD.jpg",
+    "ala": "historico"
+  },
+  {
+    "titulo": "Water Lilies",
+    "artista": "Claude Monet",
+    "ano": "1916",
+    "museu": "Musee de l Orangerie Paris",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Claude_Monet_-_Nymph%C3%A9as.jpg/800px-Claude_Monet_-_Nymph%C3%A9as.jpg",
+    "ala": "natureza"
+  }
+]
