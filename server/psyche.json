@@ -1,0 +1,92 @@
+[
+  {
+    "ala": "fase",
+    "titulo": "The Persistence of Memory",
+    "artista": "Salvador Dali",
+    "ano": "1931",
+    "museu": "Museum of Modern Art, New York",
+    "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DP-20134-001.jpg",
+    "api_id": "dali_persistence"
+  },
+  {
+    "ala": "fase",
+    "titulo": "The Son of Man",
+    "artista": "Rene Magritte",
+    "ano": "1964",
+    "museu": "Private Collection",
+    "imageUrl": "https://uploads5.wikiart.org/images/rene-magritte/the-son-of-man.jpg",
+    "api_id": "magritte_son_of_man"
+  },
+  {
+    "ala": "fase",
+    "titulo": "The Treachery of Images (Ceci n'est pas une pipe)",
+    "artista": "Rene Magritte",
+    "ano": "1929",
+    "museu": "LACMA, Los Angeles",
+    "imageUrl": "https://cdn.britannica.com/92/192592-050-2B7A6C65/Rene-Magritte-The-Treachery-of-Images-1929.jpg",
+    "api_id": "magritte_treachery"
+  },
+  {
+    "ala": "fase",
+    "titulo": "The Elephants",
+    "artista": "Salvador Dali",
+    "ano": "1948",
+    "museu": "Private Collection",
+    "imageUrl": "https://www.salvadordali.com/images/paintings/1948-the-elephants.jpg",
+    "api_id": "dali_elephants"
+  },
+  {
+    "ala": "fase",
+    "titulo": "Golconda",
+    "artista": "Rene Magritte",
+    "ano": "1953",
+    "museu": "Menil Collection, Houston",
+    "imageUrl": "https://cdn.britannica.com/44/193444-050-858AF747/Rene-Magritte-Golconda-1953.jpg",
+    "api_id": "magritte_golconda"
+  },
+  {
+    "ala": "fase",
+    "titulo": "The Great Masturbator",
+    "artista": "Salvador Dali",
+    "ano": "1929",
+    "museu": "Reina Sofia, Madrid",
+    "imageUrl": "https://www.salvadordali.com/images/paintings/1929-the-great-masturbator.jpg",
+    "api_id": "dali_masturbator"
+  },
+  {
+    "ala": "fase",
+    "titulo": "The Lovers",
+    "artista": "Rene Magritte",
+    "ano": "1928",
+    "museu": "MoMA, New York",
+    "imageUrl": "https://www.moma.org/media/W1siZiIsIjMxNzU1OCJd.jpg",
+    "api_id": "magritte_lovers"
+  },
+  {
+    "ala": "fase",
+    "titulo": "Swans Reflecting Elephants",
+    "artista": "Salvador Dali",
+    "ano": "1937",
+    "museu": "Private Collection",
+    "imageUrl": "https://www.salvadordali.com/images/paintings/1937-swans-reflecting-elephants.jpg",
+    "api_id": "dali_swans"
+  },
+  {
+    "ala": "fase",
+    "titulo": "The Human Condition",
+    "artista": "Rene Magritte",
+    "ano": "1933",
+    "museu": "National Gallery of Art, Washington",
+    "imageUrl": "https://www.nga.gov/collection/art-object-page.69436.html",
+    "api_id": "magritte_human_condition"
+  },
+  {
+    "ala": "fase",
+    "titulo": "The Temptation of St. Anthony",
+    "artista": "Salvador Dali",
+    "ano": "1946",
+    "museu": "Royal Museums of Fine Arts, Brussels",
+    "imageUrl": "https://www.salvadordali.com/images/paintings/1946-the-temptation-of-st-anthony.jpg",
+    "api_id": "dali_temptation"
+  }
+]
