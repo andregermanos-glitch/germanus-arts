@@ -1,4 +1,4 @@
-// server/server.js — Germanus.Art Backend (versão final)
+// server/server.js — Germanus.Art Backend (versão final com Psyché)
 require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 const express  = require("express");
 const cors     = require("cors");
@@ -79,7 +79,6 @@ const CACHE_TTL = 300000;
 const CACHE_BATCH = 50;
 const CACHE_DELAY = 60 * 1000;
 const CACHE_PERIOD = 2 * 60 * 1000;
-const CLEANUP_BATCH = 100;
 const CLEANUP_DELAY = 5 * 60 * 1000;
 const CLEANUP_PERIOD = 24 * 60 * 60 * 1000;
 
@@ -287,6 +286,55 @@ async function initDB() {
 // 🚀 ROTAS DA API
 // ═══════════════════════════════════════════════════════════════════════════
 
+// CARREGAR OBRAS SURREALISTAS DO psyche.json
+app.get("/api/psyche/carregar", async (req, res) => {
+  try {
+    const psychePath = path.join(__dirname, "psyche.json");
+    
+    if (!fs.existsSync(psychePath)) {
+      return res.status(404).json({ error: "Arquivo psyche.json não encontrado" });
+    }
+    
+    const obras = JSON.parse(fs.readFileSync(psychePath, "utf-8"));
+    let adicionadas = 0;
+    let erros = 0;
+    
+    for (const obra of obras) {
+      try {
+        const id = `psyche_${obra.api_id || obra.titulo.replace(/[^a-z0-9]/gi, '_').toLowerCase()}`;
+        
+        await pool.query(`
+          INSERT INTO artworks (id, source, title, artist, date, museum, image_url, ala_id, credit)
+          VALUES ($1, 'curadoria', $2, $3, $4, $5, $6, $7, 'Curadoria Germanus.Art - Obras Surrealistas')
+          ON CONFLICT (id) DO UPDATE SET 
+            title = EXCLUDED.title,
+            artist = EXCLUDED.artist,
+            image_url = EXCLUDED.image_url
+        `, [id, obra.titulo, obra.artista, obra.ano || "", obra.museu || "", obra.imageUrl, obra.ala || "fase"]);
+        
+        adicionadas++;
+        console.log(`  ✓ ${obra.titulo} - ${obra.artista}`);
+        
+      } catch(e) {
+        erros++;
+        console.log(`  ✗ Erro ao adicionar ${obra.titulo}: ${e.message}`);
+      }
+      await new Promise(r => setTimeout(r, 100));
+    }
+    
+    res.json({ 
+      ok: true, 
+      adicionadas, 
+      erros,
+      mensagem: `${adicionadas} obras surrealistas adicionadas à ala Psyché!`
+    });
+    
+  } catch(e) {
+    console.error("[psyche/carregar]", e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Status
 app.get("/api/status", async (req, res) => {
   let artCount = 0;
@@ -294,29 +342,29 @@ app.get("/api/status", async (req, res) => {
   res.json({ status: "online", artworks_indexed: artCount });
 });
 
-// Busca principal (usada pelo frontend)
+// Busca principal
 app.get("/api/search", async (req, res) => {
   const { q, alaId, exclude, limit = 50 } = req.query;
   
-  // Se tem alaId, busca obras daquela ala
-  if (alaId) {
+  // Alias para psyche -> fase
+  const finalAlaId = (alaId === "psyche") ? "fase" : alaId;
+  
+  if (finalAlaId) {
     try {
       const excludeIds = exclude ? exclude.split(",").filter(Boolean) : [];
-      const results = await searchCuradoria(alaId, excludeIds, parseInt(limit));
+      const results = await searchCuradoria(finalAlaId, excludeIds, parseInt(limit));
       return res.json({ 
         source: "database", 
         total: results.length, 
         results,
-        ala: alaId
+        ala: finalAlaId
       });
     } catch(e) {
       return res.status(500).json({ error: e.message });
     }
   }
   
-  // Busca por texto
   if (!q?.trim()) {
-    // Sem query, retorna obras aleatórias
     try {
       const r = await pool.query(`
         SELECT * FROM artworks 
@@ -329,7 +377,6 @@ app.get("/api/search", async (req, res) => {
     }
   }
   
-  // Busca por texto
   try {
     const results = await searchLocal(q, null, parseInt(limit));
     res.json({ source: "database", total: results.length, results });
@@ -338,7 +385,7 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-// Expandir ala (adicionar mais obras)
+// Expandir ala
 app.post("/api/curadoria/expandir", async (req, res) => {
   const ala = req.query.ala || req.body?.ala || "retratos";
   const n = parseInt(req.query.n || req.body?.n || "30");
@@ -437,6 +484,24 @@ app.get("/api/cache/forcar", async (req, res) => {
   }
 });
 
+// Forçar Semeador
+app.get("/api/semeador/agora", async (req, res) => {
+  try {
+    const sementes = JSON.parse(fs.readFileSync(path.join(__dirname, "sementes.json"), "utf-8"));
+    let total = 0;
+    for (const [ala, artistas] of Object.entries(sementes)) {
+      for (const artista of artistas) {
+        const n = await semearArtista(pool, artista, ala);
+        total += n;
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+    res.json({ ok: true, obras_adicionadas: total });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Rota de diagnóstico
 app.get("/banco", async (req, res) => {
   try {
@@ -458,32 +523,15 @@ app.get("/banco", async (req, res) => {
 <h1>GERMANUS.Art - Banco de Dados</h1>
 <p>Total: ${total.rows[0].total} obras | Cache: ${total.rows[0].cached} imagens</p>
 <h2>Por ala:</h2>
-<table><tr><th>Ala</th><th>Fonte</th><th>Obras</th></tr>
+<table>
+<tr><th>Ala</th><th>Fonte</th><th>Obras</th></tr>
 ${alas.rows.map(r => `<tr><td>${r.ala_id || 'sem ala'}</td><td>${r.source}</td><td>${r.n}</td></tr>`).join('')}
 </table>
-<p><a href="/">← Voltar ao site</a> | <a href="/api/cache/forcar?limit=200">Forçar cache</a></p>
+<p><a href="/">← Voltar ao site</a> | <a href="/api/cache/forcar?limit=200">Forçar cache</a> | <a href="/api/psyche/carregar">Carregar Psyché</a></p>
 </body>
 </html>`;
     res.send(html);
   } catch(e) { res.status(500).send(e.message); }
-});
-
-// Forçar Semeador
-app.get("/api/semeador/agora", async (req, res) => {
-  try {
-    const sementes = JSON.parse(fs.readFileSync(path.join(__dirname, "sementes.json"), "utf-8"));
-    let total = 0;
-    for (const [ala, artistas] of Object.entries(sementes)) {
-      for (const artista of artistas) {
-        const n = await semearArtista(pool, artista, ala);
-        total += n;
-        await new Promise(r => setTimeout(r, 1000));
-      }
-    }
-    res.json({ ok: true, obras_adicionadas: total });
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
 });
 
 // ─── Frontend estático ───────────────────────────────────────────────────────
@@ -516,7 +564,8 @@ async function start() {
   
   app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
-    console.log(`📊 Banco de dados: ${PORT === 3001 ? 'http://localhost:3001/banco' : '/banco'}`);
+    console.log(`📊 Banco: /banco`);
+    console.log(`🎨 Psyché: /api/psyche/carregar`);
   });
 }
 
