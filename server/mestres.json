@@ -1,0 +1,42 @@
+[
+  {
+    "titulo": "The Starry Night",
+    "artista": "Vincent van Gogh",
+    "ano": "1889",
+    "museu": "Museum of Modern Art, New York",
+    "imageUrl": "https://cdn.britannica.com/78/43678-050-F4F8CD6C/Starry-Night-canvas-Vincent-van-Gogh-New-1889.jpg",
+    "ala": "natureza"
+  },
+  {
+    "titulo": "Mona Lisa",
+    "artista": "Leonardo da Vinci",
+    "ano": "1503-1519",
+    "museu": "Louvre, Paris",
+    "imageUrl": "https://cdn.britannica.com/24/189624-050-F3C5BAA9/Mona-Lisa-oil-panel-Leonardo-da.jpg",
+    "ala": "retratos"
+  },
+  {
+    "titulo": "The Scream",
+    "artista": "Edvard Munch",
+    "ano": "1893",
+    "museu": "National Gallery, Oslo",
+    "imageUrl": "https://cdn.britannica.com/94/194394-050-9A96F8C5/The-Scream-oil-tempera-paper-Edvard-Munch-1893.jpg",
+    "ala": "fase"
+  },
+  {
+    "titulo": "Girl with a Pearl Earring",
+    "artista": "Johannes Vermeer",
+    "ano": "1665",
+    "museu": "Mauritshuis, The Hague",
+    "imageUrl": "https://cdn.britannica.com/34/188634-050-C5B5D7E6/Girl-with-a-Pearl-Earring-canvas-oil-Johannes-Vermeer-1665.jpg",
+    "ala": "retratos"
+  },
+  {
+    "titulo": "The Persistence of Memory",
+    "artista": "Salvador Dali",
+    "ano": "1931",
+    "museu": "MoMA, New York",
+    "imageUrl": "https://cdn.britannica.com/90/197590-050-FF5D6F94/Persistence-of-Memory-oil-canvas-Salvador-Dali-1931.jpg",
+    "ala": "fase"
+  }
+]
