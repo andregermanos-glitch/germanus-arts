@@ -4,7 +4,7 @@
     "artista": "Vincent van Gogh",
     "ano": "1889",
     "museu": "Museum of Modern Art, New York",
-    "imageUrl": "https://cdn.britannica.com/78/43678-050-F4F8CD6C/Starry-Night-canvas-Vincent-van-Gogh-New-1889.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1024px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
     "ala": "natureza"
   },
   {
@@ -12,7 +12,7 @@
     "artista": "Leonardo da Vinci",
     "ano": "1503-1519",
     "museu": "Louvre, Paris",
-    "imageUrl": "https://cdn.britannica.com/24/189624-050-F3C5BAA9/Mona-Lisa-oil-panel-Leonardo-da.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg/1024px-Mona_Lisa%2C_by_Leonardo_da_Vinci%2C_from_C2RMF_retouched.jpg",
     "ala": "retratos"
   },
   {
@@ -20,7 +20,7 @@
     "artista": "Edvard Munch",
     "ano": "1893",
     "museu": "National Gallery, Oslo",
-    "imageUrl": "https://cdn.britannica.com/94/194394-050-9A96F8C5/The-Scream-oil-tempera-paper-Edvard-Munch-1893.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg/1024px-Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg",
     "ala": "fase"
   },
   {
@@ -28,7 +28,7 @@
     "artista": "Johannes Vermeer",
     "ano": "1665",
     "museu": "Mauritshuis, The Hague",
-    "imageUrl": "https://cdn.britannica.com/34/188634-050-C5B5D7E6/Girl-with-a-Pearl-Earring-canvas-oil-Johannes-Vermeer-1665.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/1024px-Meisje_met_de_parel.jpg",
     "ala": "retratos"
   },
   {
@@ -36,7 +36,12 @@
     "artista": "Salvador Dali",
     "ano": "1931",
     "museu": "MoMA, New York",
-    "imageUrl": "https://cdn.britannica.com/90/197590-050-FF5D6F94/Persistence-of-Memory-oil-canvas-Salvador-Dali-1931.jpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/d/dd/The_Persistence_of_Memory.jpg/1024px-The_Persistence_of_Memory.jpg",
     "ala": "fase"
-  }
-]
+  },
+  {
+    "titulo": "The Night Watch",
+    "artista": "Rembrandt van Rijn",
+    "ano": "1642",
+    "museu": "Rijksmuseum, Amsterdam",
+    "imageUrl
