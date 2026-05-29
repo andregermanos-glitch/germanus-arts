@@ -1,0 +1,145 @@
+[
+  {
+    "titulo": "Lyrical",
+    "artista": "Wassily Kandinsky",
+    "ano": "1911",
+    "museu": "Museum Boijmans Van Beuningen, Roterdão, Países Baixos",
+    "ala": "cidades",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Wassily_Kandinsky_-_Lyrisches_-_Google_Art_Project.jpg/800px-Wassily_Kandinsky_-_Lyrisches_-_Google_Art_Project.jpg"
+  },
+  {
+    "titulo": "Composition VI",
+    "artista": "Wassily Kandinsky",
+    "ano": "1913",
+    "museu": "Hermitage Museum, São Petersburgo",
+    "ala": "cidades",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Vassily_Kandinsky,_1913_-_Composition_6.jpg/800px-Vassily_Kandinsky,_1913_-_Composition_6.jpg"
+  },
+  {
+    "titulo": "Improvisation 27 (Garden of Love II)",
+    "artista": "Wassily Kandinsky",
+    "ano": "1912",
+    "museu": "The Metropolitan Museum of Art, Nova York",
+    "ala": "cidades",
+    "api": "met",
+    "met_id": 488600
+  },
+  {
+    "titulo": "Yellow-Red-Blue",
+    "artista": "Wassily Kandinsky",
+    "ano": "1925",
+    "museu": "Centre Pompidou, Paris, França",
+    "ala": "cidades",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Wassily_Kandinsky,_1925_-_Yellow-Red-Blue.jpg/800px-Wassily_Kandinsky,_1925_-_Yellow-Red-Blue.jpg"
+  },
+  {
+    "titulo": "Composition No. 3 with Color Planes",
+    "artista": "Piet Mondrian",
+    "ano": "1915",
+    "museu": "Kunstmuseum Den Haag, Haia, Países Baixos",
+    "ala": "cidades",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Piet_Mondriaan,_1915_-_Compositie_no._III_(Composition_No._III).jpg/800px-Piet_Mondriaan,_1915_-_Compositie_no._III_(Composition_No._III).jpg"
+  },
+  {
+    "titulo": "Tableau I",
+    "artista": "Piet Mondrian",
+    "ano": "1921",
+    "museu": "Kunstmuseum Den Haag, Haia, Países Baixos",
+    "ala": "cidades",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Mondrian_Composition_II_in_Red,_Blue,_and_Yellow.jpg/800px-Mondrian_Composition_II_in_Red,_Blue,_and_Yellow.jpg"
+  },
+  {
+    "titulo": "Broadway Boogie Woogie",
+    "artista": "Piet Mondrian",
+    "ano": "1943",
+    "museu": "Museum of Modern Art, Nova York, EUA",
+    "ala": "cidades",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Mondrian_Broadway_Boogie-Woogie.jpg/800px-Mondrian_Broadway_Boogie-Woogie.jpg"
+  },
+  {
+    "titulo": "Composition IX, Card Players",
+    "artista": "Theo van Doesburg",
+    "ano": "1917",
+    "museu": "Kunstmuseum Den Haag, Haia, Países Baixos",
+    "ala": "cidades",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Theo_van_Doesburg_Composition_IX_opus_18_(The_Card_Players)_1917.jpg/800px-Theo_van_Doesburg_Composition_IX_opus_18_(The_Card_Players)_1917.jpg"
+  },
+  {
+    "titulo": "Counter-Composition VI",
+    "artista": "Theo van Doesburg",
+    "ano": "1925",
+    "museu": "Stedelijk Museum, Amsterdam, Países Baixos",
+    "ala": "cidades",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Theo_van_Doesburg,_1925_-_Counter-Composition_VI.jpg/800px-Theo_van_Doesburg,_1925_-_Counter-Composition_VI.jpg"
+  },
+  {
+    "titulo": "Udnie (Young American Girl)",
+    "artista": "Francis Picabia",
+    "ano": "1913",
+    "museu": "Centre Pompidou, Paris, França",
+    "ala": "cidades",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Francis_Picabia,_1913,_Udnie_(Young_American_Girl,_Dance),_oil_on_canvas,_290_x_300_cm,_Musée_National_d'Art_Moderne,_Centre_Georges_Pompidou,_Paris.jpg/800px-Francis_Picabia,_1913,_Udnie_(Young_American_Girl,_Dance),_oil_on_canvas,_290_x_300_cm,_Musée_National_d'Art_Moderne,_Centre_Georges_Pompidou,_Paris.jpg"
+  },
+  {
+    "titulo": "Armour",
+    "artista": "Ragnhild Keyser",
+    "ano": "1926",
+    "museu": "Coleção privada / Europeana",
+    "ala": "cidades",
+    "api": "europeana",
+    "imageUrl": "https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2Fwww.europeana.eu%2Fitem%2F2059207%2Fdata_sounds_Q2126059&size=LARGE"
+  },
+  {
+    "titulo": "Compositie met kleurvlakken (Composition with Color Planes)",
+    "artista": "Nono Reinhold",
+    "ano": "1958",
+    "museu": "Rijksmuseum, Amsterdam, Países Baixos",
+    "ala": "cidades",
+    "api": "rijksmuseum",
+    "api_id": "RP-T-1958-366"
+  },
+  {
+    "titulo": "Black Iris",
+    "artista": "Georgia O'Keeffe",
+    "ano": "1926",
+    "museu": "The Metropolitan Museum of Art, Nova York, EUA",
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Georgia O'Keeffe black iris painting"
+  },
+  {
+    "titulo": "Portrait of a German Officer",
+    "artista": "Marsden Hartley",
+    "ano": "1914",
+    "museu": "The Metropolitan Museum of Art, Nova York, EUA",
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Marsden Hartley German officer painting"
+  },
+  {
+    "titulo": "Simultaneous Windows on the City",
+    "artista": "Robert Delaunay",
+    "ano": "1912",
+    "museu": "Hamburger Kunsthalle, Hamburgo, Alemanha",
+    "ala": "cidades",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Robert_Delaunay,_1912,_Windows_Open_Simultaneously_(First_Part,_Third_Motif),_oil_on_canvas,_45.7_x_37.5_cm,_Tate_Modern,_London.jpg/800px-Robert_Delaunay,_1912,_Windows_Open_Simultaneously_(First_Part,_Third_Motif),_oil_on_canvas,_45.7_x_37.5_cm,_Tate_Modern,_London.jpg"
+  },
+  {
+    "titulo": "Gelmeroda",
+    "artista": "Lyonel Feininger",
+    "ano": "1936",
+    "museu": "The Metropolitan Museum of Art, Nova York, EUA",
+    "ala": "cidades",
+    "api": "met",
+    "search_q": "Lyonel Feininger Gelmeroda painting"
+  },
+  {
+    "titulo": "A Sunday on La Grande Jatte",
+    "artista": "Georges Seurat",
+    "ano": "1886",
+    "museu": "Art Institute of Chicago, Chicago, EUA",
+    "ala": "cidades",
+    "api": "aic",
+    "aic_id": 27992
+  }
+]
