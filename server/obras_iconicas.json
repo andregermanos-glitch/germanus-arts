@@ -1,0 +1,51 @@
+[
+  {
+    "titulo": "The Night Watch",
+    "artista": "Rembrandt van Rijn",
+    "ano": "1642",
+    "museu": "Rijksmuseum, Amsterdam, Países Baixos",
+    "ala": "historico",
+    "api": "rijksmuseum",
+    "api_id": "SK-C-5"
+  },
+  {
+    "titulo": "The Starry Night",
+    "artista": "Vincent van Gogh",
+    "ano": "1889",
+    "museu": "Museum of Modern Art, Nova York, EUA",
+    "ala": "natureza",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/800px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg"
+  },
+  {
+    "titulo": "Mona Lisa",
+    "artista": "Leonardo da Vinci",
+    "ano": "1503",
+    "museu": "Musée du Louvre, Paris, França",
+    "ala": "retratos",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg/800px-Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg"
+  },
+  {
+    "titulo": "Girl with a Pearl Earring",
+    "artista": "Johannes Vermeer",
+    "ano": "1665",
+    "museu": "Mauritshuis, Haia, Países Baixos",
+    "ala": "retratos",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Meisje_met_de_parel.jpg/800px-Meisje_met_de_parel.jpg"
+  },
+  {
+    "titulo": "The Scream",
+    "artista": "Edvard Munch",
+    "ano": "1893",
+    "museu": "National Museum, Oslo, Noruega",
+    "ala": "fase",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch,_1893,_The_Scream,_oil,_tempera_and_pastel_on_cardboard,_91_x_73_cm,_National_Gallery_of_Norway.jpg/800px-Edvard_Munch,_1893,_The_Scream,_oil,_tempera_and_pastel_on_cardboard,_91_x_73_cm,_National_Gallery_of_Norway.jpg"
+  },
+  {
+    "titulo": "Water Lilies",
+    "artista": "Claude Monet",
+    "ano": "1916",
+    "museu": "Musée de l'Orangerie, Paris, França",
+    "ala": "natureza",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Claude_Monet_-_Nymphéas.jpg/800px-Claude_Monet_-_Nymphéas.jpg"
+  }
+]
