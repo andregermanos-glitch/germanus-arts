@@ -74,7 +74,7 @@ const ALA_TERMS = {
 
 const memCache  = new Map();
 const CACHE_TTL    = 300000;
-const CACHE_BATCH  = 50;
+const CACHE_BATCH  = 200;
 const CACHE_DELAY  = 60 * 1000;
 const CACHE_PERIOD =  2 * 60 * 1000;
 const CLEANUP_DELAY  =  5 * 60 * 1000;
@@ -220,6 +220,16 @@ async function validateAndCleanImages() {
   try {
     const cacheExpiry = Math.floor((Date.now() - 3600000) / 1000);
     await pool.query(`DELETE FROM search_cache WHERE ts < $1`, [cacheExpiry]);
+
+    // Desbloqueia obras falhadas após 2h para nova tentativa
+    await pool.query(`
+      UPDATE artworks
+      SET download_attempts = 0
+      WHERE download_attempts >= 3
+        AND image_cached_at = 0
+        AND image_url IS NOT NULL AND image_url != ''
+        AND last_attempt_at < EXTRACT(EPOCH FROM NOW()) - 7200
+    `);
   } catch {}
 }
 
