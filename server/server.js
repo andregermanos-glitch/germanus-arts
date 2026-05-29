@@ -13,14 +13,13 @@ const { iniciarSemeador, semearArtista } = require("./semeador");
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
 // ─── PostgreSQL ───────────────────────────────────────────────────────────────
-const pool = new Pool({ 
-  connectionString: process.env.DATABASE_URL, 
-  ssl: { rejectUnauthorized: false } 
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
@@ -73,16 +72,15 @@ const ALA_TERMS = {
   femininas:     ["woman female artist painter work","Frida Kahlo Tarsila Amaral Brazilian Mexican woman","female artist painting impressionism Cassatt Morisot"],
 };
 
-// Cache em memória
-const memCache = new Map();
-const CACHE_TTL = 300000;
-const CACHE_BATCH = 50;
-const CACHE_DELAY = 60 * 1000;
-const CACHE_PERIOD = 2 * 60 * 1000;
-const CLEANUP_DELAY = 5 * 60 * 1000;
+const memCache  = new Map();
+const CACHE_TTL    = 300000;
+const CACHE_BATCH  = 50;
+const CACHE_DELAY  = 60 * 1000;
+const CACHE_PERIOD =  2 * 60 * 1000;
+const CLEANUP_DELAY  =  5 * 60 * 1000;
 const CLEANUP_PERIOD = 24 * 60 * 60 * 1000;
 
-// ─── Funções auxiliares ──────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 async function getCache(key) {
   const mem = memCache.get(key);
   if (mem && Date.now() - mem.ts < CACHE_TTL) return mem.data;
@@ -164,41 +162,18 @@ async function searchCuradoria(alaId, excludeIds = [], limit = 50) {
         AND image_url IS NOT NULL AND image_url != ''
     `;
     const params = [alaId];
-    
     if (excl.length > 0) {
       query += ` AND id != ALL($${params.length + 1}::TEXT[])`;
       params.push(excl);
     }
-    
     query += ` ORDER BY (image_cached_at > 0) DESC, RANDOM() LIMIT $${params.length + 1}`;
     params.push(limit);
-    
     const r = await pool.query(query, params);
     return r.rows.map(mapRow);
   } catch { return []; }
 }
 
-async function searchByGallery(alaId, extraQuery, keys, options = {}) {
-  const terms = ALA_TERMS[alaId] || ["painting art masterwork"];
-  const timeIdx = Math.floor(Date.now() / 180000) % terms.length;
-  const q1 = extraQuery || terms[timeIdx];
-  const q2 = terms[(timeIdx + 1) % terms.length];
-
-  const [r1, r2] = await Promise.all([
-    searchAll(q1, keys, { limit: 8, ...options }),
-    searchAll(q2, keys, { limit: 6, ...options }),
-  ]);
-
-  const seen = new Set();
-  return [...r1, ...r2].filter(a => {
-    const key = a.id || a.title;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return a.imageUrl;
-  });
-}
-
-// ─── Funções de manutenção ───────────────────────────────────────────────────
+// ─── Manutenção ───────────────────────────────────────────────────────────────
 async function downloadAndCacheImages() {
   try {
     const r = await pool.query(
@@ -211,10 +186,8 @@ async function downloadAndCacheImages() {
       [CACHE_BATCH]
     );
     if (r.rows.length === 0) return;
-
     console.log(`📦 Cache de imagens — baixando ${r.rows.length} obras...`);
     let saved = 0;
-
     for (const row of r.rows) {
       try {
         const res = await fetch(row.image_url, {
@@ -222,24 +195,18 @@ async function downloadAndCacheImages() {
           headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
         });
         if (!res.ok) continue;
-
         const contentType = res.headers.get("content-type") || "image/jpeg";
         if (!contentType.startsWith("image/")) continue;
-
         const buf = await res.arrayBuffer();
         if (buf.byteLength < 5000) continue;
-
         await pool.query(
-          `UPDATE artworks
-           SET image_data = $1, image_mime = $2, image_cached_at = $3,
-               download_attempts = 0
-           WHERE id = $4`,
+          `UPDATE artworks SET image_data=$1, image_mime=$2, image_cached_at=$3, download_attempts=0 WHERE id=$4`,
           [Buffer.from(buf), contentType, Math.floor(Date.now() / 1000), row.id]
         );
         saved++;
       } catch {
         await pool.query(
-          `UPDATE artworks SET download_attempts = COALESCE(download_attempts, 0) + 1 WHERE id = $1`,
+          `UPDATE artworks SET download_attempts=COALESCE(download_attempts,0)+1 WHERE id=$1`,
           [row.id]
         );
       }
@@ -253,7 +220,7 @@ async function validateAndCleanImages() {
   try {
     const cacheExpiry = Math.floor((Date.now() - 3600000) / 1000);
     await pool.query(`DELETE FROM search_cache WHERE ts < $1`, [cacheExpiry]);
-  } catch(e) {}
+  } catch {}
 }
 
 async function initDB() {
@@ -274,190 +241,128 @@ async function initDB() {
       cache_key TEXT PRIMARY KEY, data TEXT NOT NULL,
       ts BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
     );
-    CREATE INDEX IF NOT EXISTS idx_art_title ON artworks(title);
+    CREATE INDEX IF NOT EXISTS idx_art_title  ON artworks(title);
     CREATE INDEX IF NOT EXISTS idx_art_artist ON artworks(artist);
-    CREATE INDEX IF NOT EXISTS idx_art_ala ON artworks(ala_id);
-    CREATE INDEX IF NOT EXISTS idx_art_img ON artworks(image_url) WHERE image_url IS NOT NULL AND image_url != '';
+    CREATE INDEX IF NOT EXISTS idx_art_ala    ON artworks(ala_id);
+    CREATE INDEX IF NOT EXISTS idx_art_img    ON artworks(image_url) WHERE image_url IS NOT NULL AND image_url != '';
   `);
   console.log("✅ PostgreSQL pronto");
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🚀 ROTAS DE CURADORIA MANUAL (CARREGAR OBRAS VIA JSON)
+// ROTAS DE CURADORIA MANUAL
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Carregar obras do psyche.json (Surrealismo/Psyché)
 app.get("/api/carregar/psyche", async (req, res) => {
   try {
     const psychePath = path.join(__dirname, "psyche.json");
-    
-    if (!fs.existsSync(psychePath)) {
-      return res.status(404).json({ error: "Arquivo psyche.json não encontrado" });
-    }
-    
+    if (!fs.existsSync(psychePath))
+      return res.status(404).json({ error: "psyche.json não encontrado" });
     const obras = JSON.parse(fs.readFileSync(psychePath, "utf-8"));
-    let adicionadas = 0;
-    let erros = 0;
-    
+    let adicionadas = 0, erros = 0;
     for (const obra of obras) {
       try {
-        const id = `psyche_${obra.api_id || obra.titulo?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || Date.now()}`;
-        
-        await pool.query(`
-          INSERT INTO artworks (id, source, title, artist, date, museum, image_url, ala_id, credit)
-          VALUES ($1, 'curadoria_manual', $2, $3, $4, $5, $6, 'fase', 'Curadoria manual - Obras Surrealistas')
-          ON CONFLICT (id) DO UPDATE SET 
-            title = EXCLUDED.title,
-            artist = EXCLUDED.artist,
-            image_url = EXCLUDED.image_url
-        `, [id, obra.titulo, obra.artista, obra.ano || "", obra.museu || "", obra.imageUrl]);
-        
+        const id = `psyche_${(obra.api_id || obra.titulo || Date.now()).toString().replace(/[^a-z0-9]/gi,"_").toLowerCase()}`;
+        await pool.query(
+          `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit)
+           VALUES ($1,'curadoria_manual',$2,$3,$4,$5,$6,'fase','Curadoria manual - Obras Surrealistas')
+           ON CONFLICT (id) DO UPDATE SET title=EXCLUDED.title, artist=EXCLUDED.artist, image_url=EXCLUDED.image_url`,
+          [id, obra.titulo, obra.artista, obra.ano||"", obra.museu||"", obra.imageUrl]
+        );
         adicionadas++;
-        console.log(`  ✓ ${obra.titulo} - ${obra.artista}`);
-        
-      } catch(e) {
-        erros++;
-        console.log(`  ✗ Erro: ${e.message}`);
-      }
+      } catch { erros++; }
       await new Promise(r => setTimeout(r, 100));
     }
-    
-    res.json({ ok: true, adicionadas, erros, mensagem: `${adicionadas} obras adicionadas à Psyché!` });
-    
-  } catch(e) {
-    console.error("[carregar/psyche]", e.message);
-    res.status(500).json({ error: e.message });
-  }
+    res.json({ ok: true, adicionadas, erros });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Carregar obras do mestres.json (Obras-primas gerais)
 app.get("/api/carregar/mestres", async (req, res) => {
   try {
     const mestresPath = path.join(__dirname, "mestres.json");
-    
-    if (!fs.existsSync(mestresPath)) {
-      return res.status(404).json({ error: "Arquivo mestres.json não encontrado" });
-    }
-    
+    if (!fs.existsSync(mestresPath))
+      return res.status(404).json({ error: "mestres.json não encontrado" });
     const obras = JSON.parse(fs.readFileSync(mestresPath, "utf-8"));
-    let adicionadas = 0;
-    let erros = 0;
-    
+    let adicionadas = 0, erros = 0;
     for (const obra of obras) {
       try {
-        const id = `mestre_${obra.titulo?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || Date.now()}`;
+        const id = `mestre_${(obra.titulo||Date.now()).toString().replace(/[^a-z0-9]/gi,"_").toLowerCase()}`;
         const ala = obra.ala || "retratos";
-        
-        await pool.query(`
-          INSERT INTO artworks (id, source, title, artist, date, museum, image_url, ala_id, credit)
-          VALUES ($1, 'curadoria_manual', $2, $3, $4, $5, $6, $7, 'Curadoria manual - Obras-primas')
-          ON CONFLICT (id) DO UPDATE SET 
-            title = EXCLUDED.title,
-            artist = EXCLUDED.artist,
-            image_url = EXCLUDED.image_url
-        `, [id, obra.titulo, obra.artista, obra.ano || "", obra.museu || "", obra.imageUrl, ala]);
-        
+        await pool.query(
+          `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit)
+           VALUES ($1,'curadoria_manual',$2,$3,$4,$5,$6,$7,'Curadoria manual - Obras-primas')
+           ON CONFLICT (id) DO UPDATE SET title=EXCLUDED.title, artist=EXCLUDED.artist, image_url=EXCLUDED.image_url`,
+          [id, obra.titulo, obra.artista, obra.ano||"", obra.museu||"", obra.imageUrl, ala]
+        );
         adicionadas++;
-        console.log(`  ✓ ${obra.titulo} - ${obra.artista} (${ala})`);
-        
-      } catch(e) {
-        erros++;
-        console.log(`  ✗ Erro: ${e.message}`);
-      }
+      } catch { erros++; }
       await new Promise(r => setTimeout(r, 100));
     }
-    
-    res.json({ ok: true, adicionadas, erros, mensagem: `${adicionadas} obras-primas adicionadas!` });
-    
-  } catch(e) {
-    console.error("[carregar/mestres]", e.message);
-    res.status(500).json({ error: e.message });
-  }
+    res.json({ ok: true, adicionadas, erros });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Rota genérica para carregar qualquer JSON
 app.get("/api/carregar/:nome", async (req, res) => {
   try {
-    const nome = req.params.nome;
-    const filePath = path.join(__dirname, `${nome}.json`);
-    
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: `Arquivo ${nome}.json não encontrado` });
-    }
-    
+    const filePath = path.join(__dirname, `${req.params.nome}.json`);
+    if (!fs.existsSync(filePath))
+      return res.status(404).json({ error: `${req.params.nome}.json não encontrado` });
     const obras = JSON.parse(fs.readFileSync(filePath, "utf-8"));
     let adicionadas = 0;
-    
     for (const obra of obras) {
-      const id = `manual_${obra.titulo?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || Date.now()}_${Date.now()}`;
-      const ala = obra.ala || "geral";
-      
-      await pool.query(`
-        INSERT INTO artworks (id, source, title, artist, date, museum, image_url, ala_id)
-        VALUES ($1, 'curadoria_manual', $2, $3, $4, $5, $6, $7)
-        ON CONFLICT (id) DO NOTHING
-      `, [id, obra.titulo, obra.artista, obra.ano || "", obra.museu || "", obra.imageUrl, ala]);
+      const id = `manual_${(obra.titulo||"").replace(/[^a-z0-9]/gi,"_").toLowerCase()}_${Date.now()}`;
+      await pool.query(
+        `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id)
+         VALUES ($1,'curadoria_manual',$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO NOTHING`,
+        [id, obra.titulo, obra.artista, obra.ano||"", obra.museu||"", obra.imageUrl, obra.ala||"geral"]
+      );
       adicionadas++;
     }
-    
-    res.json({ ok: true, arquivo: nome, adicionadas });
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
+    res.json({ ok: true, arquivo: req.params.nome, adicionadas });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🚀 ROTAS DA API
+// ROTAS DA API
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Status
 app.get("/api/status", async (req, res) => {
   let artCount = 0;
   try { const r = await pool.query("SELECT COUNT(*) as n FROM artworks WHERE image_url!=''"); artCount = parseInt(r.rows[0].n); } catch {}
   res.json({ status: "online", artworks_indexed: artCount });
 });
 
-// Busca principal
 app.get("/api/search", async (req, res) => {
   const { q, alaId, exclude, limit = 50 } = req.query;
-  
   const finalAlaId = (alaId === "psyche") ? "fase" : alaId;
-  
+
   if (finalAlaId) {
     try {
       const excludeIds = exclude ? exclude.split(",").filter(Boolean) : [];
       const results = await searchCuradoria(finalAlaId, excludeIds, parseInt(limit));
       return res.json({ source: "database", total: results.length, results, ala: finalAlaId });
-    } catch(e) {
-      return res.status(500).json({ error: e.message });
-    }
+    } catch(e) { return res.status(500).json({ error: e.message }); }
   }
-  
+
   if (!q?.trim()) {
     try {
-      const r = await pool.query(`
-        SELECT * FROM artworks 
-        WHERE image_url IS NOT NULL AND image_url != ''
-        ORDER BY RANDOM() LIMIT $1
-      `, [parseInt(limit)]);
+      const r = await pool.query(
+        `SELECT * FROM artworks WHERE image_url IS NOT NULL AND image_url != '' ORDER BY RANDOM() LIMIT $1`,
+        [parseInt(limit)]
+      );
       return res.json({ source: "random", total: r.rows.length, results: r.rows.map(mapRow) });
-    } catch(e) {
-      return res.status(500).json({ error: e.message });
-    }
+    } catch(e) { return res.status(500).json({ error: e.message }); }
   }
-  
+
   try {
-    const results = await searchLocal(q, null, parseInt(limit));
+    const results = await searchLocal(q, finalAlaId || null, parseInt(limit));
     res.json({ source: "database", total: results.length, results });
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Expandir ala (API externa)
 app.post("/api/curadoria/expandir", async (req, res) => {
-  const ala = req.query.ala || req.body?.ala || "retratos";
-  const n = parseInt(req.query.n || req.body?.n || "30");
+  const ala  = req.query.ala  || req.body?.ala  || "retratos";
+  const n    = parseInt(req.query.n || req.body?.n || "30");
   const hint = ALA_HINTS[ala] || "painting art masterwork";
   try {
     const resultado = await expandirAla(pool, KEYS, ala, hint, n);
@@ -465,95 +370,92 @@ app.post("/api/curadoria/expandir", async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Status das alas
 app.get("/api/curadoria/status", async (req, res) => {
   try {
     const r = await pool.query(`
-      SELECT ala_id, source, COUNT(*) as n FROM artworks 
-      WHERE image_url IS NOT NULL AND image_url != '' 
+      SELECT ala_id, source, COUNT(*) as n FROM artworks
+      WHERE image_url IS NOT NULL AND image_url != ''
       GROUP BY ala_id, source ORDER BY ala_id
     `);
     res.json({ alas: r.rows });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Servir imagem em cache
 app.get("/api/image/:id", async (req, res) => {
   try {
-    const r = await pool.query(`SELECT image_data, image_mime FROM artworks WHERE id = $1 AND image_cached_at > 0`, [req.params.id]);
+    const r = await pool.query(
+      `SELECT image_data, image_mime FROM artworks WHERE id=$1 AND image_cached_at>0`,
+      [req.params.id]
+    );
     if (!r.rows[0]?.image_data) return res.status(404).send("Not cached");
-    res.set({ 
-      "Content-Type": r.rows[0].image_mime || "image/jpeg", 
+    res.set({
+      "Content-Type": r.rows[0].image_mime || "image/jpeg",
       "Cache-Control": "public, max-age=31536000, immutable",
       "Access-Control-Allow-Origin": "*"
     });
     res.send(r.rows[0].image_data);
-  } catch (e) { res.status(500).send("Error"); }
+  } catch(e) { res.status(500).send("Error"); }
 });
 
-// Status do cache
 app.get("/api/cache/status", async (req, res) => {
   try {
     const r = await pool.query(`
-      SELECT 
-        COUNT(*) as total_obras,
-        COUNT(*) FILTER (WHERE image_cached_at > 0) as imagens_cache,
-        COUNT(*) FILTER (WHERE image_url IS NOT NULL AND image_url != '' AND image_cached_at = 0) as imagens_pendentes
-      FROM artworks
-      WHERE image_url IS NOT NULL AND image_url != ''
+      SELECT COUNT(*) as total_obras,
+             COUNT(*) FILTER (WHERE image_cached_at>0) as imagens_cache,
+             COUNT(*) FILTER (WHERE image_url IS NOT NULL AND image_url!='' AND image_cached_at=0) as imagens_pendentes
+      FROM artworks WHERE image_url IS NOT NULL AND image_url!=''
     `);
     res.json(r.rows[0]);
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Forçar cache de imagens
 app.get("/api/cache/forcar", async (req, res) => {
   try {
     const limite = parseInt(req.query.limit) || 100;
-    const r = await pool.query(`
-      SELECT id, image_url FROM artworks
-      WHERE image_url IS NOT NULL AND image_url != ''
-        AND (image_data IS NULL OR image_cached_at = 0)
-        AND download_attempts < 3
-        AND image_url NOT LIKE '%metmuseum%'
-      LIMIT $1
-    `, [limite]);
-    
-    if (r.rows.length === 0) {
-      return res.json({ message: "Nenhuma imagem pendente", total: 0 });
-    }
-    
+    const r = await pool.query(
+      `SELECT id, image_url FROM artworks
+       WHERE image_url IS NOT NULL AND image_url!=''
+         AND (image_data IS NULL OR image_cached_at=0)
+         AND download_attempts<3
+         AND image_url NOT LIKE '%metmuseum%'
+       LIMIT $1`,
+      [limite]
+    );
+    if (r.rows.length === 0) return res.json({ message: "Nenhuma imagem pendente", total: 0 });
     let baixadas = 0;
     for (const row of r.rows) {
       try {
         await new Promise(r => setTimeout(r, 500));
-        const resposta = await fetch(row.image_url, {
-          signal: AbortSignal.timeout(15000),
-          headers: { "User-Agent": "Mozilla/5.0" }
-        });
+        const resposta = await fetch(row.image_url, { signal: AbortSignal.timeout(15000), headers: { "User-Agent": "Mozilla/5.0" } });
         if (!resposta.ok) continue;
-        
         const contentType = resposta.headers.get("content-type") || "image/jpeg";
         if (!contentType.startsWith("image/")) continue;
-        
         const buffer = await resposta.arrayBuffer();
         if (buffer.byteLength < 5000) continue;
-        
         await pool.query(
-          `UPDATE artworks SET image_data = $1, image_mime = $2, image_cached_at = $3 WHERE id = $4`,
+          `UPDATE artworks SET image_data=$1, image_mime=$2, image_cached_at=$3 WHERE id=$4`,
           [Buffer.from(buffer), contentType, Math.floor(Date.now() / 1000), row.id]
         );
         baixadas++;
       } catch {}
     }
-    
     res.json({ ok: true, processadas: r.rows.length, baixadas });
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Forçar Semeador
+app.get("/api/cache/detalhado", async (req, res) => {
+  try {
+    const r = await pool.query(`
+      SELECT COUNT(*) as total_obras,
+             COUNT(*) FILTER (WHERE image_cached_at>0) as imagens_cache,
+             COUNT(*) FILTER (WHERE image_url IS NOT NULL AND image_url!='' AND image_cached_at=0) as imagens_pendentes,
+             COUNT(*) FILTER (WHERE download_attempts>=3) as imagens_falhas
+      FROM artworks WHERE image_url IS NOT NULL AND image_url!=''
+    `);
+    res.json(r.rows[0]);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get("/api/semeador/agora", async (req, res) => {
   try {
     const sementes = JSON.parse(fs.readFileSync(path.join(__dirname, "sementes.json"), "utf-8"));
@@ -566,67 +468,172 @@ app.get("/api/semeador/agora", async (req, res) => {
       }
     }
     res.json({ ok: true, obras_adicionadas: total });
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Status detalhado do cache
-app.get("/api/cache/detalhado", async (req, res) => {
-  try {
-    const r = await pool.query(`
-      SELECT 
-        COUNT(*) as total_obras,
-        COUNT(*) FILTER (WHERE image_cached_at > 0) as imagens_cache,
-        COUNT(*) FILTER (WHERE image_url IS NOT NULL AND image_url != '' AND image_cached_at = 0) as imagens_pendentes,
-        COUNT(*) FILTER (WHERE download_attempts >= 3) as imagens_falhas
-      FROM artworks
-      WHERE image_url IS NOT NULL AND image_url != ''
-    `);
-    res.json(r.rows[0]);
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+// ═══════════════════════════════════════════════════════════════════════════
+// /banco — PAINEL VISUAL (v2)
+// ═══════════════════════════════════════════════════════════════════════════
 
-// Rota de diagnóstico
 app.get("/banco", async (req, res) => {
   try {
-    const total = await pool.query(`SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE image_cached_at > 0) as cached FROM artworks`);
-    const alas = await pool.query(`SELECT ala_id, source, COUNT(*) as n FROM artworks GROUP BY ala_id, source ORDER BY ala_id`);
-    const html = `<!DOCTYPE html>
-<html>
+    const tot = await pool.query(`
+      SELECT COUNT(*) AS total,
+             COUNT(*) FILTER (WHERE image_cached_at > 0) AS cached,
+             COUNT(DISTINCT artist) AS artistas,
+             COUNT(DISTINCT ala_id) FILTER (WHERE ala_id IS NOT NULL) AS alas
+      FROM artworks
+    `);
+    const alas = await pool.query(`
+      SELECT ala_id, source, COUNT(*) AS n
+      FROM artworks
+      WHERE image_url IS NOT NULL AND image_url != ''
+      GROUP BY ala_id, source ORDER BY ala_id, source
+    `);
+
+    const t    = tot.rows[0];
+    const rows = alas.rows;
+
+    const porAla = {};
+    for (const r of rows) {
+      const ala = r.ala_id || "sem_ala";
+      if (!porAla[ala]) porAla[ala] = { total: 0, fontes: {} };
+      const n = parseInt(r.n);
+      porAla[ala].total += n;
+      porAla[ala].fontes[r.source] = (porAla[ala].fontes[r.source] || 0) + n;
+    }
+
+    const ALA_LABEL = {
+      retratos:"Retratos", pessoas_reais:"Personnages", historico:"Histoire",
+      perspectiva:"Perspective", objetos:"Objets", lugares:"Lieux",
+      natureza:"Nature", familiar:"Familiale", nudes:"Nus",
+      esoterico:"Ésotérisme", sacro:"Sacré", arquitetura:"Architecture",
+      povo:"Peuple", luz_sol:"Lumière", cores:"Couleurs",
+      cidades:"Émotion", fase:"Psyché", femininas:"Féminines", sem_ala:"— sem ala"
+    };
+    const ORDER = [
+      "retratos","pessoas_reais","historico","perspectiva","objetos",
+      "lugares","natureza","familiar","nudes","esoterico","sacro","arquitetura",
+      "povo","luz_sol","cores","cidades","fase","femininas","sem_ala"
+    ];
+    const SRC_COLOR = {
+      curadoria:"#1D9E75", semeador:"#185FA5",
+      curadoria_manual:"#BA7517", direto:"#BA7517", expansao:"#534AB7"
+    };
+
+    const maxN = Math.max(...Object.values(porAla).map(d => d.total), 1);
+
+    const alaRows = ORDER.filter(a => porAla[a]).map(ala => {
+      const d   = porAla[ala];
+      const lbl = ALA_LABEL[ala] || ala;
+      const barSegs = Object.entries(d.fontes).map(([src, n]) => {
+        const w = (n / maxN * 100).toFixed(1);
+        const c = SRC_COLOR[src] || "#888";
+        return `<div style="width:${w}%;height:8px;background:${c}"></div>`;
+      }).join("");
+      const status = d.total < 20 ? "⚠" : d.total < 50 ? "·" : "✓";
+      const sc     = d.total < 20 ? "#E24B4A" : d.total < 50 ? "#BA7517" : "#1D9E75";
+      return `<tr>
+        <td style="padding:7px 12px;color:#e0e0e0;font-weight:500">${lbl}</td>
+        <td style="padding:7px 12px">
+          <div style="background:#1a1a1a;border-radius:2px;height:8px;display:flex;overflow:hidden;min-width:120px">${barSegs}</div>
+        </td>
+        <td style="padding:7px 12px;text-align:right;color:#aaa;font-size:13px">${d.total.toLocaleString("pt-PT")}</td>
+        <td style="padding:7px 12px;text-align:center;color:${sc};font-size:13px">${status}</td>
+      </tr>`;
+    }).join("");
+
+    const fonteRows = Object.entries(
+      rows.reduce((acc, r) => {
+        acc[r.source] = (acc[r.source] || 0) + parseInt(r.n);
+        return acc;
+      }, {})
+    ).sort((a, b) => b[1] - a[1]).map(([src, n]) =>
+      `<tr>
+        <td style="padding:6px 12px">
+          <span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:${SRC_COLOR[src]||"#555"}33;color:${SRC_COLOR[src]||"#aaa"}">${src}</span>
+        </td>
+        <td style="padding:6px 12px;text-align:right;color:#e0e0e0;font-weight:500">${parseInt(n).toLocaleString("pt-PT")}</td>
+      </tr>`
+    ).join("");
+
+    const now = new Date().toLocaleString("pt-PT", { timeZone: "America/Sao_Paulo" });
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.send(`<!DOCTYPE html>
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>Germanus.Art - Banco</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GERMANUS.Art — Banco</title>
 <style>
-  body{background:#0f0f0f;color:#e0e0e0;font-family:sans-serif;padding:20px}
-  a{color:#60a5fa}
-  table{border-collapse:collapse;width:100%}
-  td,th{padding:8px;text-align:left;border-bottom:1px solid #333}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:28px 24px;max-width:900px}
+h1{font-size:20px;font-weight:600;color:#fff;margin-bottom:4px}
+.sub{color:#555;font-size:12px;margin-bottom:28px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:32px}
+.card{background:#141414;border:1px solid #222;border-radius:10px;padding:14px 16px}
+.card .v{font-size:28px;font-weight:700;color:#fff;line-height:1}
+.card .l{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.card.g .v{color:#1D9E75}.card.b .v{color:#185FA5}.card.a .v{color:#BA7517}
+h2{font-size:13px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.5px;margin:0 0 10px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:28px}
+th{text-align:left;padding:8px 12px;color:#444;font-size:10px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #1a1a1a}
+td{border-bottom:1px solid #111}
+tr:hover td{background:#111}
+.legend{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:#666}
+.legend b{width:10px;height:10px;border-radius:2px;display:inline-block}
+a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
+.actions{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-block;padding:8px 16px;border:1px solid #2a2a2a;border-radius:8px;color:#aaa;font-size:12px}
+.btn:hover{background:#141414;color:#fff}
 </style>
 </head>
 <body>
-<h1>GERMANUS.Art - Banco de Dados</h1>
-<p>Total: ${total.rows[0].total} obras | Cache: ${total.rows[0].cached} imagens</p>
-<h2>Por ala:</h2>
+<h1>GERMANUS.Art — Banco de Dados</h1>
+<p class="sub">Actualizado: ${now} BRT &nbsp;·&nbsp; <a href="/banco">↻ Actualizar</a></p>
+
+<div class="cards">
+  <div class="card"><div class="v">${parseInt(t.total).toLocaleString("pt-PT")}</div><div class="l">obras totais</div></div>
+  <div class="card g"><div class="v">${parseInt(t.cached).toLocaleString("pt-PT")}</div><div class="l">imagens cached</div></div>
+  <div class="card a"><div class="v">${parseInt(t.artistas).toLocaleString("pt-PT")}</div><div class="l">artistas únicos</div></div>
+  <div class="card b"><div class="v">${t.alas}</div><div class="l">alas activas</div></div>
+</div>
+
+<div class="legend">
+  <span><b style="background:#1D9E75"></b>curadoria</span>
+  <span><b style="background:#185FA5"></b>semeador</span>
+  <span><b style="background:#BA7517"></b>manual/direto</span>
+  <span><b style="background:#534AB7"></b>expansao</span>
+  <span style="margin-left:auto;color:#555">✓ ≥50 &nbsp;· 20–49 &nbsp;⚠ &lt;20</span>
+</div>
+
+<h2>obras por ala</h2>
 <table>
-<tr><th>Ala</th><th>Fonte</th><th>Obras</th></tr>
-${alas.rows.map(r => `<tr><td>${r.ala_id || 'sem ala'}</td><td>${r.source}</td><td>${r.n}</td></tr>`).join('')}
+  <thead><tr><th>Ala</th><th>Composição</th><th style="text-align:right">Total</th><th style="text-align:center">Estado</th></tr></thead>
+  <tbody>${alaRows}</tbody>
 </table>
-<p>
-  <a href="/">← Voltar ao site</a> | 
-  <a href="/api/cache/forcar?limit=200">Forçar cache</a> |
-  <a href="/api/carregar/psyche">Carregar Psyché</a> |
-  <a href="/api/carregar/mestres">Carregar Mestres</a>
-</p>
+
+<h2>por origem</h2>
+<table>
+  <thead><tr><th>Fonte</th><th style="text-align:right">Obras</th></tr></thead>
+  <tbody>${fonteRows}</tbody>
+</table>
+
+<div class="actions">
+  <a class="btn" href="/">← Voltar ao site</a>
+  <a class="btn" href="/api/cache/forcar?limit=200">Forçar cache</a>
+  <a class="btn" href="/api/carregar/psyche">Carregar Psyché</a>
+  <a class="btn" href="/api/carregar/mestres">Carregar Mestres</a>
+  <a class="btn" href="/api/curadoria/status">JSON raw</a>
+</div>
 </body>
-</html>`;
-    res.send(html);
-  } catch(e) { res.status(500).send(e.message); }
+</html>`);
+  } catch(e) { res.status(500).send(`<pre style="color:red">Erro: ${e.message}</pre>`); }
 });
 
-// ─── Frontend estático ───────────────────────────────────────────────────────
+// ─── Frontend estático ────────────────────────────────────────────────────────
 const distPath = path.join(__dirname, "../dist");
 app.use(express.static(distPath));
 app.get("*", (req, res) => {
@@ -635,23 +642,23 @@ app.get("*", (req, res) => {
   });
 });
 
-// ─── Inicialização ───────────────────────────────────────────────────────────
+// ─── Start ────────────────────────────────────────────────────────────────────
 async function start() {
   await initDB();
-  
+
   console.log("🌱 Iniciando curadoria...");
   indexarCuradoria(pool, KEYS).catch(e => console.error("Curadoria erro:", e.message));
-  
+
   console.log("🌱 Iniciando semeador...");
   iniciarSemeador(pool);
-  
+
   setTimeout(() => {
     downloadAndCacheImages();
     setInterval(downloadAndCacheImages, CACHE_PERIOD);
   }, CACHE_DELAY);
-  
+
   setInterval(validateAndCleanImages, CLEANUP_PERIOD);
-  
+
   app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
     console.log(`📊 Banco: /banco`);
