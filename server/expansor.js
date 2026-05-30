@@ -1,6 +1,5 @@
 // server/expansor.js — Robô de Expansão da Curadoria
 // Adiciona 30 novas obras por execução, avaliando importância e diversidade
-// POST /api/curadoria/expandir?ala=retratos&n=30
 
 const { buscarShanghaiPorAla } = require("./museums");
 
