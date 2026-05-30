@@ -695,6 +695,23 @@ async function start() {
   console.log("🌱 Iniciando semeador...");
   iniciarSemeador(pool);
 
+  // Commons — carrega obras russas 5min após boot, depois a cada 24h
+  setTimeout(async () => {
+    try {
+      console.log("🖼️ Commons — carregando obras Wikimedia...");
+      const obras = await carregarTodasAlas(pool, 12);
+      const { salvas } = await salvarObras(pool, obras);
+      console.log(`🖼️ Commons concluído — ${salvas} obras adicionadas`);
+    } catch(e) { console.log("🖼️ Commons erro:", e.message); }
+    setInterval(async () => {
+      try {
+        const obras = await carregarTodasAlas(pool, 8);
+        const { salvas } = await salvarObras(pool, obras);
+        if (salvas > 0) console.log(`🖼️ Commons ciclo — +${salvas} obras`);
+      } catch {}
+    }, 24 * 3600 * 1000);
+  }, 5 * 60 * 1000);
+
   setTimeout(() => {
     downloadAndCacheImages();
     setInterval(downloadAndCacheImages, CACHE_PERIOD);
