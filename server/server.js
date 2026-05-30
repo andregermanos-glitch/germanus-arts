@@ -1,4 +1,4 @@
-// server/server.js — Germanus.Art Backend (versão final com curadoria manual)
+// server/server.js — Germanus.Art Backend (versão final com curadoria manual + Wikimedia Commons)
 require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 const express  = require("express");
 const cors     = require("cors");
@@ -9,6 +9,7 @@ const { searchAll } = require("./museums");
 const { indexarCuradoria } = require("./curador");
 const { expandirAla }      = require("./expansor");
 const { iniciarSemeador, semearArtista } = require("./semeador");
+const { buscarObrasPorAla, carregarTodasAlas, salvarObras, ARTISTAS_RUSSOS } = require("./commons");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -221,7 +222,6 @@ async function validateAndCleanImages() {
     const cacheExpiry = Math.floor((Date.now() - 3600000) / 1000);
     await pool.query(`DELETE FROM search_cache WHERE ts < $1`, [cacheExpiry]);
 
-    // Desbloqueia obras falhadas após 2h para nova tentativa
     await pool.query(`
       UPDATE artworks
       SET download_attempts = 0
@@ -330,6 +330,96 @@ app.get("/api/carregar/:nome", async (req, res) => {
     }
     res.json({ ok: true, arquivo: req.params.nome, adicionadas });
   } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ROTAS DO WIKIMEDIA COMMONS (DOMÍNIO PÚBLICO)
+// ═══════════════════════════════════════════════════════════════════════════
+
+app.get("/api/commons/ala/:ala", async (req, res) => {
+  try {
+    const { ala } = req.params;
+    const limite = parseInt(req.query.limite) || 20;
+    
+    const { ALA_TERMOS } = require("./commons");
+    if (!ALA_TERMOS[ala]) {
+      return res.status(400).json({ error: `Ala "${ala}" não encontrada. Alas: ${Object.keys(ALA_TERMOS).join(", ")}` });
+    }
+    
+    console.log(`🖼️ Baixando obras russas para ala "${ala}"...`);
+    const obras = await buscarObrasPorAla(pool, ala, limite);
+    const { salvas, erros } = await salvarObras(pool, obras);
+    
+    res.json({ ok: true, ala, encontradas: obras.length, salvas, erros });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/api/commons/todas", async (req, res) => {
+  try {
+    const limitePorAla = parseInt(req.query.limite) || 15;
+    console.log(`🖼️ Baixando obras russas para TODAS as alas...`);
+    const todasObras = await carregarTodasAlas(pool, limitePorAla);
+    const { salvas, erros } = await salvarObras(pool, todasObras);
+    res.json({ ok: true, total_encontradas: todasObras.length, total_salvas: salvas, erros });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/api/commons/artista/:nome", async (req, res) => {
+  try {
+    const nome = decodeURIComponent(req.params.nome);
+    const limite = parseInt(req.query.limite) || 30;
+    
+    console.log(`🖼️ Buscando obras de ${nome}...`);
+    const url = `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(nome)} painting&gsrnamespace=6&gsrlimit=${limite}&prop=imageinfo&iiprop=url&format=json&origin=*`;
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    const obras = [];
+    if (data.query && data.query.pages) {
+      for (const page of Object.values(data.query.pages)) {
+        if (page.imageinfo && page.imageinfo[0]) {
+          obras.push({
+            id: `commons_${nome.replace(/\s/g, '_')}_${page.pageid}`,
+            source: "wikimedia_commons",
+            title: page.title.replace(/^File:/, '').replace(/\.(jpg|jpeg|png|gif|tiff)$/i, ''),
+            artist: nome,
+            date: "",
+            museum: "Wikimedia Commons - Domínio Público",
+            image_url: page.imageinfo[0].url,
+            ala_id: "geral"
+          });
+        }
+      }
+    }
+    const { salvas, erros } = await salvarObras(pool, obras);
+    res.json({ ok: true, artista: nome, encontradas: obras.length, salvas, erros });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get("/api/commons/artistas", async (req, res) => {
+  res.json({ artistas_russos: ARTISTAS_RUSSOS });
+});
+
+app.get("/api/commons/status", async (req, res) => {
+  try {
+    const r = await pool.query(`
+      SELECT source, COUNT(*) as total,
+             COUNT(*) FILTER (WHERE image_cached_at > 0) as cached
+      FROM artworks WHERE source = 'wikimedia_commons' GROUP BY source
+      UNION ALL
+      SELECT ala_id as source, COUNT(*), COUNT(*) FILTER (WHERE image_cached_at > 0)
+      FROM artworks WHERE source = 'wikimedia_commons' GROUP BY ala_id
+    `);
+    res.json(r.rows);
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -528,7 +618,8 @@ app.get("/banco", async (req, res) => {
     ];
     const SRC_COLOR = {
       curadoria:"#1D9E75", semeador:"#185FA5",
-      curadoria_manual:"#BA7517", direto:"#BA7517", expansao:"#534AB7"
+      curadoria_manual:"#BA7517", wikimedia_commons:"#9B59B6",
+      direto:"#BA7517", expansao:"#534AB7"
     };
 
     const maxN = Math.max(...Object.values(porAla).map(d => d.total), 1);
@@ -547,136 +638,6 @@ app.get("/banco", async (req, res) => {
         <td style="padding:7px 12px;color:#e0e0e0;font-weight:500">${lbl}</td>
         <td style="padding:7px 12px">
           <div style="background:#1a1a1a;border-radius:2px;height:8px;display:flex;overflow:hidden;min-width:120px">${barSegs}</div>
-        </td>
+         </td>
         <td style="padding:7px 12px;text-align:right;color:#aaa;font-size:13px">${d.total.toLocaleString("pt-PT")}</td>
-        <td style="padding:7px 12px;text-align:center;color:${sc};font-size:13px">${status}</td>
-      </tr>`;
-    }).join("");
-
-    const fonteRows = Object.entries(
-      rows.reduce((acc, r) => {
-        acc[r.source] = (acc[r.source] || 0) + parseInt(r.n);
-        return acc;
-      }, {})
-    ).sort((a, b) => b[1] - a[1]).map(([src, n]) =>
-      `<tr>
-        <td style="padding:6px 12px">
-          <span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:${SRC_COLOR[src]||"#555"}33;color:${SRC_COLOR[src]||"#aaa"}">${src}</span>
-        </td>
-        <td style="padding:6px 12px;text-align:right;color:#e0e0e0;font-weight:500">${parseInt(n).toLocaleString("pt-PT")}</td>
-      </tr>`
-    ).join("");
-
-    const now = new Date().toLocaleString("pt-PT", { timeZone: "America/Sao_Paulo" });
-
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.send(`<!DOCTYPE html>
-<html lang="pt">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GERMANUS.Art — Banco</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#0a0a0a;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:28px 24px;max-width:900px}
-h1{font-size:20px;font-weight:600;color:#fff;margin-bottom:4px}
-.sub{color:#555;font-size:12px;margin-bottom:28px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:32px}
-.card{background:#141414;border:1px solid #222;border-radius:10px;padding:14px 16px}
-.card .v{font-size:28px;font-weight:700;color:#fff;line-height:1}
-.card .l{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
-.card.g .v{color:#1D9E75}.card.b .v{color:#185FA5}.card.a .v{color:#BA7517}
-h2{font-size:13px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.5px;margin:0 0 10px}
-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:28px}
-th{text-align:left;padding:8px 12px;color:#444;font-size:10px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #1a1a1a}
-td{border-bottom:1px solid #111}
-tr:hover td{background:#111}
-.legend{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
-.legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:#666}
-.legend b{width:10px;height:10px;border-radius:2px;display:inline-block}
-a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
-.actions{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap}
-.btn{display:inline-block;padding:8px 16px;border:1px solid #2a2a2a;border-radius:8px;color:#aaa;font-size:12px}
-.btn:hover{background:#141414;color:#fff}
-</style>
-</head>
-<body>
-<h1>GERMANUS.Art — Banco de Dados</h1>
-<p class="sub">Actualizado: ${now} BRT &nbsp;·&nbsp; <a href="/banco">↻ Actualizar</a></p>
-
-<div class="cards">
-  <div class="card"><div class="v">${parseInt(t.total).toLocaleString("pt-PT")}</div><div class="l">obras totais</div></div>
-  <div class="card g"><div class="v">${parseInt(t.cached).toLocaleString("pt-PT")}</div><div class="l">imagens cached</div></div>
-  <div class="card a"><div class="v">${parseInt(t.artistas).toLocaleString("pt-PT")}</div><div class="l">artistas únicos</div></div>
-  <div class="card b"><div class="v">${t.alas}</div><div class="l">alas activas</div></div>
-</div>
-
-<div class="legend">
-  <span><b style="background:#1D9E75"></b>curadoria</span>
-  <span><b style="background:#185FA5"></b>semeador</span>
-  <span><b style="background:#BA7517"></b>manual/direto</span>
-  <span><b style="background:#534AB7"></b>expansao</span>
-  <span style="margin-left:auto;color:#555">✓ ≥50 &nbsp;· 20–49 &nbsp;⚠ &lt;20</span>
-</div>
-
-<h2>obras por ala</h2>
-<table>
-  <thead><tr><th>Ala</th><th>Composição</th><th style="text-align:right">Total</th><th style="text-align:center">Estado</th></tr></thead>
-  <tbody>${alaRows}</tbody>
-</table>
-
-<h2>por origem</h2>
-<table>
-  <thead><tr><th>Fonte</th><th style="text-align:right">Obras</th></tr></thead>
-  <tbody>${fonteRows}</tbody>
-</table>
-
-<div class="actions">
-  <a class="btn" href="/">← Voltar ao site</a>
-  <a class="btn" href="/api/cache/forcar?limit=200">Forçar cache</a>
-  <a class="btn" href="/api/carregar/psyche">Carregar Psyché</a>
-  <a class="btn" href="/api/carregar/mestres">Carregar Mestres</a>
-  <a class="btn" href="/api/curadoria/status">JSON raw</a>
-</div>
-</body>
-</html>`);
-  } catch(e) { res.status(500).send(`<pre style="color:red">Erro: ${e.message}</pre>`); }
-});
-
-// ─── Frontend estático ────────────────────────────────────────────────────────
-const distPath = path.join(__dirname, "../dist");
-app.use(express.static(distPath));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(distPath, "index.html"), err => {
-    if (err) res.status(200).send("Germanus.Art online");
-  });
-});
-
-// ─── Start ────────────────────────────────────────────────────────────────────
-async function start() {
-  await initDB();
-
-  console.log("🌱 Iniciando curadoria...");
-  indexarCuradoria(pool, KEYS).catch(e => console.error("Curadoria erro:", e.message));
-
-  console.log("🌱 Iniciando semeador...");
-  iniciarSemeador(pool);
-
-  setTimeout(() => {
-    downloadAndCacheImages();
-    setInterval(downloadAndCacheImages, CACHE_PERIOD);
-  }, CACHE_DELAY);
-
-  setInterval(validateAndCleanImages, CLEANUP_PERIOD);
-
-  app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-    console.log(`📊 Banco: /banco`);
-    console.log(`🎨 Carregar Psyché: /api/carregar/psyche`);
-    console.log(`🎨 Carregar Mestres: /api/carregar/mestres`);
-  });
-}
-
-start().catch(e => { console.error("❌ Fatal:", e.message); process.exit(1); });
-
-module.exports = app;
+        <
