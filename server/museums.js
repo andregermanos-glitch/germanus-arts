@@ -1,4 +1,4 @@
-// museums.js — Conectores para 8 APIs de museus globais
+// museums.js — Conectores para 8 APIs de museus globais + Shanghai Museum
 // Cada conector: busca, normaliza e verifica imagem antes de retornar
 
 const fetch = require("node-fetch");
@@ -53,7 +53,6 @@ async function filterWithImages(artworks) {
 }
 
 // ─── 1. Victoria & Albert Museum (Londres) ────────────────────────────────────
-// Sem chave, CORS nativo, 1M+ obras
 async function searchVAM(query, limit = 8) {
   try {
     const url = `https://api.vam.ac.uk/v2/objects/search?q=${encodeURIComponent(query)}&page_size=${limit}&images_exist=1`;
@@ -84,10 +83,9 @@ async function searchVAM(query, limit = 8) {
   }
 }
 
-// ─── 2. Rijksmuseum (Amsterdã) — API Linked Art, sem chave ───────────────────
+// ─── 2. Rijksmuseum (Amsterdã) ────────────────────────────────────────────────
 async function searchRijks(query, key, limit = 8) {
   try {
-    // Parâmetros semânticos corretos conforme documentação oficial
     const mainWord = query.split(" ").filter(w => w.length > 3)[0] || query.split(" ")[0];
     const params = new URLSearchParams({ type:"painting", imageAvailable:"true", description:mainWord });
     const url = `https://data.rijksmuseum.nl/search/collection?${params}`;
@@ -96,12 +94,9 @@ async function searchRijks(query, key, limit = 8) {
       headers: { "Accept": "application/ld+json, application/json", "User-Agent": "GermanusArt/1.0" }
     });
     const data = await res.json();
-    if (data.detail) console.log(`[Rijks] detalhe: ${data.detail}`);
     const items = data.orderedItems || [];
-    console.log(`[Rijks] ✅ ${items.length} obras`);
     if (items.length === 0) return [];
 
-    // Para cada ID, tenta pegar título via IIIF manifest e constrói resultado
     const results = await Promise.all(items.slice(0, limit).map(async (item) => {
       const idParts = (item.id || "").split("/");
       const objNum  = idParts[idParts.length - 1];
@@ -129,7 +124,6 @@ async function searchRijks(query, key, limit = 8) {
     console.log("[Rijks nova API] erro:", e.message);
   }
 
-  // Fallback: API antiga com chave
   if (!key) return [];
   try {
     const url = `https://www.rijksmuseum.nl/api/en/collection?key=${key}&q=${encodeURIComponent(query)}&imgonly=True&ps=${limit}&format=json`;
@@ -159,7 +153,6 @@ async function searchRijks(query, key, limit = 8) {
 }
 
 // ─── 3. Cleveland Museum of Art ───────────────────────────────────────────────
-// Sem chave, CORS nativo, 64k+ obras CC0
 async function searchCleveland(query, limit = 8) {
   try {
     const url = `https://openaccess-api.clevelandart.org/api/artworks/?q=${encodeURIComponent(query)}&limit=${limit}&has_image=1&cc0=1`;
@@ -190,8 +183,7 @@ async function searchCleveland(query, limit = 8) {
   }
 }
 
-// ─── 4. Art Institute of Chicago (AIC) ───────────────────────────────────────
-// Sem chave, IIIF, 120k+ obras
+// ─── 4. Art Institute of Chicago (AIC) ────────────────────────────────────────
 async function searchAIC(query, limit = 8) {
   try {
     const fields = "id,title,artist_display,date_display,medium_display,dimensions,style_title,place_of_origin,description,image_id,credit_line,department_title,artwork_type_title";
@@ -199,7 +191,6 @@ async function searchAIC(query, limit = 8) {
     const res = await fetch(url, { timeout: 10000 });
     const data = await res.json();
 
-    // Exclui tipos que não são obras de arte visual
     const excludeTypes = ["Architectural", "Technical", "Map", "Document", "Decorative Art", "Stencil", "Poster", "Graphic Design", "Ephemera"];
     const raw = (data.data || []).filter(o =>
       o.image_id &&
@@ -217,7 +208,6 @@ async function searchAIC(query, limit = 8) {
       description: (o.description || "").replace(/<[^>]+>/g, ""),
       credit:      o.credit_line || "Art Institute of Chicago",
       type:        o.artwork_type_title || "",
-      // URLs IIIF do AIC são confiáveis — sem verificação HEAD que falha server-side
       imageUrl:    `https://www.artic.edu/iiif/2/${o.image_id}/full/400,/0/default.jpg`,
       externalUrl: `https://www.artic.edu/artworks/${o.id}`,
     }));
@@ -229,14 +219,13 @@ async function searchAIC(query, limit = 8) {
   }
 }
 
-// ─── 5. Metropolitan Museum of Art (Nova York) ───────────────────────────────
-// Sem chave, 470k+ obras — busca em 2 etapas
+// ─── 5. Metropolitan Museum of Art (Nova York) ────────────────────────────────
 async function searchMet(query, limit = 6) {
   try {
     const searchUrl = `https://collectionapi.metmuseum.org/public/collection/v1/search?q=${encodeURIComponent(query)}&hasImages=true`;
     const sr = await fetch(searchUrl, { timeout: 10000 });
     const sd = await sr.json();
-    const ids = (sd.objectIDs || []).slice(0, limit * 2); // pega mais pois alguns podem falhar
+    const ids = (sd.objectIDs || []).slice(0, limit * 2);
 
     const objects = await Promise.all(
       ids.map(id =>
@@ -271,7 +260,6 @@ async function searchMet(query, limit = 6) {
 }
 
 // ─── 6. Smithsonian Institution ───────────────────────────────────────────────
-// Chave gratuita (DEMO_KEY funciona com rate limit), 4M+ obras
 async function searchSmithsonian(query, key = "DEMO_KEY", limit = 8) {
   try {
     const url = `https://api.si.edu/openaccess/api/v1.0/search?q=${encodeURIComponent(query)}&api_key=${key}&rows=${limit}&media.type=Images&type=edanmdm`;
@@ -309,7 +297,6 @@ async function searchSmithsonian(query, key = "DEMO_KEY", limit = 8) {
 }
 
 // ─── 7. Harvard Art Museums ───────────────────────────────────────────────────
-// Chave gratuita obrigatória, 250k+ obras
 async function searchHarvard(query, key, limit = 8) {
   if (!key) return [];
   try {
@@ -343,29 +330,22 @@ async function searchHarvard(query, key, limit = 8) {
 }
 
 // ─── 8. Europeana ─────────────────────────────────────────────────────────────
-// Chave via header X-Api-Key (método preferido desde maio 2025)
 async function searchEuropeana(query, key, limit = 8) {
   if (!key) return [];
   try {
-    // Adiciona "painting" ao termo para filtrar patrimônio cultural → só pinturas
     const simpleQuery = query.split(" ")[0];
     const artQuery = `${simpleQuery} painting`;
     const url = `https://api.europeana.eu/record/v2/search.json?query=${encodeURIComponent(artQuery)}&rows=${limit}&media=true&qf=TYPE%3AIMAGE&profile=rich`;
     const res = await fetch(url, {
       timeout: 10000,
-      headers: {
-        "X-Api-Key": key,
-        "Accept": "application/json"
-      }
+      headers: { "X-Api-Key": key, "Accept": "application/json" }
     });
     const data = await res.json();
 
     if (data.success === false || !data.items) {
-      console.log(`[Europeana] falhou: ${data.error || JSON.stringify(data).slice(0,100)}`);
       return [];
     }
 
-    console.log(`[Europeana] ✅ ${data.items?.length || 0} resultados via X-Api-Key header`);
     return processEuropeanaItems(data.items, limit);
   } catch (e) {
     console.error("[Europeana]", e.message);
@@ -391,12 +371,104 @@ function processEuropeanaItems(items, limit) {
       description: arr(o, "dcDescription") || "",
       credit:      `Europeana — ${arr(o, "dataProvider") || ""}`,
       type:        "",
-      // Europeana fornece URLs de thumbnail diretas e confiáveis — sem verificação HEAD
       imageUrl:    arr(o, "edmPreview"),
       externalUrl: arr(o, "edmIsShownAt") || o.guid || "",
     }));
-  // Filtra apenas por URL existente — não faz HEAD request (bloqueia CORS)
   return raw.filter(o => o.imageUrl && o.imageUrl.startsWith("http"));
+}
+
+// ─── 9. SHANGHAI MUSEUM (Museu de Xangai) ─────────────────────────────────────
+// Termos de busca para cada uma das 18 alas
+const TERMOS_SHANGHAI = {
+  retratos: ["portrait figure person", "人物画", "人像", "portrait painting"],
+  pessoas_reais: ["historical figure emperor", "历史人物", "帝王像", "official portrait"],
+  historico: ["historical event battle", "历史事件", "战争图", "battle scene"],
+  perspectiva: ["architecture perspective", "建筑画", "园林", "garden view"],
+  objetos: ["still life object", "静物", "器物", "art object"],
+  lugares: ["famous place landscape", "名胜", "风景", "landscape famous"],
+  natureza: ["nature landscape", "山水", "自然风景", "mountain water"],
+  familiar: ["family domestic scene", "家庭生活", "仕女图", "domestic interior"],
+  nudes: ["figure nude", "人体", "裸体画", "nude figure"],
+  esoterico: ["religious mystical", "宗教画", "佛道", "mystical art"],
+  sacro: ["religious sacred buddhist", "佛教艺术", "道教", "sacred art"],
+  arquitetura: ["architecture building", "建筑", "宫殿", "building art"],
+  povo: ["peasant worker folk", "民俗", "市井", "folk scene"],
+  luz_sol: ["sunlight bright", "阳光", "明亮", "sunlight scene"],
+  cores: ["colorful vibrant", "色彩", "绚丽", "color art"],
+  cidades: ["urban city scene", "城市", "都市", "cityscape"],
+  fase: ["surreal fantasy", "奇幻", "梦幻", "fantasy art"],
+  femininas: ["female woman artist", "女性艺术", "仕女", "woman figure"]
+};
+
+async function buscarShanghaiMuseum(termo, maxN = 8, ala = null) {
+  const resultados = [];
+  let termosBusca = [];
+  
+  if (ala && TERMOS_SHANGHAI[ala]) {
+    termosBusca = TERMOS_SHANGHAI[ala];
+  } else {
+    termosBusca = [termo, "art", "painting", "chinese art"];
+  }
+  
+  for (const busca of termosBusca.slice(0, 3)) {
+    if (resultados.length >= maxN) break;
+    
+    try {
+      const url = `https://www.shanghaimuseum.net/mu/frontend/pg/en/collection/antique?keywords=${encodeURIComponent(busca)}&format=json&limit=${maxN * 2}`;
+      
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "Accept": "application/json"
+        },
+        signal: AbortSignal.timeout(10000)
+      });
+      
+      if (!response.ok) continue;
+      
+      const data = await response.json();
+      
+      if (data.data && data.data.length > 0) {
+        for (const item of data.data.slice(0, maxN - resultados.length)) {
+          if (!item.image_url && !item.thumb_url) continue;
+          
+          resultados.push({
+            imageUrl: item.image_url || item.thumb_url,
+            museum: "Shanghai Museum, Xangai, China",
+            title: item.title_en || item.title || "Sem título",
+            artist: item.artist_en || item.artist || "Artista chinês",
+            date: item.dynasty || item.period || item.year || "",
+            api_id: `shanghai_${item.id || Date.now()}_${Math.random()}`,
+            source: "shanghai_museum",
+            ala_id: ala
+          });
+          
+          await new Promise(r => setTimeout(r, 150));
+        }
+      }
+      
+    } catch (error) {
+      console.log(`[Shanghai] Erro: ${error.message}`);
+    }
+    
+    await new Promise(r => setTimeout(r, 500));
+  }
+  
+  return resultados;
+}
+
+async function buscarShanghaiPorAla(ala, maxN = 10) {
+  const termos = TERMOS_SHANGHAI[ala] || ["chinese art", "painting"];
+  const todosResultados = [];
+  
+  for (const termo of termos.slice(0, 2)) {
+    if (todosResultados.length >= maxN) break;
+    const resultados = await buscarShanghaiMuseum(termo, maxN - todosResultados.length, ala);
+    todosResultados.push(...resultados);
+    await new Promise(r => setTimeout(r, 300));
+  }
+  
+  return todosResultados;
 }
 
 // ─── Busca unificada ──────────────────────────────────────────────────────────
@@ -420,12 +492,11 @@ async function searchAll(query, keys = {}, options = {}) {
     .filter(r => r.status === "fulfilled")
     .flatMap(r => r.value);
 
-  // Aplica filtro de ano se fornecido
   const { fromYear, toYear } = options;
   if (fromYear || toYear) {
     return all.filter(art => {
       const year = parseInt(art.date);
-      if (isNaN(year)) return true; // mantém se não tem ano
+      if (isNaN(year)) return true;
       if (fromYear && year < parseInt(fromYear)) return false;
       if (toYear   && year > parseInt(toYear))   return false;
       return true;
@@ -446,4 +517,7 @@ module.exports = {
   searchHarvard,
   searchEuropeana,
   verifyImage,
+  buscarShanghaiMuseum,
+  buscarShanghaiPorAla,
+  TERMOS_SHANGHAI
 };
