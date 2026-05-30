@@ -2,6 +2,8 @@
 // Adiciona 30 novas obras por execução, avaliando importância e diversidade
 // POST /api/curadoria/expandir?ala=retratos&n=30
 
+const { buscarShanghaiPorAla } = require("./museums");
+
 // ─── Score de importância por artista (0-100) ─────────────────────────────────
 const ARTIST_SCORE = {
   // Nível S — Cânone absoluto
@@ -64,7 +66,6 @@ function museumScore(museum) {
 function calcularScore(obra, jaExistentes) {
   let score = 0;
 
-  // Score do artista
   const nomeArtista = (obra.artist || obra.autor || "").trim();
   const artistKey   = Object.keys(ARTIST_SCORE).find(k =>
     nomeArtista.toLowerCase().includes(k.toLowerCase()) ||
@@ -72,19 +73,16 @@ function calcularScore(obra, jaExistentes) {
   );
   score += artistKey ? ARTIST_SCORE[artistKey] : 20;
 
-  // Score do museu
   score += museumScore(obra.museum || obra.museum || "");
 
-  // Bônus de diversidade — penaliza repetição do mesmo artista
   const artistCount = jaExistentes.filter(e =>
     e.artist?.toLowerCase().includes(nomeArtista.toLowerCase().split(" ")[0])
   ).length;
-  if (artistCount === 0) score += 25;      // artista novo: bônus
-  else if (artistCount === 1) score += 10; // 1 obra já: ok
-  else if (artistCount === 2) score -= 10; // 2 obras: penalidade leve
-  else score -= 30;                         // 3+: penalidade forte
+  if (artistCount === 0) score += 25;
+  else if (artistCount === 1) score += 10;
+  else if (artistCount === 2) score -= 10;
+  else score -= 30;
 
-  // Bônus de diversidade geográfica
   const origem = (obra.origin || obra.origem || "").toLowerCase();
   const origemCount = jaExistentes.filter(e =>
     (e.origin || "").toLowerCase() === origem
@@ -92,7 +90,6 @@ function calcularScore(obra, jaExistentes) {
   if (origemCount < 3) score += 15;
   else if (origemCount > 8) score -= 10;
 
-  // Bônus de imagem confirmada
   if (obra.imageUrl?.startsWith("http")) score += 15;
 
   return Math.max(0, score);
@@ -170,7 +167,6 @@ async function buscarCandidatasHarvard(alaHint, key, existingIds) {
 async function buscarCandidatasEuropeana(alaHint, key, existingIds) {
   if (!key) return [];
   const candidatas = [];
-  // Usa termos variados para maior diversidade
   const termos = [alaHint.split(" ")[0], "portrait painting", "self-portrait oil", "master portrait"];
   const termo  = termos[Math.floor(Date.now() / 300000) % termos.length];
   try {
@@ -181,108 +177,4 @@ async function buscarCandidatasEuropeana(alaHint, key, existingIds) {
     );
     const d = await r.json();
     const arr = (o, f) => Array.isArray(o?.[f]) ? o[f][0] : (o?.[f] || "");
-    for (const item of (d.items || [])) {
-      const preview = arr(item, "edmPreview");
-      if (!preview) continue;
-      const id = `europeana_${(item.id||"").replace(/\//g,"_")}`;
-      if (existingIds.has(id)) continue;
-      candidatas.push({
-        id, api:"europeana",
-        title:    arr(item, "title") || "",
-        artist:   arr(item, "dcCreator") || "",
-        date:     arr(item, "year") || "",
-        museum:   arr(item, "dataProvider") || "Europeana",
-        origin:   arr(item, "country") || "Europa",
-        imageUrl: preview,
-        externalUrl: arr(item, "edmIsShownAt") || item.guid || "",
-      });
-    }
-  } catch {}
-  return candidatas;
-}
-
-// ─── Função principal — adiciona N obras à ala ────────────────────────────────
-async function expandirAla(pool, keys, ala, alaHint, quantidade = 30) {
-  console.log(`🤖 Expansor — iniciando ${ala} (+${quantidade})`);
-
-  // 1. Carrega obras já existentes no banco
-  const existentes = [];
-  const existingIds = new Set();
-  try {
-    const r = await pool.query(
-      `SELECT id, title, artist, origin FROM artworks WHERE ala_id=$1`,
-      [ala]
-    );
-    for (const row of r.rows) {
-      existentes.push(row);
-      existingIds.add(row.id);
-    }
-  } catch {}
-  console.log(`  📋 Existentes: ${existentes.length} obras`);
-
-  // 2. Busca candidatas nas três APIs em paralelo
-  const [rijks, harvard, europeana] = await Promise.all([
-    buscarCandidatasRijks(alaHint, existingIds),
-    buscarCandidatasHarvard(alaHint, keys.harvard, existingIds),
-    buscarCandidatasEuropeana(alaHint, keys.europeana, existingIds),
-  ]);
-  const candidatas = [...rijks, ...harvard, ...europeana];
-  console.log(`  🔍 Candidatas: ${candidatas.length} (Rijks:${rijks.length} Harvard:${harvard.length} Europeana:${europeana.length})`);
-
-  if (candidatas.length === 0) {
-    console.log(`  ⚠️  Nenhuma candidata nova encontrada`);
-    return { adicionadas: 0, total: existentes.length };
-  }
-
-  // 3. Calcula score de importância para cada candidata
-  const pontuadas = candidatas
-    .map(obra => ({ obra, score: calcularScore(obra, existentes) }))
-    .sort((a, b) => b.score - a.score); // maior score primeiro
-
-  // 4. Grava as top N no PostgreSQL
-  let adicionadas = 0;
-  for (const { obra, score } of pontuadas.slice(0, quantidade)) {
-    // Para Rijksmuseum, busca título real via manifest
-    if (obra.api === "rijksmuseum" && !obra.title) {
-      try {
-        const mr = await fetch(
-          `https://www.rijksmuseum.nl/api/iiif/${obra.api_id}/manifest/json`,
-          { signal: AbortSignal.timeout(4000) }
-        );
-        const m  = await mr.json();
-        const lbl = m.label;
-        obra.title = typeof lbl === "string" ? lbl : (lbl?.en?.[0] || lbl?.nl?.[0] || obra.api_id);
-        const meta = m.metadata || [];
-        const cf = meta.find(x => (x.label||"").toLowerCase().includes("maker"));
-        if (cf?.value) obra.artist = cf.value;
-      } catch {}
-    }
-
-    // Importância baseada no score
-    const importancia = score >= 120 ? "iconica" : score >= 90 ? "alta" : "media";
-
-    try {
-      await pool.query(
-        `INSERT INTO artworks (id,source,title,artist,date,medium,dimensions,origin,style,museum,description,credit,image_url,external_url,ala_id)
-         VALUES ($1,'expansao',$2,$3,$4,'','','',$5,$6,'',$7,$8,'',$9)
-         ON CONFLICT (id) DO UPDATE SET image_url=EXCLUDED.image_url, indexed_at=EXTRACT(EPOCH FROM NOW())::BIGINT`,
-        [obra.id, obra.title || obra.titulo || "Sem título", obra.artist || "Desconhecido",
-         obra.date || "", importancia, obra.museum || "",
-         `expansão automática — score: ${score}`, obra.imageUrl, ala]
-      );
-      adicionadas++;
-    } catch {}
-  }
-
-  // 5. Loga as 5 melhores adicionadas
-  const top5 = pontuadas.slice(0, 5);
-  console.log(`  ✅ Adicionadas: ${adicionadas} obras`);
-  console.log(`  🏆 Top 5 desta expansão:`);
-  top5.forEach(({obra, score}) =>
-    console.log(`     [${score}] ${obra.artist || ""} — ${obra.title || obra.api_id || ""}`)
-  );
-
-  return { adicionadas, total: existentes.length + adicionadas };
-}
-
-module.exports = { expandirAla };
+    for
