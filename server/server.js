@@ -77,9 +77,9 @@ const memCache  = new Map();
 const CACHE_TTL    = 300000;
 const CACHE_BATCH  = 200;
 const CACHE_DELAY  = 60 * 1000;
-const CACHE_PERIOD =  2 * 60 * 1000;
+const CACHE_PERIOD = 30 * 1000;        // 30 segundos entre lotes
 const CLEANUP_DELAY  =  5 * 60 * 1000;
-const CLEANUP_PERIOD = 24 * 60 * 60 * 1000;
+const CLEANUP_PERIOD =  2 * 60 * 60 * 1000; // 2h — desbloqueia URLs falhadas
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 async function getCache(key) {
@@ -182,7 +182,6 @@ async function downloadAndCacheImages() {
        WHERE image_url IS NOT NULL AND image_url != ''
          AND (image_data IS NULL OR image_cached_at = 0)
          AND (download_attempts IS NULL OR download_attempts < 3)
-         AND image_url NOT LIKE '%metmuseum%'
        ORDER BY RANDOM() LIMIT $1`,
       [CACHE_BATCH]
     );
@@ -211,7 +210,7 @@ async function downloadAndCacheImages() {
           [row.id]
         );
       }
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 200));
     }
     if (saved > 0) console.log(`📦 Cache concluído — ${saved}/${r.rows.length} imagens`);
   } catch (e) { console.error("[downloadAndCacheImages]", e.message); }
@@ -430,7 +429,6 @@ app.get("/api/cache/forcar", async (req, res) => {
        WHERE image_url IS NOT NULL AND image_url!=''
          AND (image_data IS NULL OR image_cached_at=0)
          AND download_attempts<3
-         AND image_url NOT LIKE '%metmuseum%'
        LIMIT $1`,
       [limite]
     );
