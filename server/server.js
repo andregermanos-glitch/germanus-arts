@@ -154,7 +154,7 @@ async function searchLocal(q, alaId, limit) {
   } catch { return []; }
 }
 
-async function searchCuradoria(alaId, excludeIds = [], limit = 50) {
+async function searchCuradoria(alaId, excludeIds = [], limit = 500, offset = 0) {
   try {
     const excl = excludeIds.filter(Boolean);
     let query = `
@@ -167,8 +167,8 @@ async function searchCuradoria(alaId, excludeIds = [], limit = 50) {
       query += ` AND id != ALL($${params.length + 1}::TEXT[])`;
       params.push(excl);
     }
-    query += ` ORDER BY (image_cached_at > 0) DESC, RANDOM() LIMIT $${params.length + 1}`;
-    params.push(limit);
+    query += ` ORDER BY (image_cached_at > 0) DESC, indexed_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    params.push(limit, offset);
     const r = await pool.query(query, params);
     return r.rows.map(mapRow);
   } catch { return []; }
@@ -345,21 +345,37 @@ app.get("/api/status", async (req, res) => {
 });
 
 app.get("/api/search", async (req, res) => {
-  const { q, alaId, exclude, limit = 50 } = req.query;
+  const { q, alaId, exclude, limit = 500, offset = 0 } = req.query;
   const finalAlaId = (alaId === "psyche") ? "fase" : alaId;
 
   if (finalAlaId) {
     try {
       const excludeIds = exclude ? exclude.split(",").filter(Boolean) : [];
-      const results = await searchCuradoria(finalAlaId, excludeIds, parseInt(limit));
-      return res.json({ source: "database", total: results.length, results, ala: finalAlaId });
+      const results = await searchCuradoria(finalAlaId, excludeIds, parseInt(limit), parseInt(offset));
+      // Total real na ala
+      let totalAla = results.length;
+      try {
+        const ct = await pool.query(
+          `SELECT COUNT(*) AS n FROM artworks WHERE ala_id=$1 AND image_url IS NOT NULL AND image_url!=''`,
+          [finalAlaId]
+        );
+        totalAla = parseInt(ct.rows[0].n);
+      } catch {}
+      return res.json({
+        source: "database",
+        total: totalAla,
+        shown: parseInt(offset) + results.length,
+        hasMore: parseInt(offset) + results.length < totalAla,
+        results,
+        ala: finalAlaId
+      });
     } catch(e) { return res.status(500).json({ error: e.message }); }
   }
 
   if (!q?.trim()) {
     try {
       const r = await pool.query(
-        `SELECT * FROM artworks WHERE image_url IS NOT NULL AND image_url != '' ORDER BY RANDOM() LIMIT $1`,
+        `SELECT * FROM artworks WHERE image_url IS NOT NULL AND image_url != '' ORDER BY indexed_at DESC LIMIT $1`,
         [parseInt(limit)]
       );
       return res.json({ source: "random", total: r.rows.length, results: r.rows.map(mapRow) });
