@@ -794,6 +794,38 @@ async function start() {
     }, 24 * 3600 * 1000);
   }, 5 * 60 * 1000);
 
+  // Categorias Wikimedia — carrega todas as 18 alas 8min após boot, depois a cada 24h
+  setTimeout(async () => {
+    async function correrCategorias() {
+      const alas = Object.keys(CATEGORIAS_WIKIMEDIA);
+      let total = 0;
+      console.log("🎨 Categorias Wikimedia — carregando 18 alas...");
+      for (const ala of alas) {
+        try {
+          const obras = await buscarPorCategoria(ala, 40);
+          let salvas = 0;
+          for (const obra of obras) {
+            try {
+              await pool.query(
+                `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit,image_cached_at)
+                 VALUES ($1,'wikimedia_commons',$2,$3,$4,$5,$6,$7,$8,0)
+                 ON CONFLICT (id) DO UPDATE SET ala_id=EXCLUDED.ala_id`,
+                [`commons_${obra.pageid}`, obra.title, obra.artist, obra.date, obra.museum, obra.imageUrl, ala, obra.credit]
+              );
+              salvas++;
+            } catch {}
+          }
+          if (salvas > 0) console.log(`  ✓ [${ala}] +${salvas} obras de categoria`);
+          total += salvas;
+        } catch(e) { console.log(`  ⚠ [${ala}] ${e.message}`); }
+        await new Promise(r => setTimeout(r, 1000));
+      }
+      console.log(`🎨 Categorias concluído — ${total} obras adicionadas`);
+    }
+    try { await correrCategorias(); } catch(e) { console.log("🎨 Categorias erro:", e.message); }
+    setInterval(correrCategorias, 24 * 3600 * 1000);
+  }, 8 * 60 * 1000);
+
   setTimeout(() => {
     downloadAndCacheImages();
     setInterval(downloadAndCacheImages, CACHE_PERIOD);
