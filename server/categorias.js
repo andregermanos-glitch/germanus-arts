@@ -153,44 +153,56 @@ function isLivre(license, date) {
   return true; // dúvida → incluir
 }
 
-// ─── Buscar membros de uma categoria do Commons ───────────────────────────────
+// ─── Buscar membros de uma categoria do Commons (COM PAGINAÇÃO) ───────────────
 async function buscarCategoria(categoria, limite = 50) {
-  const url = `https://commons.wikimedia.org/w/api.php`
-    + `?action=query&generator=categorymembers`
-    + `&gcmtitle=${encodeURIComponent("Category:" + categoria)}`
-    + `&gcmtype=file&gcmlimit=${Math.min(limite, 100)}`
-    + `&prop=imageinfo&iiprop=url|extmetadata`
-    + `&iiextmetadatafilter=LicenseShortName|Artist|DateTimeOriginal|ObjectName`
-    + `&format=json&origin=*`;
+  const obras = [];
+  let cmcontinue = null;
+  let paginas = 0;
+  const MAX_PAGINAS = 6;  // até ~300 ficheiros por categoria
 
-  try {
-    const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
-    const d = await r.json();
-    const obras = [];
-    for (const page of Object.values(d.query?.pages || {})) {
-      const ii = page.imageinfo?.[0];
-      if (!ii?.url) continue;
-      if (!ii.url.match(/\.(jpg|jpeg|png|tiff?)$/i)) continue;
-      const meta = ii.extmetadata || {};
-      const license = meta.LicenseShortName?.value || "";
-      const date    = meta.DateTimeOriginal?.value || "";
-      if (!isLivre(license, date)) continue;
-      const artist = (meta.Artist?.value || "").replace(/<[^>]+>/g, "").trim();
-      obras.push({
-        pageid: page.pageid,
-        title:  (page.title || "").replace(/^File:/, "").replace(/\.(jpg|jpeg|png|tiff?)$/i, ""),
-        artist: artist || "Desconhecido",
-        date:   date.match(/\b(1[0-9]{3}|20[0-2][0-9])\b/)?.[0] || "",
-        museum: `Wikimedia Commons — ${categoria}`,
-        imageUrl: ii.url,
-        credit: "Domínio Público — Wikimedia Commons"
-      });
+  while (obras.length < limite && paginas < MAX_PAGINAS) {
+    paginas++;
+    let url = `https://commons.wikimedia.org/w/api.php`
+      + `?action=query&generator=categorymembers`
+      + `&gcmtitle=${encodeURIComponent("Category:" + categoria)}`
+      + `&gcmtype=file&gcmlimit=50`
+      + `&prop=imageinfo&iiprop=url|extmetadata`
+      + `&iiextmetadatafilter=LicenseShortName|Artist|DateTimeOriginal|ObjectName`
+      + `&format=json&origin=*`;
+    if (cmcontinue) url += `&gcmcontinue=${encodeURIComponent(cmcontinue)}`;
+
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
+      const d = await r.json();
+      for (const page of Object.values(d.query?.pages || {})) {
+        const ii = page.imageinfo?.[0];
+        if (!ii?.url) continue;
+        if (!ii.url.match(/\.(jpg|jpeg|png|tiff?)$/i)) continue;
+        const meta = ii.extmetadata || {};
+        const license = meta.LicenseShortName?.value || "";
+        const date    = meta.DateTimeOriginal?.value || "";
+        if (!isLivre(license, date)) continue;
+        const artist = (meta.Artist?.value || "").replace(/<[^>]+>/g, "").trim();
+        obras.push({
+          pageid: page.pageid,
+          title:  (page.title || "").replace(/^File:/, "").replace(/\.(jpg|jpeg|png|tiff?)$/i, ""),
+          artist: artist || "Desconhecido",
+          date:   date.match(/\b(1[0-9]{3}|20[0-2][0-9])\b/)?.[0] || "",
+          museum: `Wikimedia Commons — ${categoria}`,
+          imageUrl: ii.url,
+          credit: "Domínio Público — Wikimedia Commons"
+        });
+      }
+      // Token de continuação para a próxima página
+      cmcontinue = d.continue?.gcmcontinue || null;
+      if (!cmcontinue) break;  // não há mais páginas
+      await new Promise(r => setTimeout(r, 250));
+    } catch(e) {
+      console.log(`  [Commons] ${categoria} p${paginas}: ${e.message}`);
+      break;
     }
-    return obras;
-  } catch(e) {
-    console.log(`  [Commons] ${categoria}: ${e.message}`);
-    return [];
   }
+  return obras.slice(0, limite);
 }
 
 // ─── Buscar todas as categorias de uma ala ────────────────────────────────────
