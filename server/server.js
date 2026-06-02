@@ -794,15 +794,41 @@ async function start() {
     }, 24 * 3600 * 1000);
   }, 5 * 60 * 1000);
 
-  // Categorias Wikimedia — carrega todas as 18 alas 8min após boot, depois a cada 24h
+  // Auto-equilibrador — enche cada ala até META obras. Corre 8min após boot, depois a cada 90min
+  const META_POR_ALA = 200;
   setTimeout(async () => {
-    async function correrCategorias() {
+    async function equilibrar() {
       const alas = Object.keys(CATEGORIAS_WIKIMEDIA);
-      let total = 0;
-      console.log("🎨 Categorias Wikimedia — carregando 18 alas...");
-      for (const ala of alas) {
+
+      // Contar obras actuais por ala
+      const contagem = {};
+      try {
+        const r = await pool.query(`
+          SELECT ala_id, COUNT(*) AS n FROM artworks
+          WHERE image_url IS NOT NULL AND image_url != ''
+          GROUP BY ala_id
+        `);
+        for (const row of r.rows) contagem[row.ala_id] = parseInt(row.n);
+      } catch {}
+
+      // Ordenar alas: as mais fracas primeiro
+      const fracas = alas
+        .map(a => ({ ala: a, n: contagem[a] || 0 }))
+        .filter(x => x.n < META_POR_ALA)
+        .sort((a, b) => a.n - b.n);
+
+      if (fracas.length === 0) {
+        console.log(`🎯 Todas as 18 alas atingiram a meta de ${META_POR_ALA} obras!`);
+        return;
+      }
+
+      console.log(`🎯 Auto-equilibrador — ${fracas.length} alas abaixo de ${META_POR_ALA}`);
+
+      // Focar nas 4 mais fracas por ciclo
+      for (const { ala, n } of fracas.slice(0, 4)) {
+        const faltam = META_POR_ALA - n;
         try {
-          const obras = await buscarPorCategoria(ala, 40);
+          const obras = await buscarPorCategoria(ala, faltam + 20);
           let salvas = 0;
           for (const obra of obras) {
             try {
@@ -815,15 +841,13 @@ async function start() {
               salvas++;
             } catch {}
           }
-          if (salvas > 0) console.log(`  ✓ [${ala}] +${salvas} obras de categoria`);
-          total += salvas;
+          console.log(`  🎯 [${ala}] ${n} → ${n + salvas} (+${salvas}, meta ${META_POR_ALA})`);
         } catch(e) { console.log(`  ⚠ [${ala}] ${e.message}`); }
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 1500));
       }
-      console.log(`🎨 Categorias concluído — ${total} obras adicionadas`);
     }
-    try { await correrCategorias(); } catch(e) { console.log("🎨 Categorias erro:", e.message); }
-    setInterval(correrCategorias, 24 * 3600 * 1000);
+    try { await equilibrar(); } catch(e) { console.log("🎯 Equilibrador erro:", e.message); }
+    setInterval(equilibrar, 90 * 60 * 1000);  // a cada 90 minutos
   }, 8 * 60 * 1000);
 
   setTimeout(() => {
