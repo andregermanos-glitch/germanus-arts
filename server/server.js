@@ -10,6 +10,7 @@ const { indexarCuradoria } = require("./curador");
 const { expandirAla }      = require("./expansor");
 const { iniciarSemeador, semearArtista } = require("./semeador");
 const { buscarObrasPorAla, carregarTodasAlas, salvarObras, ARTISTAS_RUSSOS, ALA_TERMOS } = require("./commons");
+const { buscarPorCategoria, listarCategoriasWikimedia, CATEGORIAS_WIKIMEDIA, CATEGORIAS_EXTRA } = require("./categorias");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -526,6 +527,73 @@ app.get("/api/commons/todas", async (req, res) => {
 
 app.get("/api/commons/artistas", async (req, res) => {
   res.json({ artistas: ARTISTAS_RUSSOS });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ROTAS WIKIMEDIA POR CATEGORIA
+// ═══════════════════════════════════════════════════════════════════════════
+
+app.get("/api/commons/categorias", (req, res) => {
+  res.json({
+    alas: CATEGORIAS_WIKIMEDIA,
+    extras: CATEGORIAS_EXTRA,
+    lista: listarCategoriasWikimedia()
+  });
+});
+
+app.get("/api/commons/categoria/:nome", async (req, res) => {
+  try {
+    const { nome } = req.params;
+    const ala    = req.query.ala || (CATEGORIAS_WIKIMEDIA[nome] ? nome : "fase");
+    const limite = parseInt(req.query.limite) || 50;
+
+    console.log(`🖼️ Categoria Wikimedia: ${nome} → ala "${ala}" (${limite})`);
+    const obras = await buscarPorCategoria(nome, limite);
+
+    let salvas = 0;
+    for (const obra of obras) {
+      try {
+        const id = `commons_${obra.pageid}`;
+        await pool.query(
+          `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit,image_cached_at)
+           VALUES ($1,'wikimedia_commons',$2,$3,$4,$5,$6,$7,$8,0)
+           ON CONFLICT (id) DO UPDATE SET ala_id=EXCLUDED.ala_id`,
+          [id, obra.title, obra.artist, obra.date, obra.museum, obra.imageUrl, ala, obra.credit]
+        );
+        salvas++;
+      } catch {}
+    }
+    res.json({ ok: true, categoria: nome, ala, encontradas: obras.length, salvas });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post("/api/commons/categorias", async (req, res) => {
+  try {
+    const { categorias, ala = "fase", limitePorCategoria = 30 } = req.body;
+    if (!Array.isArray(categorias) || !categorias.length)
+      return res.status(400).json({ error: "Envie { categorias: ['surrealismo','cubismo'], ala: 'fase' }" });
+
+    const resultados = {};
+    let total = 0;
+    for (const cat of categorias) {
+      const obras = await buscarPorCategoria(cat, limitePorCategoria);
+      let salvas = 0;
+      for (const obra of obras) {
+        try {
+          await pool.query(
+            `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit,image_cached_at)
+             VALUES ($1,'wikimedia_commons',$2,$3,$4,$5,$6,$7,$8,0)
+             ON CONFLICT (id) DO UPDATE SET ala_id=EXCLUDED.ala_id`,
+            [`commons_${obra.pageid}`, obra.title, obra.artist, obra.date, obra.museum, obra.imageUrl, ala, obra.credit]
+          );
+          salvas++;
+        } catch {}
+      }
+      resultados[cat] = { encontradas: obras.length, salvas };
+      total += salvas;
+    }
+    res.json({ ok: true, ala, total_salvas: total, resultados });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
