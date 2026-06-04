@@ -218,26 +218,6 @@ const T = {
 
 // ─── 18 Alas ──────────────────────────────────────────────────────────────────
 const ALAS = [
-  // ── GERMANUS.Art — 18 ALAS COM CRITÉRIOS FIXOS ────────────────────────────────
-  // retratos:      Bustos e configuração clássica de retrato — pessoa real ou não
-  // pessoas_reais: Pessoa identificável, corpo todo ou em ação, INCLUI eventos históricos pessoais
-  // historico:     Momentos históricos clássicos — independências, guerras, eventos conhecidos
-  // perspectiva:   Lugares NÃO identificáveis onde a perspectiva é a linguagem
-  // objetos:       Todos os objetos — INCLUI natureza morta/natura morta
-  // lugares:       Lugares RECONHECÍVEIS — o utilizador sabe onde é ao primeiro olhar
-  // natureza:      Natureza desconhecida — SEM natureza morta, SEM lugares famosos
-  // familiar:      Cotidiano doméstico — SEM pessoa em contexto específico/atividade
-  // nudes:         Nu feminino clássico — a mulher como tema universal da arte
-  // esoterico:     Conhecimento oculto — alquimia, Rosa-Cruz, Varo, budismo esotérico
-  // sacro:         Barroco mundial — fé, santos, anjos, arte sacra de toda tradição
-  // arquitetura:   Prédio, ponte, construção como DESTAQUE — não cidade conhecida
-  // povo:          Gente em contexto/atividade específica — a vida social cotidiana
-  // luz_sol:       Luz do sol em qualquer sujeito — céu, pessoas, paisagem, chão
-  // cores:         Cor como LINGUAGEM — Fauvismo + Impressionismo + Pop Art (Warhol, Basquiat)
-  // cidades:       Abstracionismo — cor/forma EMERGINDO como realidade emocional (=Emoção)
-  // fase (Psyché): Sonho como tema + ilusão de ótica — artistas do século XX
-  // femininas:     A artista mulher — Frida Kahlo e Tarsila do Amaral protagonistas
-  // ── Apenas pinturas — sem gravuras, fotos ou desenhos antigos ─────────────────
   { id:"retratos",     icon:"👤", color:"#7A5C4A", desc:{fr:"Portraits classiques — bustes et figures",en:"Classical portraits — busts and figures",es:"Retratos clásicos — bustos y figuras",it:"Ritratti classici — busti e figure"},            hint:"portrait bust figure man woman classical painting face" },
   { id:"pessoas_reais",icon:"🎭", color:"#8B4A4A", desc:{fr:"Personnages identifiables — célébrités en action",en:"Identifiable people — celebrities in action or full body",es:"Personas identificables — celebridades en acción",it:"Persone identificabili — celebrità in azione"},              hint:"known figure identified person celebrity full body action portrait" },
   { id:"historico",    icon:"⚔️", color:"#6B4A4A", desc:{fr:"Moments historiques — événements qui ont changé le monde",en:"Historical moments — events that changed the world",es:"Momentos históricos — eventos que cambiaron el mundo",it:"Momenti storici — eventi che hanno cambiato il mondo"},    hint:"historical event battle independence revolution war famous moment" },
@@ -296,7 +276,6 @@ async function searchArt(query, ala, fromYear, toYear, lang) {
   if (ala) { p.append("ala", ala.nameEn||ala.id); p.append("alaHint", ala.hint||""); p.append("alaId", ala.id); }
   if (fromYear) p.append("fromYear", fromYear);
   if (toYear)   p.append("toYear", toYear);
-  // Envia IDs já vistos para o servidor excluir (rotatividade)
   const seen = getSeenIds();
   if (seen.length > 0) p.append("exclude", seen.slice(0, 80).join(","));
   const res = await fetch(`/api/search?${p}`);
@@ -304,7 +283,6 @@ async function searchArt(query, ala, fromYear, toYear, lang) {
   const data = await res.json();
   if (data.error) throw new Error(data.error);
   const results = (data.results || []).map((o, i) => ({ ...o, id: o.id || `art_${Date.now()}_${i}` }));
-  // Marca obras retornadas como vistas
   addSeenIds(results.map(r => r.id));
   return results;
 }
@@ -395,11 +373,96 @@ function AlaBtn({ name, ala, active, onClick }) {
   );
 }
 
+// ─── Visor de zoom em alta resolução ──────────────────────────────────────────
+function ZoomViewer({ art, onClose, lang = "fr" }) {
+  const [scale, setScale]   = useState(1);
+  const [pos, setPos]       = useState({ x: 0, y: 0 });
+  const [drag, setDrag]     = useState(null);
+  const [loaded, setLoaded] = useState(false);
+
+  const src = art.imageHd || art.imageUrl;
+
+  useEffect(() => {
+    const onKey = e => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "+" || e.key === "=") setScale(s => Math.min(s + 0.4, 8));
+      if (e.key === "-") setScale(s => Math.max(s - 0.4, 1));
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [onClose]);
+
+  const onWheel = e => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.3 : 0.3;
+    setScale(s => Math.min(Math.max(s + delta, 1), 8));
+  };
+  const onMouseDown = e => { if (scale <= 1) return; setDrag({ x: e.clientX - pos.x, y: e.clientY - pos.y }); };
+  const onMouseMove = e => { if (!drag) return; setPos({ x: e.clientX - drag.x, y: e.clientY - drag.y }); };
+  const onMouseUp = () => setDrag(null);
+  const reset = () => { setScale(1); setPos({ x: 0, y: 0 }); };
+
+  return (
+    <div onClick={onClose}
+      style={{ position:"fixed", inset:0, zIndex:9999, background:"rgba(10,10,10,0.94)",
+        display:"flex", alignItems:"center", justifyContent:"center",
+        cursor: scale > 1 ? (drag ? "grabbing" : "grab") : "default" }}>
+      <div onClick={e => e.stopPropagation()} onWheel={onWheel}
+        onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
+        onDoubleClick={() => scale > 1 ? reset() : setScale(2.5)}
+        style={{ overflow:"hidden", maxWidth:"92vw", maxHeight:"88vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        {!loaded && (
+          <div style={{ position:"absolute", color:"#888", fontFamily:"Verdana,sans-serif", fontSize:13 }}>
+            <span style={{ display:"inline-block", animation:"spin 1s linear infinite" }}>⟳</span> carregando alta resolução…
+          </div>
+        )}
+        <img src={src} alt={art.title} draggable={false} onLoad={() => setLoaded(true)}
+          style={{ maxWidth:"92vw", maxHeight:"88vh",
+            transform:`translate(${pos.x}px, ${pos.y}px) scale(${scale})`,
+            transition: drag ? "none" : "transform .15s ease-out",
+            opacity: loaded ? 1 : 0, userSelect:"none" }}/>
+      </div>
+
+      <div style={{ position:"fixed", bottom:20, left:"50%", transform:"translateX(-50%)", textAlign:"center", color:"#ccc", fontFamily:"'Cormorant Garamond',serif", pointerEvents:"none" }}>
+        <p style={{ margin:0, fontSize:16, fontStyle:"italic" }}>{art.title}</p>
+        <p style={{ margin:"2px 0 0", fontSize:12, color:"#999" }}>{art.artist}{art.date ? ` · ${art.date}` : ""}</p>
+      </div>
+
+      <div style={{ position:"fixed", top:20, right:20, display:"flex", gap:8 }}>
+        <ZoomBtn onClick={e => { e.stopPropagation(); setScale(s => Math.min(s + 0.5, 8)); }}>+</ZoomBtn>
+        <ZoomBtn onClick={e => { e.stopPropagation(); setScale(s => Math.max(s - 0.5, 1)); }}>−</ZoomBtn>
+        <ZoomBtn onClick={e => { e.stopPropagation(); reset(); }}>⟲</ZoomBtn>
+        <ZoomBtn onClick={e => { e.stopPropagation(); onClose(); }}>✕</ZoomBtn>
+      </div>
+
+      <p style={{ position:"fixed", top:24, left:24, margin:0, fontSize:10, color:"#777", fontFamily:"Verdana,sans-serif", letterSpacing:1, pointerEvents:"none" }}>
+        RODA = ZOOM · ARRASTAR = MOVER · DUPLO-CLIQUE · ESC = FECHAR
+      </p>
+    </div>
+  );
+}
+
+function ZoomBtn({ children, onClick }) {
+  const [h, setH] = useState(false);
+  return (
+    <button onClick={onClick} onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      style={{ width:38, height:38, borderRadius:4,
+        background: h ? "#fff" : "rgba(255,255,255,0.12)",
+        border:"1px solid rgba(255,255,255,0.3)", color: h ? "#0a0a0a" : "#fff",
+        fontSize:18, cursor:"pointer", transition:"all .15s",
+        display:"flex", alignItems:"center", justifyContent:"center" }}>
+      {children}
+    </button>
+  );
+}
+
 // ─── Card de obra ─────────────────────────────────────────────────────────────
 function Card({ art, onAdd, onRemove, inCollection, onNavigate, t, lang="fr" }) {
   const [open,setOpen]    = useState(false);
   const [imgErr,setImgErr]= useState(false);
   const [imgOk,setImgOk]  = useState(false);
+  const [zoom,setZoom]    = useState(false);
   const nav=(q,id)=>onNavigate&&onNavigate(q,id);
   const ala = ALAS.find(a=>a.id===art.alaId);
 
@@ -412,7 +475,7 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, t, lang="fr" }) 
         {art.imageUrl&&!imgErr?(
           <>
             {!imgOk&&<div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"#f2f0eb" }}><div style={{ width:20, height:20, border:"2px solid #ddd", borderTopColor:"#888", borderRadius:"50%", animation:"spin 1s linear infinite" }}/></div>}
-            <img src={art.imageUrl} alt={art.title} className="artwork-card__img" style={{ opacity:imgOk?1:0, transition:"opacity .3s" }} onLoad={()=>setImgOk(true)} onError={()=>setImgErr(true)}/>
+            <img src={art.imageUrl} alt={art.title} className="artwork-card__img" onClick={()=>setZoom(true)} style={{ opacity:imgOk?1:0, transition:"opacity .3s", cursor:"zoom-in" }} onLoad={()=>setImgOk(true)} onError={()=>setImgErr(true)}/>
           </>
         ):(
           <div className="artwork-card__placeholder" style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:12, textAlign:"center" }}>
@@ -443,7 +506,6 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, t, lang="fr" }) 
           <div style={{ borderTop:"1px solid #f0ece4", paddingTop:9, display:"flex", flexDirection:"column", gap:5 }}>
             {art.dimensions&&<p style={{ margin:0, fontSize:10.5, color:"#bbb", fontFamily:"monospace" }}>{art.dimensions}</p>}
             {art.description&&<p style={{ margin:0, fontSize:13, color:"#444", lineHeight:1.65, fontFamily:"'Cormorant Garamond',serif" }}>{art.description}</p>}
-            {/* Texto Wikipedia — idioma seleccionado com fallback para inglês */}
             {art.wiki&&(art.wiki[lang||"fr"]||art.wiki.en||art.wiki.fr)&&(()=>{
               const wLang = (lang&&art.wiki[lang]) ? lang : (art.wiki.en?"en":(art.wiki.fr?"fr":(art.wiki.es?"es":"it")));
               const wText = art.wiki[wLang];
@@ -484,6 +546,8 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, t, lang="fr" }) 
           {onRemove&&<Btn danger onClick={()=>onRemove(art.id)}>{t.remove}</Btn>}
         </div>
       </div>
+
+      {zoom && <ZoomViewer art={art} onClose={()=>setZoom(false)} lang={lang}/>}
     </div>
   );
 }
