@@ -1,899 +1,840 @@
-// server/server.js — Germanus.Art Backend (versão final com curadoria manual)
-require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
-const express  = require("express");
-const cors     = require("cors");
-const fs       = require("fs");
-const path     = require("path");
-const { Pool } = require("pg");
-const { searchAll } = require("./museums");
-const { indexarCuradoria } = require("./curador");
-const { expandirAla }      = require("./expansor");
-const { iniciarSemeador, semearArtista } = require("./semeador");
-const { buscarObrasPorAla, carregarTodasAlas, salvarObras, ARTISTAS_RUSSOS, ALA_TERMOS } = require("./commons");
-const { buscarPorCategoria, listarCategoriasWikimedia, CATEGORIAS_WIKIMEDIA, CATEGORIAS_EXTRA } = require("./categorias");
+import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
+import "./germanus.css";
 
-const app  = express();
-const PORT = process.env.PORT || 3001;
+// ─── Persistência ─────────────────────────────────────────────────────────────
+const loadCol  = () => { try { return JSON.parse(localStorage.getItem("germ_col")||"[]"); } catch { return []; } };
+const saveCol  = col => { try { localStorage.setItem("germ_col", JSON.stringify(col)); } catch {} };
+const loadLang = () => { try { return localStorage.getItem("germ_lang") || "fr"; } catch { return "fr"; } };
+const saveLang = l  => { try { localStorage.setItem("germ_lang", l); } catch {} };
 
-app.use(cors());
-app.use(express.json({ limit: "50mb" }));
+// ─── Rotatividade — rastreia obras vistas (30 min) ───────────────────────────
+const SEEN_KEY = "germ_seen";
+const SEEN_TTL = 30 * 60 * 1000;
 
-// ─── PostgreSQL ───────────────────────────────────────────────────────────────
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-
-// ─── Constantes ──────────────────────────────────────────────────────────────
-const KEYS = {
-  rijks:     process.env.RIJKS_KEY     || "",
-  si:        process.env.SI_KEY        || "DEMO_KEY",
-  harvard:   process.env.HARVARD_KEY   || "",
-  europeana: process.env.EUROPEANA_KEY || "",
-};
-
-const ALA_HINTS = {
-  retratos:      "portrait bust figure man woman classical painting face",
-  pessoas_reais: "known figure identified person celebrity full body action portrait",
-  historico:     "historical event battle independence revolution war famous moment",
-  perspectiva:   "unknown place street interior depth perspective viewpoint urban",
-  objetos:       "still life objects vanitas flowers fruit natura morta composition",
-  lugares:       "famous recognizable place landmark known city building landscape",
-  natureza:      "landscape nature wilderness countryside forest pastoral sea mountain",
-  familiar:      "domestic interior family everyday life home genre room",
-  nudes:         "nude female Venus goddess classical mythology figure woman",
-  esoterico:     "esoteric occult alchemy Rosicrucian mysticism symbolic hidden knowledge",
-  sacro:         "religious baroque sacred faith saints angels Madonna Christ altarpiece",
-  arquitetura:   "architecture building bridge church cathedral palace construction exterior",
-  povo:          "peasant workers people folk context activity scene labor market crowd",
-  luz_sol:       "sunlight sunshine luminism golden light sky landscape people ground",
-  cores:         "fauvism impressionism pop art color language Matisse Monet Warhol Basquiat",
-  cidades:       "abstract expressionism Kandinsky Pollock Rothko Malevich color form reality",
-  fase:          "surrealism dream optical illusion Dalí Magritte De Chirico Vasarely 20th century",
-  femininas:     "female woman artist painter Frida Kahlo Tarsila Amaral Cassatt Morisot",
-};
-
-const ALA_TERMS = {
-  retratos:      ["portrait painting face expression bust","self-portrait oil canvas master Renaissance","baroque portrait figure man woman classical"],
-  pessoas_reais: ["known historical figure identified portrait","celebrity full body action person commission","real person identified full portrait commissioned"],
-  historico:     ["historical event battle scene famous moment","independence revolution war historical painting","famous historical moment battle allegory event"],
-  perspectiva:   ["perspective depth unknown place interior","architectural view unknown city street depth","unknown street interior corridor perspective viewpoint"],
-  objetos:       ["still life flowers objects Dutch vanitas","natura morta nature morte fruit vessels Flemish","still life composition objects table kitchen flowers"],
-  lugares:       ["famous landmark known place city view","recognizable place monument Venice Paris London","famous city building landscape known heritage"],
-  natureza:      ["landscape nature countryside wilderness forest","pastoral seascape mountain meadow river unknown","nature wild landscape unknown pastoral no still life"],
-  familiar:      ["domestic interior family genre everyday","home room reading sewing music interior Dutch","family domestic scene interior everyday life"],
-  nudes:         ["nude female figure Venus classical mythology","nude woman goddess bather nymph oil canvas","classical nude female figure painting art"],
-  esoterico:     ["esoteric occult symbolism alchemy mysticism","Rosicrucian hidden knowledge spiritual symbolic","esoteric alchemical Buddhist mystical occult Varo"],
-  sacro:         ["religious painting Madonna saints baroque","Christ crucifixion altarpiece sacred baroque faith","religious icon prayer church angel Virgin holy"],
-  arquitetura:   ["architecture building exterior church ruins","bridge palace cathedral construction landmark","building architecture facade exterior painting"],
-  povo:          ["peasant workers folk genre scene activity","market labor crowd common people context","folk scene people working activity social"],
-  luz_sol:       ["sunlight luminism golden light sunshine","sunlit landscape figures light impressionist plein air","sunlight sky atmosphere golden hour light"],
-  cores:         ["fauvism impressionism color vibrant painting","Matisse Monet color language bold Fauves","pop art Warhol Basquiat Lichtenstein color bold"],
-  cidades:       ["abstract expressionism action painting gesture","Kandinsky abstraction inner emotional Bauhaus Malevich","Pollock Rothko abstract form color emerging reality"],
-  fase:          ["surrealism dream painting Dalí Magritte","optical illusion De Chirico metaphysical dreamlike","surrealist dream psychological 20th century Vasarely"],
-  femininas:     ["woman female artist painter work","Frida Kahlo Tarsila Amaral Brazilian Mexican woman","female artist painting impressionism Cassatt Morisot"],
-};
-
-const memCache  = new Map();
-const CACHE_TTL    = 300000;
-const CACHE_BATCH  = 300;
-const CACHE_DELAY  = 60 * 1000;
-const CACHE_PERIOD = 20 * 1000;        // 30 segundos entre lotes
-const CLEANUP_DELAY  =  5 * 60 * 1000;
-const CLEANUP_PERIOD =  2 * 60 * 60 * 1000; // 2h — desbloqueia URLs falhadas
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-async function getCache(key) {
-  const mem = memCache.get(key);
-  if (mem && Date.now() - mem.ts < CACHE_TTL) return mem.data;
+function getSeenIds() {
   try {
-    const r = await pool.query(
-      `SELECT data FROM search_cache WHERE cache_key=$1 AND ts > $2`,
-      [key, Math.floor((Date.now() - CACHE_TTL) / 1000)]
-    );
-    if (r.rows.length > 0) {
-      const data = JSON.parse(r.rows[0].data);
-      memCache.set(key, { data, ts: Date.now() });
-      return data;
-    }
-  } catch {}
-  return null;
-}
-
-async function setCache(key, data) {
-  memCache.set(key, { data, ts: Date.now() });
-  try {
-    await pool.query(
-      `INSERT INTO search_cache (cache_key, data) VALUES ($1, $2)
-       ON CONFLICT (cache_key) DO UPDATE SET data=EXCLUDED.data, ts=EXTRACT(EPOCH FROM NOW())::BIGINT`,
-      [key, JSON.stringify(data)]
-    );
-  } catch {}
-}
-
-async function saveArtwork(art) {
-  try {
-    await pool.query(
-      `INSERT INTO artworks (id,source,title,artist,date,medium,dimensions,origin,style,museum,description,credit,image_url,external_url,ala_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
-       ON CONFLICT (id) DO UPDATE SET image_url=EXCLUDED.image_url, indexed_at=EXTRACT(EPOCH FROM NOW())::BIGINT`,
-      [art.id, art.source, art.title, art.artist, art.date, art.medium, art.dimensions, art.origin,
-       art.style, art.museum, art.description, art.credit, art.imageUrl, art.externalUrl, art.alaId || null]
-    );
-  } catch {}
-}
-
-// Constrói URL de alta resolução para zoom a partir da URL da miniatura
-function toHd(url) {
-  if (!url) return url;
-  // AIC IIIF: /full/400,/ → /full/1686,/ (resolução recomendada do AIC)
-  if (url.includes("artic.edu/iiif")) {
-    return url.replace(/\/full\/[^/]+\//, "/full/1686,/");
-  }
-  // Wikimedia: /800px-Nome → /1600px-Nome
-  if (url.includes("upload.wikimedia.org") && url.includes("/thumb/")) {
-    return url.replace(/\/\d+px-/, "/1600px-");
-  }
-  // Met, Cleveland, Rijksmuseum e outros — a URL guardada já é boa resolução
-  return url;
-}
-
-function mapRow(r) {
-  // Servir directamente da URL original (CDN do museu) — não usa volume do banco
-  const imageUrl = r.image_url;
-  const imageHd  = toHd(r.image_url);
-  return {
-    id: r.id, source: r.source, title: r.title, artist: r.artist, date: r.date,
-    medium: r.medium, dimensions: r.dimensions, origin: r.origin, style: r.style,
-    museum: r.museum, description: r.description, credit: r.credit,
-    imageUrl, imageHd, externalUrl: r.external_url, alaId: r.ala_id,
-    isCached: (r.image_cached_at > 0),
-    wiki: { en: r.wiki_en || null, fr: r.wiki_fr || null, es: r.wiki_es || null, it: r.wiki_it || null }
-  };
-}
-
-function rotate(results, excludeIds) {
-  const excluded = new Set(excludeIds || []);
-  const fresh = excluded.size > 0 ? results.filter(a => !excluded.has(a.id)) : results;
-  return fresh.filter(a => a.imageUrl).sort(() => Math.random() - 0.45);
-}
-
-async function searchLocal(q, alaId, limit) {
-  try {
-    const r = await pool.query(
-      `SELECT * FROM artworks
-       WHERE (title ILIKE $1 OR artist ILIKE $1 OR style ILIKE $1 OR museum ILIKE $1 OR origin ILIKE $1)
-       AND ($2::TEXT IS NULL OR ala_id = $2)
-       AND image_url IS NOT NULL AND image_url != ''
-       ORDER BY indexed_at DESC LIMIT $3`,
-      [`%${q}%`, alaId || null, limit]
-    );
-    return r.rows.map(mapRow);
+    const s = sessionStorage.getItem(SEEN_KEY);
+    if (!s) return [];
+    const { ids, ts } = JSON.parse(s);
+    if (Date.now() - ts > SEEN_TTL) { sessionStorage.removeItem(SEEN_KEY); return []; }
+    return ids || [];
   } catch { return []; }
 }
 
-async function searchCuradoria(alaId, excludeIds = [], limit = 500, offset = 0) {
+function addSeenIds(newIds) {
   try {
-    const excl = excludeIds.filter(Boolean);
-    let query = `
-      SELECT *, image_cached_at FROM artworks
-      WHERE ala_id = $1
-        AND image_url IS NOT NULL AND image_url != ''
-    `;
-    const params = [alaId];
-    if (excl.length > 0) {
-      query += ` AND id != ALL($${params.length + 1}::TEXT[])`;
-      params.push(excl);
-    }
-    query += ` ORDER BY (image_cached_at > 0) DESC, indexed_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
-    params.push(limit, offset);
-    const r = await pool.query(query, params);
-    return r.rows.map(mapRow);
-  } catch { return []; }
-}
-
-// ─── Manutenção ───────────────────────────────────────────────────────────────
-async function downloadAndCacheImages() {
-  try {
-    const r = await pool.query(
-      `SELECT id, image_url FROM artworks
-       WHERE image_url IS NOT NULL AND image_url != ''
-         AND (image_data IS NULL OR image_cached_at = 0)
-         AND (download_attempts IS NULL OR download_attempts < 3)
-       ORDER BY RANDOM() LIMIT $1`,
-      [CACHE_BATCH]
-    );
-    if (r.rows.length === 0) return;
-    console.log(`📦 Cache — baixando ${r.rows.length} obras em paralelo...`);
-
-    // Baixar uma imagem
-    async function baixarUma(row) {
-      try {
-        const res = await fetch(row.image_url, {
-          signal: AbortSignal.timeout(15000),
-          headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
-        });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const contentType = res.headers.get("content-type") || "image/jpeg";
-        if (!contentType.startsWith("image/")) throw new Error("not image");
-        const buf = await res.arrayBuffer();
-        if (buf.byteLength < 5000) throw new Error("too small");
-        await pool.query(
-          `UPDATE artworks SET image_data=$1, image_mime=$2, image_cached_at=$3, download_attempts=0 WHERE id=$4`,
-          [Buffer.from(buf), contentType, Math.floor(Date.now() / 1000), row.id]
-        );
-        return true;
-      } catch {
-        await pool.query(
-          `UPDATE artworks SET download_attempts=COALESCE(download_attempts,0)+1, last_attempt_at=EXTRACT(EPOCH FROM NOW())::BIGINT WHERE id=$1`,
-          [row.id]
-        );
-        return false;
-      }
-    }
-
-    // Processar em lotes paralelos de CONCORRENCIA imagens de cada vez
-    const CONCORRENCIA = 12;
-    let saved = 0;
-    for (let i = 0; i < r.rows.length; i += CONCORRENCIA) {
-      const lote = r.rows.slice(i, i + CONCORRENCIA);
-      const resultados = await Promise.all(lote.map(baixarUma));
-      saved += resultados.filter(Boolean).length;
-    }
-    if (saved > 0) console.log(`📦 Cache concluído — ${saved}/${r.rows.length} imagens`);
-  } catch (e) { console.error("[downloadAndCacheImages]", e.message); }
-}
-
-async function validateAndCleanImages() {
-  try {
-    const cacheExpiry = Math.floor((Date.now() - 3600000) / 1000);
-    await pool.query(`DELETE FROM search_cache WHERE ts < $1`, [cacheExpiry]);
-
-    // Desbloqueia obras falhadas após 2h para nova tentativa
-    await pool.query(`
-      UPDATE artworks
-      SET download_attempts = 0
-      WHERE download_attempts >= 3
-        AND image_cached_at = 0
-        AND image_url IS NOT NULL AND image_url != ''
-        AND last_attempt_at < EXTRACT(EPOCH FROM NOW()) - 7200
-    `);
+    const ids = [...new Set([...getSeenIds(), ...newIds])];
+    sessionStorage.setItem(SEEN_KEY, JSON.stringify({ ids, ts: Date.now() }));
   } catch {}
 }
 
-async function initDB() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS artworks (
-      id TEXT PRIMARY KEY, source TEXT, title TEXT NOT NULL, artist TEXT,
-      date TEXT, medium TEXT, dimensions TEXT, origin TEXT, style TEXT,
-      museum TEXT, description TEXT, credit TEXT, image_url TEXT,
-      external_url TEXT, ala_id TEXT,
-      indexed_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT,
-      image_data BYTEA DEFAULT NULL, image_mime TEXT DEFAULT 'image/jpeg',
-      image_cached_at BIGINT DEFAULT 0,
-      wiki_en TEXT, wiki_fr TEXT, wiki_es TEXT, wiki_it TEXT,
-      wiki_fetched_at BIGINT DEFAULT 0,
-      download_attempts INT DEFAULT 0, last_attempt_at BIGINT DEFAULT 0
-    );
-    CREATE TABLE IF NOT EXISTS search_cache (
-      cache_key TEXT PRIMARY KEY, data TEXT NOT NULL,
-      ts BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT
-    );
-    CREATE INDEX IF NOT EXISTS idx_art_title  ON artworks(title);
-    CREATE INDEX IF NOT EXISTS idx_art_artist ON artworks(artist);
-    CREATE INDEX IF NOT EXISTS idx_art_ala    ON artworks(ala_id);
-    CREATE INDEX IF NOT EXISTS idx_art_img    ON artworks(image_url) WHERE image_url IS NOT NULL AND image_url != '';
-  `);
-  console.log("✅ PostgreSQL pronto");
+function clearSeen() {
+  try { sessionStorage.removeItem(SEEN_KEY); } catch {}
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// ROTAS DE CURADORIA MANUAL
-// ═══════════════════════════════════════════════════════════════════════════
-
-app.get("/api/carregar/psyche", async (req, res) => {
-  try {
-    const psychePath = fs.existsSync(path.join(__dirname, "psyche.json"))
-      ? path.join(__dirname, "psyche.json")
-      : path.join(__dirname, "psique.json");
-    if (!fs.existsSync(psychePath))
-      return res.status(404).json({ error: "psyche.json / psique.json não encontrado" });
-    const obras = JSON.parse(fs.readFileSync(psychePath, "utf-8"));
-    let adicionadas = 0, erros = 0;
-    for (const obra of obras) {
-      try {
-        const id = `psyche_${(obra.api_id || obra.titulo || Date.now()).toString().replace(/[^a-z0-9]/gi,"_").toLowerCase()}`;
-        await pool.query(
-          `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit)
-           VALUES ($1,'curadoria_manual',$2,$3,$4,$5,$6,'fase','Curadoria manual - Obras Surrealistas')
-           ON CONFLICT (id) DO UPDATE SET title=EXCLUDED.title, artist=EXCLUDED.artist, image_url=EXCLUDED.image_url`,
-          [id, obra.titulo, obra.artista, obra.ano||"", obra.museu||"", obra.imageUrl]
-        );
-        adicionadas++;
-      } catch { erros++; }
-      await new Promise(r => setTimeout(r, 100));
-    }
-    res.json({ ok: true, adicionadas, erros });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get("/api/carregar/mestres", async (req, res) => {
-  try {
-    const mestresPath = path.join(__dirname, "mestres.json");
-    if (!fs.existsSync(mestresPath))
-      return res.status(404).json({ error: "mestres.json não encontrado" });
-    const obras = JSON.parse(fs.readFileSync(mestresPath, "utf-8"));
-    let adicionadas = 0, erros = 0;
-    for (const obra of obras) {
-      try {
-        const id = `mestre_${(obra.titulo||Date.now()).toString().replace(/[^a-z0-9]/gi,"_").toLowerCase()}`;
-        const ala = obra.ala || "retratos";
-        await pool.query(
-          `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit)
-           VALUES ($1,'curadoria_manual',$2,$3,$4,$5,$6,$7,'Curadoria manual - Obras-primas')
-           ON CONFLICT (id) DO UPDATE SET title=EXCLUDED.title, artist=EXCLUDED.artist, image_url=EXCLUDED.image_url`,
-          [id, obra.titulo, obra.artista, obra.ano||"", obra.museu||"", obra.imageUrl, ala]
-        );
-        adicionadas++;
-      } catch { erros++; }
-      await new Promise(r => setTimeout(r, 100));
-    }
-    res.json({ ok: true, adicionadas, erros });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get("/api/carregar/:nome", async (req, res) => {
-  try {
-    const filePath = path.join(__dirname, `${req.params.nome}.json`);
-    if (!fs.existsSync(filePath))
-      return res.status(404).json({ error: `${req.params.nome}.json não encontrado` });
-    const obras = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    let adicionadas = 0;
-    for (const obra of obras) {
-      const id = `manual_${(obra.titulo||"").replace(/[^a-z0-9]/gi,"_").toLowerCase()}_${Date.now()}`;
-      await pool.query(
-        `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id)
-         VALUES ($1,'curadoria_manual',$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO NOTHING`,
-        [id, obra.titulo, obra.artista, obra.ano||"", obra.museu||"", obra.imageUrl, obra.ala||"geral"]
-      );
-      adicionadas++;
-    }
-    res.json({ ok: true, arquivo: req.params.nome, adicionadas });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ROTAS DA API
-// ═══════════════════════════════════════════════════════════════════════════
-
-app.get("/api/status", async (req, res) => {
-  let artCount = 0;
-  try { const r = await pool.query("SELECT COUNT(*) as n FROM artworks WHERE image_url!=''"); artCount = parseInt(r.rows[0].n); } catch {}
-  res.json({ status: "online", artworks_indexed: artCount });
-});
-
-app.get("/api/search", async (req, res) => {
-  const { q, alaId, exclude, limit = 500, offset = 0 } = req.query;
-  const finalAlaId = (alaId === "psyche") ? "fase" : alaId;
-
-  if (finalAlaId) {
-    try {
-      const excludeIds = exclude ? exclude.split(",").filter(Boolean) : [];
-      const results = await searchCuradoria(finalAlaId, excludeIds, parseInt(limit), parseInt(offset));
-      // Total real na ala
-      let totalAla = results.length;
-      try {
-        const ct = await pool.query(
-          `SELECT COUNT(*) AS n FROM artworks WHERE ala_id=$1 AND image_url IS NOT NULL AND image_url!=''`,
-          [finalAlaId]
-        );
-        totalAla = parseInt(ct.rows[0].n);
-      } catch {}
-      return res.json({
-        source: "database",
-        total: totalAla,
-        shown: parseInt(offset) + results.length,
-        hasMore: parseInt(offset) + results.length < totalAla,
-        results,
-        ala: finalAlaId
-      });
-    } catch(e) { return res.status(500).json({ error: e.message }); }
-  }
-
-  if (!q?.trim()) {
-    try {
-      const r = await pool.query(
-        `SELECT * FROM artworks WHERE image_url IS NOT NULL AND image_url != '' ORDER BY indexed_at DESC LIMIT $1`,
-        [parseInt(limit)]
-      );
-      return res.json({ source: "random", total: r.rows.length, results: r.rows.map(mapRow) });
-    } catch(e) { return res.status(500).json({ error: e.message }); }
-  }
-
-  try {
-    const results = await searchLocal(q, finalAlaId || null, parseInt(limit));
-    res.json({ source: "database", total: results.length, results });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.post("/api/curadoria/expandir", async (req, res) => {
-  const ala  = req.query.ala  || req.body?.ala  || "retratos";
-  const n    = parseInt(req.query.n || req.body?.n || "30");
-  const hint = ALA_HINTS[ala] || "painting art masterwork";
-  try {
-    const resultado = await expandirAla(pool, KEYS, ala, hint, n);
-    res.json({ ok: true, ala, ...resultado });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get("/api/curadoria/status", async (req, res) => {
-  try {
-    const r = await pool.query(`
-      SELECT ala_id, source, COUNT(*) as n FROM artworks
-      WHERE image_url IS NOT NULL AND image_url != ''
-      GROUP BY ala_id, source ORDER BY ala_id
-    `);
-    res.json({ alas: r.rows });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get("/api/image/:id", async (req, res) => {
-  try {
-    const r = await pool.query(
-      `SELECT image_data, image_mime FROM artworks WHERE id=$1 AND image_cached_at>0`,
-      [req.params.id]
-    );
-    if (!r.rows[0]?.image_data) return res.status(404).send("Not cached");
-    res.set({
-      "Content-Type": r.rows[0].image_mime || "image/jpeg",
-      "Cache-Control": "public, max-age=31536000, immutable",
-      "Access-Control-Allow-Origin": "*"
-    });
-    res.send(r.rows[0].image_data);
-  } catch(e) { res.status(500).send("Error"); }
-});
-
-app.get("/api/cache/status", async (req, res) => {
-  try {
-    const r = await pool.query(`
-      SELECT COUNT(*) as total_obras,
-             COUNT(*) FILTER (WHERE image_cached_at>0) as imagens_cache,
-             COUNT(*) FILTER (WHERE image_url IS NOT NULL AND image_url!='' AND image_cached_at=0) as imagens_pendentes
-      FROM artworks WHERE image_url IS NOT NULL AND image_url!=''
-    `);
-    res.json(r.rows[0]);
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get("/api/cache/forcar", async (req, res) => {
-  try {
-    const limite = parseInt(req.query.limit) || 100;
-    const r = await pool.query(
-      `SELECT id, image_url FROM artworks
-       WHERE image_url IS NOT NULL AND image_url!=''
-         AND (image_data IS NULL OR image_cached_at=0)
-         AND download_attempts<3
-       LIMIT $1`,
-      [limite]
-    );
-    if (r.rows.length === 0) return res.json({ message: "Nenhuma imagem pendente", total: 0 });
-    let baixadas = 0;
-    for (const row of r.rows) {
-      try {
-        await new Promise(r => setTimeout(r, 500));
-        const resposta = await fetch(row.image_url, { signal: AbortSignal.timeout(15000), headers: { "User-Agent": "Mozilla/5.0" } });
-        if (!resposta.ok) continue;
-        const contentType = resposta.headers.get("content-type") || "image/jpeg";
-        if (!contentType.startsWith("image/")) continue;
-        const buffer = await resposta.arrayBuffer();
-        if (buffer.byteLength < 5000) continue;
-        await pool.query(
-          `UPDATE artworks SET image_data=$1, image_mime=$2, image_cached_at=$3 WHERE id=$4`,
-          [Buffer.from(buffer), contentType, Math.floor(Date.now() / 1000), row.id]
-        );
-        baixadas++;
-      } catch {}
-    }
-    res.json({ ok: true, processadas: r.rows.length, baixadas });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get("/api/cache/detalhado", async (req, res) => {
-  try {
-    const r = await pool.query(`
-      SELECT COUNT(*) as total_obras,
-             COUNT(*) FILTER (WHERE image_cached_at>0) as imagens_cache,
-             COUNT(*) FILTER (WHERE image_url IS NOT NULL AND image_url!='' AND image_cached_at=0) as imagens_pendentes,
-             COUNT(*) FILTER (WHERE download_attempts>=3) as imagens_falhas
-      FROM artworks WHERE image_url IS NOT NULL AND image_url!=''
-    `);
-    res.json(r.rows[0]);
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get("/api/semeador/agora", async (req, res) => {
-  try {
-    const sementes = JSON.parse(fs.readFileSync(path.join(__dirname, "sementes.json"), "utf-8"));
-    let total = 0;
-    for (const [ala, artistas] of Object.entries(sementes)) {
-      for (const artista of artistas) {
-        const n = await semearArtista(pool, artista, ala);
-        total += n;
-        await new Promise(r => setTimeout(r, 1000));
-      }
-    }
-    res.json({ ok: true, obras_adicionadas: total });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ROTAS WIKIMEDIA COMMONS
-// ═══════════════════════════════════════════════════════════════════════════
-
-app.get("/api/commons/ala/:ala", async (req, res) => {
-  try {
-    const { ala } = req.params;
-    const limite = parseInt(req.query.limite) || 20;
-    if (!ALA_TERMOS[ala])
-      return res.status(400).json({ error: `Ala "${ala}" não encontrada` });
-    const obras = await buscarObrasPorAla(pool, ala, limite);
-    const { salvas, erros } = await salvarObras(pool, obras);
-    res.json({ ok: true, ala, encontradas: obras.length, salvas, erros });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get("/api/commons/todas", async (req, res) => {
-  try {
-    const limitePorAla = parseInt(req.query.limite) || 15;
-    const todasObras = await carregarTodasAlas(pool, limitePorAla);
-    const { salvas, erros } = await salvarObras(pool, todasObras);
-    res.json({ ok: true, total_encontradas: todasObras.length, total_salvas: salvas, erros });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get("/api/commons/artistas", async (req, res) => {
-  res.json({ artistas: ARTISTAS_RUSSOS });
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// ROTAS WIKIMEDIA POR CATEGORIA
-// ═══════════════════════════════════════════════════════════════════════════
-
-app.get("/api/commons/categorias", (req, res) => {
-  res.json({
-    alas: CATEGORIAS_WIKIMEDIA,
-    extras: CATEGORIAS_EXTRA,
-    lista: listarCategoriasWikimedia()
-  });
-});
-
-app.get("/api/commons/categoria/:nome", async (req, res) => {
-  try {
-    const { nome } = req.params;
-    const ala    = req.query.ala || (CATEGORIAS_WIKIMEDIA[nome] ? nome : "fase");
-    const limite = parseInt(req.query.limite) || 50;
-
-    console.log(`🖼️ Categoria Wikimedia: ${nome} → ala "${ala}" (${limite})`);
-    const obras = await buscarPorCategoria(nome, limite);
-
-    let salvas = 0;
-    for (const obra of obras) {
-      try {
-        const id = `commons_${obra.pageid}`;
-        await pool.query(
-          `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit,image_cached_at)
-           VALUES ($1,'wikimedia_commons',$2,$3,$4,$5,$6,$7,$8,0)
-           ON CONFLICT (id) DO UPDATE SET ala_id=EXCLUDED.ala_id`,
-          [id, obra.title, obra.artist, obra.date, obra.museum, obra.imageUrl, ala, obra.credit]
-        );
-        salvas++;
-      } catch {}
-    }
-    res.json({ ok: true, categoria: nome, ala, encontradas: obras.length, salvas });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-app.post("/api/commons/categorias", async (req, res) => {
-  try {
-    const { categorias, ala = "fase", limitePorCategoria = 30 } = req.body;
-    if (!Array.isArray(categorias) || !categorias.length)
-      return res.status(400).json({ error: "Envie { categorias: ['surrealismo','cubismo'], ala: 'fase' }" });
-
-    const resultados = {};
-    let total = 0;
-    for (const cat of categorias) {
-      const obras = await buscarPorCategoria(cat, limitePorCategoria);
-      let salvas = 0;
-      for (const obra of obras) {
-        try {
-          await pool.query(
-            `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit,image_cached_at)
-             VALUES ($1,'wikimedia_commons',$2,$3,$4,$5,$6,$7,$8,0)
-             ON CONFLICT (id) DO UPDATE SET ala_id=EXCLUDED.ala_id`,
-            [`commons_${obra.pageid}`, obra.title, obra.artist, obra.date, obra.museum, obra.imageUrl, ala, obra.credit]
-          );
-          salvas++;
-        } catch {}
-      }
-      resultados[cat] = { encontradas: obras.length, salvas };
-      total += salvas;
-    }
-    res.json({ ok: true, ala, total_salvas: total, resultados });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// /banco — PAINEL VISUAL (v2)
-// ═══════════════════════════════════════════════════════════════════════════
-
-app.get("/banco", async (req, res) => {
-  try {
-    const tot = await pool.query(`
-      SELECT COUNT(*) AS total,
-             COUNT(*) FILTER (WHERE image_cached_at > 0) AS cached,
-             COUNT(DISTINCT artist) AS artistas,
-             COUNT(DISTINCT ala_id) FILTER (WHERE ala_id IS NOT NULL) AS alas
-      FROM artworks
-    `);
-    const alas = await pool.query(`
-      SELECT ala_id, source, COUNT(*) AS n
-      FROM artworks
-      WHERE image_url IS NOT NULL AND image_url != ''
-      GROUP BY ala_id, source ORDER BY ala_id, source
-    `);
-
-    const t    = tot.rows[0];
-    const rows = alas.rows;
-
-    const porAla = {};
-    for (const r of rows) {
-      const ala = r.ala_id || "sem_ala";
-      if (!porAla[ala]) porAla[ala] = { total: 0, fontes: {} };
-      const n = parseInt(r.n);
-      porAla[ala].total += n;
-      porAla[ala].fontes[r.source] = (porAla[ala].fontes[r.source] || 0) + n;
-    }
-
-    const ALA_LABEL = {
-      retratos:"Retratos", pessoas_reais:"Personnages", historico:"Histoire",
-      perspectiva:"Perspective", objetos:"Objets", lugares:"Lieux",
-      natureza:"Nature", familiar:"Familiale", nudes:"Nus",
+// ─── Traduções ────────────────────────────────────────────────────────────────
+const T = {
+  fr: {
+    tabs: ["Rechercher", "Collection", "Curation", "Ajouter une œuvre"],
+    searchDirect: "Recherche directe — œuvre, artiste, style, période...",
+    searchRefine: n => `Affiner dans ${n}... (optionnel)`,
+    from: "DE", to: "À",
+    searching: n => n ? `Recherche dans ${n}...` : "Consultation de la base d'art mondiale...",
+    found: (n, i) => `${n} œuvre${n>1?"s":""} · ${i} avec image`,
+    select: "Sélectionnez une galerie ou recherchez directement",
+    noImg: "image non disponible",
+    explore: "Explorer à partir de cette œuvre",
+    moreAla: "Plus dans cette galerie",
+    samePeriod: "+ Même période",
+    add: "+ COLLECTION", saved: "✓ SAUVÉ",
+    details: "▼ DÉTAILS", close: "▲ FERMER",
+    remove: "✕",
+    wikiLink: "Voir sur Wikipedia ↗",
+    empty: "Collection vide — explorez les galeries",
+    browse: "EXPLORER LES GALERIES",
+    filter: "Filtrer la collection...",
+    allGalleries: "Toutes les galeries",
+    artworks: n => `${n} œuvre${n>1?"s":""}`,
+    curationTitle: "Curation",
+    curationSub: "18 galeries thématiques par expérience visuelle — cliquez pour explorer.",
+    addTitle: "Ajouter une œuvre",
+    addSub: "Pour les œuvres de groupes, galeries et musées sans API ouverte.",
+    addBtn: "Ajouter à la Collection",
+    titleReq: "Titre obligatoire.",
+    fields: {
+      title:"Titre *", artist:"Artiste", date:"Date / Période", medium:"Technique",
+      dim:"Dimensions", origin:"Origine / Pays", style:"Style / Mouvement",
+      museum:"Musée / Collection", credit:"Crédits", imgUrl:"URL de l'image",
+      extUrl:"Lien de référence", desc:"Description", gallery:"Galerie"
+    },
+    noGallery: "— sans galerie —",
+    footer: "18 GALERIES · MUSÉES MONDIAUX · COLLECTION PERSONNELLE",
+    global: "Collection d'Art Mondial",
+    alas: {
+      retratos:"Portraits", pessoas_reais:"Personnages Réels", historico:"Histoire", emocao:"Émotion", cidades:"Émotion",
+      objetos:"Objets", lugares:"Lieux Connus",
+      natureza:"Nature", familiar:"Ambiance Familiale", nudes:"Nus Féminins",
       esoterico:"Ésotérisme", sacro:"Sacré", arquitetura:"Architecture",
-      povo:"Peuple", luz_sol:"Lumière", cores:"Couleurs",
-      cidades:"Émotion", fase:"Psyché", femininas:"Féminines", sem_ala:"— sem ala"
-    };
-    const ORDER = [
-      "retratos","pessoas_reais","historico","perspectiva","objetos",
-      "lugares","natureza","familiar","nudes","esoterico","sacro","arquitetura",
-      "povo","luz_sol","cores","cidades","fase","femininas","sem_ala"
-    ];
-    const SRC_COLOR = {
-      curadoria:"#1D9E75", semeador:"#185FA5",
-      curadoria_manual:"#BA7517", direto:"#BA7517", expansao:"#534AB7"
-    };
-
-    const maxN = Math.max(...Object.values(porAla).map(d => d.total), 1);
-
-    const alaRows = ORDER.filter(a => porAla[a]).map(ala => {
-      const d   = porAla[ala];
-      const lbl = ALA_LABEL[ala] || ala;
-      const barSegs = Object.entries(d.fontes).map(([src, n]) => {
-        const w = (n / maxN * 100).toFixed(1);
-        const c = SRC_COLOR[src] || "#888";
-        return `<div style="width:${w}%;height:8px;background:${c}"></div>`;
-      }).join("");
-      const status = d.total < 20 ? "⚠" : d.total < 50 ? "·" : "✓";
-      const sc     = d.total < 20 ? "#E24B4A" : d.total < 50 ? "#BA7517" : "#1D9E75";
-      return `<tr>
-        <td style="padding:7px 12px;color:#e0e0e0;font-weight:500">${lbl}</td>
-        <td style="padding:7px 12px">
-          <div style="background:#1a1a1a;border-radius:2px;height:8px;display:flex;overflow:hidden;min-width:120px">${barSegs}</div>
-        </td>
-        <td style="padding:7px 12px;text-align:right;color:#aaa;font-size:13px">${d.total.toLocaleString("pt-PT")}</td>
-        <td style="padding:7px 12px;text-align:center;color:${sc};font-size:13px">${status}</td>
-      </tr>`;
-    }).join("");
-
-    const fonteRows = Object.entries(
-      rows.reduce((acc, r) => {
-        acc[r.source] = (acc[r.source] || 0) + parseInt(r.n);
-        return acc;
-      }, {})
-    ).sort((a, b) => b[1] - a[1]).map(([src, n]) =>
-      `<tr>
-        <td style="padding:6px 12px">
-          <span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:${SRC_COLOR[src]||"#555"}33;color:${SRC_COLOR[src]||"#aaa"}">${src}</span>
-        </td>
-        <td style="padding:6px 12px;text-align:right;color:#e0e0e0;font-weight:500">${parseInt(n).toLocaleString("pt-PT")}</td>
-      </tr>`
-    ).join("");
-
-    const now = new Date().toLocaleString("pt-PT", { timeZone: "America/Sao_Paulo" });
-
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.send(`<!DOCTYPE html>
-<html lang="pt">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GERMANUS.Art — Banco</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#0a0a0a;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:28px 24px;max-width:900px}
-h1{font-size:20px;font-weight:600;color:#fff;margin-bottom:4px}
-.sub{color:#555;font-size:12px;margin-bottom:28px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:32px}
-.card{background:#141414;border:1px solid #222;border-radius:10px;padding:14px 16px}
-.card .v{font-size:28px;font-weight:700;color:#fff;line-height:1}
-.card .l{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
-.card.g .v{color:#1D9E75}.card.b .v{color:#185FA5}.card.a .v{color:#BA7517}
-h2{font-size:13px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.5px;margin:0 0 10px}
-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:28px}
-th{text-align:left;padding:8px 12px;color:#444;font-size:10px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #1a1a1a}
-td{border-bottom:1px solid #111}
-tr:hover td{background:#111}
-.legend{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
-.legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:#666}
-.legend b{width:10px;height:10px;border-radius:2px;display:inline-block}
-a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
-.actions{margin-top:28px;display:flex;gap:12px;flex-wrap:wrap}
-.btn{display:inline-block;padding:8px 16px;border:1px solid #2a2a2a;border-radius:8px;color:#aaa;font-size:12px}
-.btn:hover{background:#141414;color:#fff}
-</style>
-</head>
-<body>
-<h1>GERMANUS.Art — Banco de Dados</h1>
-<p class="sub">Actualizado: ${now} BRT &nbsp;·&nbsp; <a href="/banco">↻ Actualizar</a></p>
-
-<div class="cards">
-  <div class="card"><div class="v">${parseInt(t.total).toLocaleString("pt-PT")}</div><div class="l">obras totais</div></div>
-  <div class="card g"><div class="v">${parseInt(t.cached).toLocaleString("pt-PT")}</div><div class="l">imagens cached</div></div>
-  <div class="card a"><div class="v">${parseInt(t.artistas).toLocaleString("pt-PT")}</div><div class="l">artistas únicos</div></div>
-  <div class="card b"><div class="v">${t.alas}</div><div class="l">alas activas</div></div>
-</div>
-
-<div class="legend">
-  <span><b style="background:#1D9E75"></b>curadoria</span>
-  <span><b style="background:#185FA5"></b>semeador</span>
-  <span><b style="background:#BA7517"></b>manual/direto</span>
-  <span><b style="background:#534AB7"></b>expansao</span>
-  <span style="margin-left:auto;color:#555">✓ ≥50 &nbsp;· 20–49 &nbsp;⚠ &lt;20</span>
-</div>
-
-<h2>obras por ala</h2>
-<table>
-  <thead><tr><th>Ala</th><th>Composição</th><th style="text-align:right">Total</th><th style="text-align:center">Estado</th></tr></thead>
-  <tbody>${alaRows}</tbody>
-</table>
-
-<h2>por origem</h2>
-<table>
-  <thead><tr><th>Fonte</th><th style="text-align:right">Obras</th></tr></thead>
-  <tbody>${fonteRows}</tbody>
-</table>
-
-<div class="actions">
-  <a class="btn" href="/">← Voltar ao site</a>
-  <a class="btn" href="/api/cache/forcar?limit=200">Forçar cache</a>
-  <a class="btn" href="/api/carregar/psyche">Carregar Psyché</a>
-  <a class="btn" href="/api/carregar/mestres">Carregar Mestres</a>
-  <a class="btn" href="/api/curadoria/status">JSON raw</a>
-</div>
-</body>
-</html>`);
-  } catch(e) { res.status(500).send(`<pre style="color:red">Erro: ${e.message}</pre>`); }
-});
-
-// ─── Frontend estático ────────────────────────────────────────────────────────
-const distPath = path.join(__dirname, "../dist");
-app.use(express.static(distPath));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(distPath, "index.html"), err => {
-    if (err) res.status(200).send("Germanus.Art online");
-  });
-});
-
-// ─── Start ────────────────────────────────────────────────────────────────────
-async function start() {
-  await initDB();
-
-  console.log("🌱 Iniciando curadoria...");
-  indexarCuradoria(pool, KEYS).catch(e => console.error("Curadoria erro:", e.message));
-
-  console.log("🌱 Iniciando semeador...");
-  iniciarSemeador(pool);
-
-  // Commons — carrega obras russas 5min após boot, depois a cada 24h
-  setTimeout(async () => {
-    try {
-      console.log("🖼️ Commons — carregando obras Wikimedia...");
-      const obras = await carregarTodasAlas(pool, 12);
-      const { salvas } = await salvarObras(pool, obras);
-      console.log(`🖼️ Commons concluído — ${salvas} obras adicionadas`);
-    } catch(e) { console.log("🖼️ Commons erro:", e.message); }
-    setInterval(async () => {
-      try {
-        const obras = await carregarTodasAlas(pool, 8);
-        const { salvas } = await salvarObras(pool, obras);
-        if (salvas > 0) console.log(`🖼️ Commons ciclo — +${salvas} obras`);
-      } catch {}
-    }, 24 * 3600 * 1000);
-  }, 5 * 60 * 1000);
-
-  // Auto-equilibrador — enche cada ala até META obras. Corre 8min após boot, depois a cada 90min
-  const META_POR_ALA = 200;
-  setTimeout(async () => {
-    async function equilibrar() {
-      const alas = Object.keys(CATEGORIAS_WIKIMEDIA);
-
-      // Contar obras actuais por ala
-      const contagem = {};
-      try {
-        const r = await pool.query(`
-          SELECT ala_id, COUNT(*) AS n FROM artworks
-          WHERE image_url IS NOT NULL AND image_url != ''
-          GROUP BY ala_id
-        `);
-        for (const row of r.rows) contagem[row.ala_id] = parseInt(row.n);
-      } catch {}
-
-      // Ordenar alas: as mais fracas primeiro
-      const fracas = alas
-        .map(a => ({ ala: a, n: contagem[a] || 0 }))
-        .filter(x => x.n < META_POR_ALA)
-        .sort((a, b) => a.n - b.n);
-
-      if (fracas.length === 0) {
-        console.log(`🎯 Todas as 18 alas atingiram a meta de ${META_POR_ALA} obras!`);
-        return;
-      }
-
-      console.log(`🎯 Auto-equilibrador — ${fracas.length} alas abaixo de ${META_POR_ALA}`);
-
-      // Focar nas 4 mais fracas por ciclo
-      for (const { ala, n } of fracas.slice(0, 4)) {
-        const faltam = META_POR_ALA - n;
-        try {
-          const obras = await buscarPorCategoria(ala, faltam + 20);
-          let salvas = 0;
-          for (const obra of obras) {
-            try {
-              await pool.query(
-                `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit,image_cached_at)
-                 VALUES ($1,'wikimedia_commons',$2,$3,$4,$5,$6,$7,$8,0)
-                 ON CONFLICT (id) DO UPDATE SET ala_id=EXCLUDED.ala_id`,
-                [`commons_${obra.pageid}`, obra.title, obra.artist, obra.date, obra.museum, obra.imageUrl, ala, obra.credit]
-              );
-              salvas++;
-            } catch {}
-          }
-          console.log(`  🎯 [${ala}] ${n} → ${n + salvas} (+${salvas}, meta ${META_POR_ALA})`);
-        } catch(e) { console.log(`  ⚠ [${ala}] ${e.message}`); }
-        await new Promise(r => setTimeout(r, 1500));
-      }
+      povo:"Gens du Peuple", perspectiva:"Perspective", luz_sol:"Lumière du Soleil",
+      cores:"Couleurs", fase:"Psyché", femininas:"Artistes Féminines",
     }
-    try { await equilibrar(); } catch(e) { console.log("🎯 Equilibrador erro:", e.message); }
-    setInterval(equilibrar, 90 * 60 * 1000);  // a cada 90 minutos
-  }, 8 * 60 * 1000);
+  },
+  en: {
+    tabs: ["Search", "Collection", "Curation", "Add Artwork"],
+    searchDirect: "Direct search — artwork, artist, style, period...",
+    searchRefine: n => `Refine in ${n}... (optional)`,
+    from: "FROM", to: "TO",
+    searching: n => n ? `Searching in ${n}...` : "Consulting global art database...",
+    found: (n, i) => `${n} artwork${n>1?"s":""} · ${i} with image`,
+    select: "Select a gallery or search directly",
+    noImg: "image unavailable",
+    explore: "Explore from this artwork",
+    moreAla: "More in this gallery",
+    samePeriod: "+ Same period",
+    add: "+ COLLECTION", saved: "✓ SAVED",
+    details: "▼ DETAILS", close: "▲ CLOSE",
+    remove: "✕",
+    wikiLink: "See on Wikipedia ↗",
+    empty: "Empty collection — explore the galleries",
+    browse: "EXPLORE GALLERIES",
+    filter: "Filter collection...",
+    allGalleries: "All galleries",
+    artworks: n => `${n} artwork${n>1?"s":""}`,
+    curationTitle: "Curation",
+    curationSub: "18 thematic galleries by visual experience — click to explore.",
+    addTitle: "Add Artwork",
+    addSub: "For works from groups, galleries and museums without open API.",
+    addBtn: "Add to Collection",
+    titleReq: "Title is required.",
+    fields: {
+      title:"Title *", artist:"Artist", date:"Date / Period", medium:"Technique",
+      dim:"Dimensions", origin:"Origin / Country", style:"Style / Movement",
+      museum:"Museum / Collection", credit:"Credits", imgUrl:"Image URL",
+      extUrl:"Reference link", desc:"Description", gallery:"Gallery"
+    },
+    noGallery: "— no gallery —",
+    footer: "18 GALLERIES · GLOBAL MUSEUMS · PERSONAL COLLECTION",
+    global: "Global Art Collection",
+    alas: {
+      retratos:"Portraits", pessoas_reais:"Real People", historico:"History", emocao:"Emotion", cidades:"Emotion",
+      objetos:"Objects", lugares:"Famous Places",
+      natureza:"Nature", familiar:"Home Environment", nudes:"Female Nudes",
+      esoterico:"Esotericism", sacro:"Sacred", arquitetura:"Architecture",
+      povo:"Common People", perspectiva:"Perspective", luz_sol:"Sunlight",
+      cores:"Colors", fase:"Psyche", femininas:"Female Artists",
+    }
+  },
+  es: {
+    tabs: ["Buscar", "Colección", "Curaduría", "Agregar Obra"],
+    searchDirect: "Búsqueda directa — obra, artista, estilo, período...",
+    searchRefine: n => `Refinar en ${n}... (opcional)`,
+    from: "DESDE", to: "HASTA",
+    searching: n => n ? `Buscando en ${n}...` : "Consultando base de arte global...",
+    found: (n, i) => `${n} obra${n>1?"s":""} · ${i} con imagen`,
+    select: "Selecciona una galería o busca directamente",
+    noImg: "imagen no disponible",
+    explore: "Explorar desde esta obra",
+    moreAla: "Más en esta galería",
+    samePeriod: "+ Mismo período",
+    add: "+ COLECCIÓN", saved: "✓ GUARDADO",
+    details: "▼ DETALLES", close: "▲ CERRAR",
+    remove: "✕",
+    wikiLink: "Ver en Wikipedia ↗",
+    empty: "Colección vacía — explora las galerías",
+    browse: "EXPLORAR GALERÍAS",
+    filter: "Filtrar colección...",
+    allGalleries: "Todas las galerías",
+    artworks: n => `${n} obra${n>1?"s":""}`,
+    curationTitle: "Curaduría",
+    curationSub: "18 galerías temáticas por experiencia visual — haz clic para explorar.",
+    addTitle: "Agregar Obra",
+    addSub: "Para obras de grupos, galerías y museos sin API abierta.",
+    addBtn: "Agregar a la Colección",
+    titleReq: "El título es obligatorio.",
+    fields: {
+      title:"Título *", artist:"Artista", date:"Fecha / Período", medium:"Técnica",
+      dim:"Dimensiones", origin:"Origen / País", style:"Estilo / Movimiento",
+      museum:"Museo / Colección", credit:"Créditos", imgUrl:"URL de imagen",
+      extUrl:"Enlace de referencia", desc:"Descripción", gallery:"Galería"
+    },
+    noGallery: "— sin galería —",
+    footer: "18 GALERÍAS · MUSEOS GLOBALES · COLECCIÓN PERSONAL",
+    global: "Colección de Arte Global",
+    alas: {
+      retratos:"Retratos", pessoas_reais:"Personas Reales", historico:"Historia", emocao:"Emoción", cidades:"Emoción",
+      objetos:"Objetos", lugares:"Lugares Conocidos",
+      natureza:"Naturaleza", familiar:"Ambiente Familiar", nudes:"Desnudos Femeninos",
+      esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Arquitectura",
+      povo:"Gente del Pueblo", perspectiva:"Perspectiva", luz_sol:"Luz del Sol",
+      cores:"Colores", fase:"Psiqué", femininas:"Artistas Femeninas",
+    }
+  },
+  it: {
+    tabs: ["Cerca", "Collezione", "Curatela", "Aggiungi Opera"],
+    searchDirect: "Ricerca diretta — opera, artista, stile, periodo...",
+    searchRefine: n => `Raffina in ${n}... (facoltativo)`,
+    from: "DA", to: "A",
+    searching: n => n ? `Ricerca in ${n}...` : "Consultazione del database d'arte globale...",
+    found: (n, i) => `${n} opera${n>1?"e":""}` + ` · ${i} con immagine`,
+    select: "Seleziona una galleria o cerca direttamente",
+    noImg: "immagine non disponibile",
+    explore: "Esplora da questa opera",
+    moreAla: "Altro in questa galleria",
+    samePeriod: "+ Stesso periodo",
+    add: "+ COLLEZIONE", saved: "✓ SALVATO",
+    details: "▼ DETTAGLI", close: "▲ CHIUDI",
+    remove: "✕",
+    wikiLink: "Vedi su Wikipedia ↗",
+    empty: "Collezione vuota — esplora le gallerie",
+    browse: "ESPLORA LE GALLERIE",
+    filter: "Filtra la collezione...",
+    allGalleries: "Tutte le gallerie",
+    artworks: n => `${n} opera${n>1?"e":""}`,
+    curationTitle: "Curatela",
+    curationSub: "18 gallerie tematiche per esperienza visiva — clicca per esplorare.",
+    addTitle: "Aggiungi Opera",
+    addSub: "Per opere da gruppi, gallerie e musei senza API aperta.",
+    addBtn: "Aggiungi alla Collezione",
+    titleReq: "Il titolo è obbligatorio.",
+    fields: {
+      title:"Titolo *", artist:"Artista", date:"Data / Periodo", medium:"Tecnica",
+      dim:"Dimensioni", origin:"Origine / Paese", style:"Stile / Movimento",
+      museum:"Museo / Collezione", credit:"Crediti", imgUrl:"URL immagine",
+      extUrl:"Link di riferimento", desc:"Descrizione", gallery:"Galleria"
+    },
+    noGallery: "— senza galleria —",
+    footer: "18 GALLERIE · MUSEI GLOBALI · COLLEZIONE PERSONALE",
+    global: "Collezione d'Arte Globale",
+    alas: {
+      retratos:"Ritratti", pessoas_reais:"Persone Reali", historico:"Storia", emocao:"Emozione", cidades:"Emozione",
+      objetos:"Oggetti", lugares:"Luoghi Noti",
+      natureza:"Natura", familiar:"Ambiente Familiare", nudes:"Nudi Femminili",
+      esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Architettura",
+      povo:"Gente del Popolo", perspectiva:"Prospettiva", luz_sol:"Luce del Sole",
+      cores:"Colori", fase:"Psiche", femininas:"Artiste Femminili",
+    }
+  }
+};
 
-  // Cache de imagens DESACTIVADO — imagens servidas directamente das URLs dos museus
-  // (evita encher o volume do Postgres). Para reactivar, descomentar abaixo:
-  // setTimeout(() => {
-  //   downloadAndCacheImages();
-  //   setInterval(downloadAndCacheImages, CACHE_PERIOD);
-  // }, CACHE_DELAY);
+// ─── 18 Alas ──────────────────────────────────────────────────────────────────
+const ALAS = [
+  { id:"retratos",     icon:"👤", color:"#7A5C4A", desc:{fr:"Portraits classiques — bustes et figures",en:"Classical portraits — busts and figures",es:"Retratos clásicos — bustos y figuras",it:"Ritratti classici — busti e figure"},            hint:"portrait bust figure man woman classical painting face" },
+  { id:"pessoas_reais",icon:"🎭", color:"#8B4A4A", desc:{fr:"Personnages identifiables — célébrités en action",en:"Identifiable people — celebrities in action or full body",es:"Personas identificables — celebridades en acción",it:"Persone identificabili — celebrità in azione"},              hint:"known figure identified person celebrity full body action portrait" },
+  { id:"historico",    icon:"⚔️", color:"#6B4A4A", desc:{fr:"Moments historiques — événements qui ont changé le monde",en:"Historical moments — events that changed the world",es:"Momentos históricos — eventos que cambiaron el mundo",it:"Momenti storici — eventi che hanno cambiato il mondo"},    hint:"historical event battle independence revolution war famous moment" },
+  { id:"perspectiva",  icon:"📐", color:"#5B6B8B", desc:{fr:"Lieux inconnus vus en profondeur — la perspective comme langage",en:"Unknown places in depth — perspective as language",es:"Lugares desconocidos en profundidad — la perspectiva como lenguaje",it:"Luoghi sconosciuti in profondità — la prospettiva come linguaggio"},hint:"unknown place street interior depth perspective viewpoint urban" },
+  { id:"objetos",      icon:"🏺", color:"#A08B5B", desc:{fr:"Objets et natures mortes — toute composition d'objets",en:"Objects and still life — all object compositions",es:"Objetos y naturalezas muertas — toda composición de objetos",it:"Oggetti e natura morta — ogni composizione di oggetti"},    hint:"still life objects vanitas flowers fruit natura morta composition" },
+  { id:"lugares",      icon:"🗺", color:"#5B8B8B", desc:{fr:"Lieux célèbres — vous les reconnaîtrez au premier regard",en:"Famous places — you will recognize them at first glance",es:"Lugares famosos — los reconocerás a primera vista",it:"Luoghi famosi — li riconoscerai al primo sguardo"},        hint:"famous recognizable place landmark known city building landscape monument" },
+  { id:"natureza",     icon:"🌿", color:"#5B8B5B", desc:{fr:"Paysages et nature sauvage — sans nature morte",en:"Landscapes and wild nature — no still life",es:"Paisajes y naturaleza salvaje — sin naturaleza muerta",it:"Paesaggi e natura selvaggia — senza natura morta"},            hint:"landscape nature wilderness countryside forest pastoral sea mountain" },
+  { id:"familiar",     icon:"🏠", color:"#8B7A5B", desc:{fr:"Vie quotidienne domestique — scènes d'intérieur",en:"Domestic everyday life — interior scenes",es:"Vida cotidiana doméstica — escenas de interior",it:"Vita quotidiana domestica — scene d'interno"},                    hint:"domestic interior family everyday life home genre room" },
+  { id:"nudes",        icon:"🌸", color:"#9B7A7A", desc:{fr:"Nu féminin classique — la femme dans l'art universel",en:"Classical female nude — woman in universal art",es:"Desnudo femenino clásico — la mujer en el arte universal",it:"Nudo femminile classico — la donna nell'arte universale"},  hint:"nude female Venus goddess classical mythology figure woman" },
+  { id:"esoterico",    icon:"🔮", color:"#5B5B8B", desc:{fr:"Art occulte — alchimie, Rose-Croix, Varo et ésotérisme",en:"Occult art — alchemy, Rosicrucian, Varo and esoteric knowledge",es:"Arte oculto — alquimia, rosacruz, Varo y conocimiento esotérico",it:"Arte occulta — alchimia, rosacroce, Varo e conoscenza esoterica"},hint:"esoteric occult alchemy Rosicrucian mysticism symbolic hidden knowledge Varo" },
+  { id:"sacro",        icon:"⛪", color:"#8B7A4A", desc:{fr:"Baroque mondial — foi, saints, anges et art sacré",en:"World baroque — faith, saints, angels and sacred art",es:"Barroco mundial — fe, santos, ángeles y arte sacro",it:"Barocco mondiale — fede, santi, angeli e arte sacra"},          hint:"religious baroque sacred faith saints angels Madonna Christ altarpiece" },
+  { id:"arquitetura",  icon:"🏛", color:"#6B6B5B", desc:{fr:"L'architecture comme sujet — édifices, ponts, constructions",en:"Architecture as subject — buildings, bridges, constructions in focus",es:"La arquitectura como tema — edificios, puentes, construcciones",it:"L'architettura come soggetto — edifici, ponti, costruzioni in primo piano"},hint:"architecture building bridge church cathedral palace construction exterior" },
+  { id:"povo",         icon:"👥", color:"#7A6B5B", desc:{fr:"Gens du peuple — la vie quotidienne en contexte",en:"Common people — everyday life in specific context",es:"Gente del pueblo — vida cotidiana en contexto específico",it:"Gente del popolo — vita quotidiana in contesto specifico"},      hint:"peasant workers people folk context activity scene labor market crowd" },
+  { id:"luz_sol",      icon:"☀️", color:"#A08B4A", desc:{fr:"La lumière du soleil — dans le ciel, les gens et les paysages",en:"Sunlight — in the sky, on people, landscapes and architecture",es:"La luz del sol — en el cielo, personas, paisajes y arquitectura",it:"La luce del sole — nel cielo, persone, paesaggi e architettura"},hint:"sunlight sunshine luminism golden light sky landscape people" },
+  { id:"cores",        icon:"🌈", color:"#7B5B9B", desc:{fr:"La couleur comme langage — fauvisme, impressionnisme, pop art",en:"Color as language — Fauvism, Impressionism, Pop Art",es:"El color como lenguaje — fauvismo, impresionismo, pop art",it:"Il colore come linguaggio — Fauvismo, Impressionismo, Pop Art"},hint:"fauvism impressionism pop art color language Matisse Monet Warhol Basquiat vibrant" },
+  { id:"cidades",      icon:"🌊", color:"#3A3A6E", desc:{fr:"Émotion — l'abstraction comme réalité émotionnelle",en:"Emotion — abstraction as emotional reality",es:"Emoción — la abstracción como realidad emocional",it:"Emozione — l'astrazione come realtà emotiva"},                    hint:"abstract expressionism Kandinsky Pollock Rothko Malevich color form reality" },
+  { id:"fase",         icon:"🧠", color:"#5B8B7B", desc:{fr:"Psyché — rêve et illusion d'optique, artistes du XXe siècle",en:"Psyché — dream and optical illusion, 20th century artists",es:"Psyché — sueño e ilusión óptica, artistas del siglo XX",it:"Psyché — sogno e illusione ottica, artisti del XX secolo"},    hint:"surrealism dream optical illusion Dalí Magritte De Chirico Vasarely 20th century" },
+  { id:"femininas",    icon:"🎨", color:"#9B5B7B", desc:{fr:"Artistes femmes — Frida, Tarsila et les grandes créatrices",en:"Women artists — Frida, Tarsila and the great female creators",es:"Artistas mujeres — Frida, Tarsila y las grandes creadoras",it:"Artiste donne — Frida, Tarsila e le grandi creatrici"},        hint:"female woman artist painter Frida Kahlo Tarsila Amaral Cassatt Morisot" },
+];
 
-  setInterval(validateAndCleanImages, CLEANUP_PERIOD);
+// ─── Lua ──────────────────────────────────────────────────────────────────────
+function getMoonPhase() {
+  const now=new Date(), ref=new Date("2000-01-06T18:14:00Z"), cycle=29.53058867;
+  const age=(((now-ref)/86400000)%cycle+cycle)%cycle;
+  const idx=Math.floor((age/cycle)*8)%8;
+  const p=["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"];
+  return { emoji:p[idx], age:Math.round(age) };
+}
 
-  app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-    console.log(`📊 Banco: /banco`);
-    console.log(`🎨 Carregar Psyché: /api/carregar/psyche`);
-    console.log(`🎨 Carregar Mestres: /api/carregar/mestres`);
+// ─── Temperatura ─────────────────────────────────────────────────────────────
+async function getWeather() {
+  return new Promise(resolve => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(async ({ coords: { latitude: lat, longitude: lon } }) => {
+      try {
+        const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current_weather=true&timezone=auto`);
+        const d = await r.json();
+        const cw = d.current_weather;
+        let city = "";
+        try {
+          const gr = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+          const gd = await gr.json();
+          city = gd.address?.city || gd.address?.town || gd.address?.village || "";
+        } catch {}
+        const code = cw?.weathercode ?? 0;
+        const icon = code===0?"☀️":code<=3?"🌤":code<=49?"🌫":code<=69?"🌧":"⛈";
+        resolve({ temp: Math.round(cw?.temperature ?? 0), icon, city });
+      } catch { resolve(null); }
+    }, () => resolve(null), { timeout: 6000, maximumAge: 300000 });
   });
 }
 
-start().catch(e => { console.error("❌ Fatal:", e.message); process.exit(1); });
+// ─── Busca ────────────────────────────────────────────────────────────────────
+async function searchArt(query, ala, fromYear, toYear, lang) {
+  const p = new URLSearchParams({ q: query, lang: lang || "fr" });
+  if (ala) { p.append("ala", ala.nameEn||ala.id); p.append("alaHint", ala.hint||""); p.append("alaId", ala.id); }
+  if (fromYear) p.append("fromYear", fromYear);
+  if (toYear)   p.append("toYear", toYear);
+  const seen = getSeenIds();
+  if (seen.length > 0) p.append("exclude", seen.slice(0, 80).join(","));
+  const res = await fetch(`/api/search?${p}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  const results = (data.results || []).map((o, i) => ({ ...o, id: o.id || `art_${Date.now()}_${i}` }));
+  addSeenIds(results.map(r => r.id));
+  return results;
+}
 
-module.exports = app;
+// ─── Logo ─────────────────────────────────────────────────────────────────────
+function Logo({ small }) {
+  const n=small?16:40, d=small?26:68, a=small?16:44;
+  return (
+    <div style={{ display:"flex", alignItems:"baseline", lineHeight:1, userSelect:"none" }}>
+      <span style={{ fontFamily:"Verdana,Geneva,sans-serif", fontSize:n, fontWeight:700, color:"#111", letterSpacing:small?"0.04em":"0.04em", textTransform:"uppercase" }}>Germanus</span>
+      <span style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:d, fontWeight:700, color:"#1545c7", margin:"0 1px" }}>.</span>
+      <span style={{ fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:a, fontWeight:700, color:"#d41515", letterSpacing:"-0.02em" }}>Art</span>
+    </div>
+  );
+}
+
+// ─── Seletor de idioma ────────────────────────────────────────────────────────
+function LangSwitcher({ lang, setLang }) {
+  const langs = [
+    { code:"fr", flag:"🇫🇷" },
+    { code:"en", flag:"🇬🇧" },
+    { code:"es", flag:"🇪🇸" },
+    { code:"it", flag:"🇮🇹" },
+  ];
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+      {langs.map(l => (
+        <button key={l.code} onClick={() => { setLang(l.code); saveLang(l.code); }}
+          style={{
+            background:"none", border:"none", cursor:"pointer",
+            fontSize:20, lineHeight:1, padding:"2px 3px",
+            opacity: lang===l.code ? 1 : 0.35,
+            borderBottom: lang===l.code ? "2px solid #0a0a0a" : "2px solid transparent",
+            transition:"all .2s"
+          }}>
+          {l.flag}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─── Barra ambiente ───────────────────────────────────────────────────────────
+function AmbientBar() {
+  const [moon, setMoon]       = useState(null);
+  const [weather, setWeather] = useState(null);
+  const [wL, setWL]           = useState(true);
+  useEffect(() => {
+    setMoon(getMoonPhase());
+    getWeather().then(w => { setWeather(w); setWL(false); });
+  }, []);
+  const s = { fontSize:10, color:"#999", fontFamily:"Verdana,sans-serif", letterSpacing:.3 };
+  return (
+    <div style={{ background:"#f5f4f0", borderBottom:"1px solid #ece9e2", padding:"5px 36px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+      <span style={s}>{moon?.emoji} · día {moon?.age}</span>
+      <span style={s}>{wL?"···":weather?`${weather.icon} ${weather.temp}°C${weather.city?` · ${weather.city}`:""}` : "—"}</span>
+    </div>
+  );
+}
+
+// ─── Botão de ala — texto, padding 3mm (≈11px) ───────────────────────────────
+function AlaBtn({ name, ala, active, onClick }) {
+  const [h,setH] = useState(false);
+  const hot = active || h;
+  return (
+    <button className={`ala-btn${active?" ala-btn--active":""}`} onClick={onClick} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
+      style={{
+        display:"flex", alignItems:"center",
+        padding:"7px 14px",
+        background: hot
+          ? `linear-gradient(90deg, ${ala.color}45 0%, ${ala.color}12 50%, #faf9f7 100%)`
+          : `linear-gradient(90deg, ${ala.color}18 0%, ${ala.color}05 50%, #faf9f7 100%)`,
+        border:"1px solid",
+        borderColor: hot ? `${ala.color}66` : "#e8e4dc",
+        borderLeft: `3px solid ${active ? ala.color : hot ? ala.color+"aa" : "#e0dbd0"}`,
+        borderRadius:3, cursor:"pointer", transition:"all .18s",
+        textAlign:"left", width:"100%",
+        boxShadow: active ? `0 2px 8px ${ala.color}22` : "none",
+      }}>
+      <span style={{
+        margin:0, fontSize:12, lineHeight:"1",
+        fontFamily:"Verdana,sans-serif",
+        fontWeight: active ? 700 : 500,
+        color: active ? "#0a0a0a" : "#2a2a2a",
+        letterSpacing:".3px", display:"block",
+      }}>{name}</span>
+    </button>
+  );
+}
+
+// ─── Visor de zoom em alta resolução ──────────────────────────────────────────
+function ZoomViewer({ art, onClose, lang = "fr" }) {
+  const [scale, setScale]   = useState(1);
+  const [pos, setPos]       = useState({ x: 0, y: 0 });
+  const [drag, setDrag]     = useState(null);
+  const [loaded, setLoaded] = useState(false);
+
+  const src = art.imageHd || art.imageUrl;
+
+  useEffect(() => {
+    const onKey = e => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "+" || e.key === "=") setScale(s => Math.min(s + 0.4, 8));
+      if (e.key === "-") setScale(s => Math.max(s - 0.4, 1));
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [onClose]);
+
+  const onWheel = e => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.3 : 0.3;
+    setScale(s => Math.min(Math.max(s + delta, 1), 8));
+  };
+  const onMouseDown = e => { if (scale <= 1) return; setDrag({ x: e.clientX - pos.x, y: e.clientY - pos.y }); };
+  const onMouseMove = e => { if (!drag) return; setPos({ x: e.clientX - drag.x, y: e.clientY - drag.y }); };
+  const onMouseUp = () => setDrag(null);
+  const reset = () => { setScale(1); setPos({ x: 0, y: 0 }); };
+
+  return createPortal(
+    <div onClick={onClose}
+      style={{ position:"fixed", top:0, left:0, right:0, bottom:0, width:"100vw", height:"100vh",
+        zIndex:99999, background:"rgba(10,10,10,0.95)",
+        display:"flex", alignItems:"center", justifyContent:"center",
+        cursor: scale > 1 ? (drag ? "grabbing" : "grab") : "default" }}>
+      <div onClick={e => e.stopPropagation()} onWheel={onWheel}
+        onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
+        onDoubleClick={() => scale > 1 ? reset() : setScale(2.5)}
+        style={{ overflow:"hidden", maxWidth:"94vw", maxHeight:"90vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        {!loaded && (
+          <div style={{ position:"absolute", color:"#888", fontFamily:"Verdana,sans-serif", fontSize:13 }}>
+            <span style={{ display:"inline-block", animation:"spin 1s linear infinite" }}>⟳</span> carregando alta resolução…
+          </div>
+        )}
+        <img src={src} alt={art.title} draggable={false} onLoad={() => setLoaded(true)}
+          style={{ maxWidth:"94vw", maxHeight:"90vh", width:"auto", height:"auto", objectFit:"contain", display:"block",
+            transform:`translate(${pos.x}px, ${pos.y}px) scale(${scale})`,
+            transformOrigin:"center center",
+            transition: drag ? "none" : "transform .15s ease-out",
+            opacity: loaded ? 1 : 0, userSelect:"none" }}/>
+      </div>
+
+      <div style={{ position:"fixed", bottom:20, left:"50%", transform:"translateX(-50%)", textAlign:"center", color:"#ccc", fontFamily:"'Cormorant Garamond',serif", pointerEvents:"none" }}>
+        <p style={{ margin:0, fontSize:16, fontStyle:"italic" }}>{art.title}</p>
+        <p style={{ margin:"2px 0 0", fontSize:12, color:"#999" }}>{art.artist}{art.date ? ` · ${art.date}` : ""}</p>
+      </div>
+
+      <div style={{ position:"fixed", top:16, right:16, display:"flex", gap:8, zIndex:100000 }}>
+        <ZoomBtn onClick={e => { e.stopPropagation(); setScale(s => Math.min(s + 0.5, 8)); }}>+</ZoomBtn>
+        <ZoomBtn onClick={e => { e.stopPropagation(); setScale(s => Math.max(s - 0.5, 1)); }}>−</ZoomBtn>
+        <ZoomBtn onClick={e => { e.stopPropagation(); reset(); }}>⟲</ZoomBtn>
+        <ZoomBtn onClick={e => { e.stopPropagation(); onClose(); }} close>✕</ZoomBtn>
+      </div>
+
+      <p style={{ position:"fixed", bottom:70, left:"50%", transform:"translateX(-50%)", margin:0, fontSize:10, color:"#888", fontFamily:"Verdana,sans-serif", letterSpacing:1, pointerEvents:"none", textAlign:"center" }}>
+        RODA = ZOOM · ARRASTAR = MOVER · ESC = FECHAR
+      </p>
+    </div>,
+    document.body
+  );
+}
+
+function ZoomBtn({ children, onClick, close }) {
+  const [h, setH] = useState(false);
+  return (
+    <button onClick={onClick} onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      style={{ width:44, height:44, borderRadius:6,
+        background: close ? (h ? "#d41515" : "rgba(212,21,21,0.8)") : (h ? "#fff" : "rgba(255,255,255,0.15)"),
+        border:"1px solid rgba(255,255,255,0.4)", color:"#fff",
+        fontSize:20, fontWeight:700, cursor:"pointer", transition:"all .15s",
+        display:"flex", alignItems:"center", justifyContent:"center",
+        boxShadow:"0 2px 8px rgba(0,0,0,0.4)" }}>
+      {children}
+    </button>
+  );
+}
+
+// ─── Card de obra ─────────────────────────────────────────────────────────────
+function Card({ art, onAdd, onRemove, inCollection, onNavigate, t, lang="fr" }) {
+  const [open,setOpen]    = useState(false);
+  const [imgErr,setImgErr]= useState(false);
+  const [imgOk,setImgOk]  = useState(false);
+  const [zoom,setZoom]    = useState(false);
+  const nav=(q,id)=>onNavigate&&onNavigate(q,id);
+  const ala = ALAS.find(a=>a.id===art.alaId);
+
+  return (
+    <div className="artwork-card" style={{ background:"#fff", border:"1px solid #e8e4dc", overflow:"hidden", display:"flex", flexDirection:"column" }}
+      onMouseEnter={e=>{ e.currentTarget.style.borderColor="#aaa"; e.currentTarget.style.boxShadow="3px 3px 0 #0a0a0a20"; }}
+      onMouseLeave={e=>{ e.currentTarget.style.borderColor="#e8e4dc"; e.currentTarget.style.boxShadow="none"; }}>
+
+      <div className="artwork-card__img-area" style={{ borderBottom:"1px solid #ece9e2", overflow:"hidden", position:"relative", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        {art.imageUrl&&!imgErr?(
+          <>
+            {!imgOk&&<div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"#f2f0eb" }}><div style={{ width:20, height:20, border:"2px solid #ddd", borderTopColor:"#888", borderRadius:"50%", animation:"spin 1s linear infinite" }}/></div>}
+            <img src={art.imageUrl} alt={art.title} className="artwork-card__img" onClick={()=>setZoom(true)} style={{ opacity:imgOk?1:0, transition:"opacity .3s", cursor:"zoom-in" }} onLoad={()=>setImgOk(true)} onError={()=>setImgErr(true)}/>
+          </>
+        ):(
+          <div className="artwork-card__placeholder" style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:12, textAlign:"center" }}>
+            <span style={{ fontSize:24, opacity:.1 }}>🖼</span>
+            <span style={{ fontSize:9, color:"#bbb", fontFamily:"monospace", letterSpacing:1.5, textTransform:"uppercase" }}>{t.noImg}</span>
+            {art.externalUrl&&<a href={art.externalUrl} target="_blank" rel="noreferrer" style={{ fontSize:9, color:"#aaa", fontFamily:"monospace" }}>wikipedia ↗</a>}
+          </div>
+        )}
+        {ala&&<div style={{ position:"absolute", top:7, left:7, background:`${ala.color}ee`, borderRadius:2, padding:"2px 7px" }}><span style={{ fontSize:9, color:"#fff", fontFamily:"Verdana,sans-serif", letterSpacing:.5 }}>{t.alas[ala.id]}</span></div>}
+      </div>
+
+      <div className="artwork-card__content" style={{ flex:1, display:"flex", flexDirection:"column", gap:5 }}>
+        <h3 className="artwork-card__title" style={{ margin:0, lineHeight:1.35 }}>{art.title}</h3>
+        <p style={{ margin:0, fontSize:12, color:"#444", cursor:"pointer" }}
+          onClick={()=>nav(art.artist?.split("(")[0].trim())}
+          onMouseEnter={e=>e.target.style.color="#1a3a6e"} onMouseLeave={e=>e.target.style.color="#444"}>
+          {art.artist}
+        </p>
+        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+          {art.date&&<span style={{ fontSize:10.5, color:"#aaa", fontFamily:"monospace" }}>{art.date}</span>}
+          {art.origin&&<span onClick={()=>nav(art.origin)} style={{ fontSize:10.5, color:"#888", fontFamily:"monospace", cursor:"pointer", borderBottom:"1px dotted #ccc" }} onMouseEnter={e=>e.target.style.color="#1a3a6e"} onMouseLeave={e=>e.target.style.color="#888"}>🌍 {art.origin}</span>}
+          {art.style&&<span onClick={()=>nav(art.style)} style={{ fontSize:10.5, color:"#888", fontFamily:"monospace", cursor:"pointer", borderBottom:"1px dotted #ccc" }} onMouseEnter={e=>e.target.style.color="#1a3a6e"} onMouseLeave={e=>e.target.style.color="#888"}>🎨 {art.style}</span>}
+        </div>
+        {art.museum&&<p className="artwork-card__museum" style={{ margin:0, lineHeight:1.4, cursor:"pointer" }} onClick={()=>nav(art.museum?.split(",")[0])} onMouseEnter={e=>e.currentTarget.style.color="#1a3a6e"} onMouseLeave={e=>e.currentTarget.style.color="#555"}>{art.museum}</p>}
+        {art.medium&&<p style={{ margin:0, fontSize:10.5, color:"#bbb" }}>{art.medium.slice(0,80)}{art.medium.length>80?"…":""}</p>}
+
+        {open&&(
+          <div style={{ borderTop:"1px solid #f0ece4", paddingTop:9, display:"flex", flexDirection:"column", gap:5 }}>
+            {art.dimensions&&<p style={{ margin:0, fontSize:10.5, color:"#bbb", fontFamily:"monospace" }}>{art.dimensions}</p>}
+            {art.description&&<p style={{ margin:0, fontSize:13, color:"#444", lineHeight:1.65, fontFamily:"'Cormorant Garamond',serif" }}>{art.description}</p>}
+            {art.wiki&&(art.wiki[lang||"fr"]||art.wiki.en||art.wiki.fr)&&(()=>{
+              const wLang = (lang&&art.wiki[lang]) ? lang : (art.wiki.en?"en":(art.wiki.fr?"fr":(art.wiki.es?"es":"it")));
+              const wText = art.wiki[wLang];
+              if (!wText) return null;
+              return (
+                <div style={{ borderLeft:"2px solid #c4a46c", paddingLeft:8, margin:"4px 0" }}>
+                  <p style={{ margin:0, fontSize:12.5, color:"#555", lineHeight:1.65,
+                    fontFamily:"'Cormorant Garamond',serif", fontStyle:"italic" }}>
+                    {wText}
+                  </p>
+                  <p style={{ margin:"4px 0 0", fontSize:9, color:"#bbb",
+                    fontFamily:"Verdana,sans-serif", letterSpacing:1 }}>
+                    FONTE: WIKIPEDIA ({wLang.toUpperCase()}) · CC BY-SA
+                  </p>
+                </div>
+              );
+            })()}
+            {art.credit&&<p style={{ margin:0, fontSize:10, color:"#ccc", fontStyle:"italic" }}>{art.credit}</p>}
+            {art.externalUrl&&<a href={art.externalUrl} target="_blank" rel="noreferrer" style={{ color:"#1a3a6e", fontSize:11, fontFamily:"monospace" }}>{t.wikiLink}</a>}
+            {onNavigate&&(
+              <div style={{ borderTop:"1px solid #f5f0e8", paddingTop:7 }}>
+                <p style={{ margin:"0 0 5px", fontSize:9, color:"#bbb", fontFamily:"Verdana,sans-serif", letterSpacing:1, textTransform:"uppercase" }}>{t.explore}</p>
+                <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
+                  {art.artist&&<NavBtn onClick={()=>nav(art.artist?.split("(")[0].trim())}>+ {art.artist?.split("(")[0].trim()}</NavBtn>}
+                  {art.style&&<NavBtn onClick={()=>nav(art.style)}>+ {art.style}</NavBtn>}
+                  {art.alaId&&<NavBtn onClick={()=>nav("",art.alaId)} blue>{t.moreAla}</NavBtn>}
+                  {art.date&&art.style&&<NavBtn onClick={()=>nav(`${art.style} ${art.date?.slice(0,4)}`)}>+ {t.samePeriod.replace("+ ","")}</NavBtn>}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{ display:"flex", gap:5, marginTop:"auto", paddingTop:8, borderTop:"1px solid #f5f0e8" }}>
+          <Btn outline onClick={()=>setOpen(v=>!v)}>{open?t.close:t.details}</Btn>
+          {onAdd&&!inCollection&&<Btn filled onClick={()=>onAdd(art)}>{t.add}</Btn>}
+          {onAdd&&inCollection&&<Chip>{t.saved}</Chip>}
+          {onRemove&&<Btn danger onClick={()=>onRemove(art.id)}>{t.remove}</Btn>}
+        </div>
+      </div>
+
+      {zoom && <ZoomViewer art={art} onClose={()=>setZoom(false)} lang={lang}/>}
+    </div>
+  );
+}
+
+function NavBtn({ children, onClick, blue }) {
+  const [h,setH]=useState(false);
+  return <button onClick={onClick} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)} style={{ background:h?(blue?"#1a3a6e":"#0a0a0a"):"#fff", border:`1px solid ${blue?(h?"#1a3a6e":"#c8d4e8"):(h?"#0a0a0a":"#e0dbd0")}`, borderRadius:2, color:h?"#fff":(blue?"#1a3a6e":"#777"), padding:"4px 9px", cursor:"pointer", fontSize:9.5, fontFamily:"Verdana,sans-serif", letterSpacing:.3, transition:"all .15s", whiteSpace:"nowrap" }}>{children}</button>;
+}
+function Btn({ children, onClick, filled, danger, outline }) {
+  const [h,setH]=useState(false);
+  const s={flex:danger?0:1,padding:danger?"6px 9px":"7px 0",cursor:"pointer",fontSize:9.5,fontFamily:"Verdana,sans-serif",letterSpacing:.5,borderRadius:2,border:"1px solid",transition:"all .15s"};
+  const c=filled?{background:h?"#333":"#0a0a0a",borderColor:"#0a0a0a",color:"#fff"}:danger?{background:"#fff",borderColor:h?"#b22222":"#ddd",color:h?"#b22222":"#ccc"}:{background:"#fff",borderColor:h?"#0a0a0a":"#ddd",color:h?"#0a0a0a":"#aaa"};
+  return <button onClick={onClick} style={{...s,...c}} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}>{children}</button>;
+}
+function Chip({ children }) {
+  return <span style={{ flex:1, textAlign:"center", fontSize:9.5, color:"#aaa", padding:"7px 0", border:"1px solid #eee", borderRadius:2, fontFamily:"Verdana,sans-serif" }}>{children}</span>;
+}
+
+// ─── Filtro de anos ───────────────────────────────────────────────────────────
+function YearRange({ from, to, onFrom, onTo, t }) {
+  const inp={background:"#fff",border:"1px solid #e0dbd0",borderRadius:2,color:"#333",padding:"5px 8px",fontSize:11,outline:"none",fontFamily:"Verdana,sans-serif",width:72,textAlign:"center"};
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:7 }}>
+      <span style={{ fontSize:9.5, color:"#aaa", fontFamily:"Verdana,sans-serif" }}>{t.from}</span>
+      <input type="number" placeholder="1400" value={from} onChange={e=>onFrom(e.target.value)} style={inp}/>
+      <span style={{ fontSize:9.5, color:"#aaa", fontFamily:"Verdana,sans-serif" }}>{t.to}</span>
+      <input type="number" placeholder="2025" value={to} onChange={e=>onTo(e.target.value)} style={inp}/>
+      {(from||to)&&<button onClick={()=>{onFrom("");onTo("");}} style={{ background:"none",border:"none",color:"#ccc",cursor:"pointer",fontSize:12 }}>✕</button>}
+    </div>
+  );
+}
+
+// ─── Formulário manual ────────────────────────────────────────────────────────
+const EMPTY={title:"",artist:"",date:"",medium:"",dimensions:"",origin:"",style:"",museum:"",description:"",imageUrl:"",externalUrl:"",credit:"",alaId:""};
+function ManualForm({ onAdd, t }) {
+  const [f,setF]=useState(EMPTY);
+  const s=(k,v)=>setF(x=>({...x,[k]:v}));
+  const base={width:"100%",background:"#fff",border:"1px solid #e0dbd0",borderRadius:2,color:"#0a0a0a",padding:"9px 11px",fontSize:13,outline:"none",fontFamily:"'Cormorant Garamond',serif"};
+  const inp=(label,key,rows)=>(
+    <div style={{ display:"flex",flexDirection:"column",gap:4 }}>
+      <label style={{ fontSize:9.5,color:"#aaa",fontFamily:"Verdana,sans-serif",letterSpacing:1,textTransform:"uppercase" }}>{label}</label>
+      {rows?<textarea rows={rows} value={f[key]} onChange={e=>s(key,e.target.value)} style={{...base,resize:"vertical"}}/>:<input value={f[key]} onChange={e=>s(key,e.target.value)} style={base}/>}
+    </div>
+  );
+  return (
+    <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:13 }}>
+      <div style={{ gridColumn:"1/-1" }}>{inp(t.fields.title,"title")}</div>
+      {inp(t.fields.artist,"artist")} {inp(t.fields.date,"date")}
+      {inp(t.fields.medium,"medium")} {inp(t.fields.dim,"dimensions")}
+      {inp(t.fields.origin,"origin")} {inp(t.fields.style,"style")}
+      {inp(t.fields.museum,"museum")} {inp(t.fields.credit,"credit")}
+      <div style={{ gridColumn:"1/-1" }}>
+        <label style={{ fontSize:9.5,color:"#aaa",fontFamily:"Verdana,sans-serif",letterSpacing:1,textTransform:"uppercase",display:"block",marginBottom:4 }}>{t.fields.gallery}</label>
+        <select value={f.alaId} onChange={e=>s("alaId",e.target.value)} style={{...base,cursor:"pointer"}}>
+          <option value="">{t.noGallery}</option>
+          {ALAS.map(a=><option key={a.id} value={a.id}>{t.alas[a.id]}</option>)}
+        </select>
+      </div>
+      <div style={{ gridColumn:"1/-1" }}>{inp(t.fields.imgUrl,"imageUrl")}</div>
+      <div style={{ gridColumn:"1/-1" }}>{inp(t.fields.extUrl,"externalUrl")}</div>
+      <div style={{ gridColumn:"1/-1" }}>{inp(t.fields.desc,"description",4)}</div>
+      <div style={{ gridColumn:"1/-1" }}>
+        <button onClick={()=>{ if(!f.title.trim()) return alert(t.titleReq); onAdd({...f,id:`m_${Date.now()}`,source:"manual"}); setF(EMPTY); }} style={{ width:"100%",background:"#0a0a0a",border:"none",borderRadius:2,color:"#fff",padding:"13px 0",cursor:"pointer",fontSize:11,fontFamily:"Verdana,sans-serif",letterSpacing:1,textTransform:"uppercase" }}>{t.addBtn}</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Curadoria ────────────────────────────────────────────────────────────────
+function CuradoriaTab({ col, onClickAla, t, lang }) {
+  const count=id=>col.filter(a=>a.alaId===id).length;
+  return (
+    <div>
+      <h2 style={{ margin:"0 0 4px",fontSize:20,fontWeight:700,fontFamily:"Verdana,sans-serif",color:"#0a0a0a" }}>{t.curationTitle}</h2>
+      <p style={{ margin:"0 0 22px",fontSize:12,color:"#aaa",fontFamily:"Verdana,sans-serif",lineHeight:1.6 }}>{t.curationSub}</p>
+      <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(min(100%, 280px), 1fr))",gap:8 }}>
+        {ALAS.map(ala=>{
+          const c=count(ala.id);
+          return (
+            <button key={ala.id} onClick={()=>onClickAla(ala)}
+              style={{ display:"flex",alignItems:"center",gap:10,padding:"11px 14px",background:`linear-gradient(90deg, ${ala.color}18 0%, transparent 100%)`,border:`1px solid ${ala.color}33`,borderLeft:`3px solid ${ala.color}`,borderRadius:3,cursor:"pointer",textAlign:"left",transition:"all .18s" }}
+              onMouseEnter={e=>{ e.currentTarget.style.background=`linear-gradient(90deg, ${ala.color}35 0%, transparent 100%)`; e.currentTarget.style.borderColor=`${ala.color}66`; }}
+              onMouseLeave={e=>{ e.currentTarget.style.background=`linear-gradient(90deg, ${ala.color}18 0%, transparent 100%)`; e.currentTarget.style.borderColor=`${ala.color}33`; }}>
+              <div style={{ flex:1,minWidth:0 }}>
+                <p style={{ margin:0,fontSize:12,fontFamily:"Verdana,sans-serif",fontWeight:600,color:"#0a0a0a",lineHeight:"1" }}>{t.alas[ala.id]}</p>
+                <p style={{ margin:"3px 0 0",fontSize:10.5,color:"#aaa",fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis" }}>{ala.desc[lang]}</p>
+              </div>
+              {c>0&&<span style={{ fontSize:9.5,color:ala.color,background:`${ala.color}18`,border:`1px solid ${ala.color}33`,borderRadius:10,padding:"1px 6px",fontFamily:"Verdana,sans-serif",flexShrink:0 }}>{c}</span>}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+export default function App() {
+  const [lang,setLang]     = useState(loadLang);
+  const t = T[lang];
+
+  const [tab,setTab]       = useState("buscar");
+  const [col,setCol]       = useState([]);
+  const [results,setRes]   = useState([]);
+  const [query,setQuery]   = useState("");
+  const [activeAla,setAla] = useState(null);
+  const [fromYear,setFrom] = useState("");
+  const [toYear,setTo]     = useState("");
+  const [phase,setPhase]   = useState("idle");
+  const [errMsg,setErr]    = useState("");
+  const [filter,setFilt]   = useState("");
+  const [filterAla,setFA]  = useState("");
+
+  useEffect(()=>{ setCol(loadCol()); },[]);
+
+  const add    = useCallback(art=>setCol(p=>{if(p.find(a=>a.id===art.id))return p;const n=[art,...p];saveCol(n);return n;}),[]);
+  const remove = useCallback(id=>setCol(p=>{const n=p.filter(a=>a.id!==id);saveCol(n);return n;}),[]);
+
+  const clickAla = useCallback(async (ala) => {
+    if (activeAla?.id===ala.id) { setAla(null);setRes([]);setPhase("idle");return; }
+    setAla(ala);setRes([]);setErr("");setPhase("searching");setTab("buscar");
+    try {
+      const arts = await searchArt(ala.hint, ala, fromYear, toYear, lang);
+      setRes(arts);setPhase("done");
+    } catch(e){setErr(e.message);setPhase("error");}
+  },[activeAla,fromYear,toYear]);
+
+  const doSearch = async () => {
+    if (!query.trim()||phase==="searching") return;
+    setRes([]);setErr("");setPhase("searching");
+    try {
+      const arts = await searchArt(query, activeAla, fromYear, toYear, lang);
+      setRes(arts);setPhase("done");
+    } catch(e){setErr(e.message);setPhase("error");}
+  };
+
+  const navigate = useCallback((term,alaId)=>{
+    const ala=alaId?ALAS.find(a=>a.id===alaId):activeAla;
+    if(alaId)setAla(ALAS.find(a=>a.id===alaId)||null);
+    if(term)setQuery(term);
+    setTab("buscar");setRes([]);setPhase("idle");
+    setTimeout(async()=>{
+      setPhase("searching");
+      try{const arts=await searchArt(term||query,ala,fromYear,toYear,lang);setRes(arts);setPhase("done");}
+      catch(e){setErr(e.message);setPhase("error");}
+    },50);
+  },[activeAla,query,fromYear,toYear]);
+
+  const busy=phase==="searching";
+  const ids=new Set(col.map(a=>a.id));
+  const filtered=col.filter(a=>{
+    const txt=!filter||[a.title,a.artist,a.style,a.origin,a.museum].some(v=>v?.toLowerCase().includes(filter.toLowerCase()));
+    const ala=!filterAla||a.alaId===filterAla;
+    return txt&&ala;
+  });
+
+  const TABS=[
+    {id:"buscar",   label:t.tabs[0]},
+    {id:"acervo",   label:`${t.tabs[1]}${col.length?` (${col.length})`:""}`},
+    {id:"curadoria",label:t.tabs[2]},
+    {id:"manual",   label:t.tabs[3]},
+  ];
+
+  return (
+    <div className="germ-app" style={{ minHeight:"100vh",color:"#0a0a0a",fontFamily:"'Cormorant Garamond',Georgia,serif" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
+      <style>{`*{box-sizing:border-box}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+
+      <AmbientBar/>
+
+      <header className="germ-header" style={{ borderBottom:"1px solid #e8e4dc",padding:"18px 36px 0" }}>
+        <div style={{ maxWidth:1300,margin:"0 auto" }}>
+          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:16 }}>
+            <Logo/>
+            <div style={{ display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6 }}>
+              <LangSwitcher lang={lang} setLang={setLang}/>
+              <p style={{ margin:0,fontSize:9,color:"#bbb",fontFamily:"Verdana,sans-serif",letterSpacing:2,textTransform:"uppercase" }}>{t.global}</p>
+            </div>
+          </div>
+          <nav style={{ display:"flex" }}>
+            {TABS.map(tb=>(
+              <button key={tb.id} onClick={()=>setTab(tb.id)} style={{ background:"none",border:"none",borderBottom:tab===tb.id?"2px solid #0a0a0a":"2px solid transparent",color:tab===tb.id?"#0a0a0a":"#aaa",padding:"9px 20px 9px 0",marginRight:4,cursor:"pointer",fontSize:10.5,fontFamily:"Verdana,sans-serif",letterSpacing:1,textTransform:"uppercase",transition:"color .18s" }}>{tb.label}</button>
+            ))}
+          </nav>
+        </div>
+      </header>
+
+      <main style={{ maxWidth:1300,margin:"0 auto",padding:"30px 36px" }}>
+
+        {/* BUSCAR */}
+        {tab==="buscar"&&(
+          <div>
+            <div style={{ display:"flex",alignItems:"center",borderBottom:`2px solid ${activeAla?activeAla.color:"#0a0a0a"}`,marginBottom:18,paddingBottom:2,transition:"border-color .3s" }}>
+              <input
+                placeholder={activeAla?t.searchRefine(t.alas[activeAla.id]):t.searchDirect}
+                value={query} onChange={e=>setQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doSearch()}
+                style={{ flex:1,background:"transparent",border:"none",color:"#0a0a0a",padding:"11px 0",fontSize:17,outline:"none",fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic" }}
+              />
+              {query.trim()&&(
+                <button onClick={doSearch} disabled={busy}
+                  style={{ background:"none",border:"none",cursor:busy?"default":"pointer",fontSize:10.5,fontFamily:"Verdana,sans-serif",letterSpacing:2,color:busy?"#ccc":"#0a0a0a",paddingLeft:16,whiteSpace:"nowrap" }}>
+                  {busy?<span style={{ display:"inline-block",animation:"spin 1s linear infinite" }}>⟳</span>:`${t.tabs[0].toUpperCase()} →`}
+                </button>
+              )}
+            </div>
+
+            <div style={{ display:"flex",justifyContent:"flex-end",marginBottom:14 }}>
+              <YearRange from={fromYear} to={toYear} onFrom={setFrom} onTo={setTo} t={t}/>
+            </div>
+
+            <div className="alas-grid" style={{ display:"grid",gap:6,marginBottom:22 }}>
+              {ALAS.map(ala=>(
+                <AlaBtn key={ala.id} name={t.alas[ala.id]} ala={ala} active={activeAla?.id===ala.id} onClick={()=>clickAla(ala)}/>
+              ))}
+            </div>
+
+            {phase==="searching"&&<div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:14 }}><div style={{ width:6,height:6,borderRadius:"50%",background:"#ccc",animation:"spin 1s linear infinite" }}/><span style={{ fontSize:10.5,color:"#aaa",fontFamily:"Verdana,sans-serif" }}>{t.searching(activeAla?t.alas[activeAla.id]:null)}</span></div>}
+            {phase==="done"&&results.length>0&&<p style={{ fontSize:10.5,color:"#aaa",fontFamily:"Verdana,sans-serif",marginBottom:14 }}>{t.found(results.length,results.filter(r=>r.imageUrl).length)}</p>}
+            {phase==="error"&&<p style={{ fontSize:10.5,color:"#b22222",fontFamily:"Verdana,sans-serif",marginBottom:14 }}>Erreur: {errMsg}</p>}
+
+            {results.length>0&&(
+              <div className="artworks-grid" style={{ display:"grid",gap:18 }}>
+                {results.map(a=><Card key={a.id} art={a} lang={lang} onAdd={add} inCollection={ids.has(a.id)} onNavigate={navigate} t={t}/>)}
+              </div>
+            )}
+
+            {phase==="idle"&&results.length===0&&(
+              <div style={{ textAlign:"center",paddingTop:18,borderTop:"1px solid #f0ece4" }}>
+                <p style={{ fontSize:10,color:"#ccc",fontFamily:"Verdana,sans-serif",letterSpacing:1,textTransform:"uppercase" }}>{t.select}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ACERVO */}
+        {tab==="acervo"&&(
+          <div>
+            {col.length>0&&(
+              <div style={{ display:"flex",gap:10,marginBottom:18,flexWrap:"wrap",alignItems:"center" }}>
+                <input placeholder={t.filter} value={filter} onChange={e=>setFilt(e.target.value)}
+                  style={{ flex:1,minWidth:180,background:"#fff",border:"1px solid #e0dbd0",borderRadius:2,color:"#0a0a0a",padding:"9px 12px",fontSize:13,outline:"none",fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic" }}/>
+                <select value={filterAla} onChange={e=>setFA(e.target.value)}
+                  style={{ background:"#fff",border:"1px solid #e0dbd0",borderRadius:2,color:filterAla?"#0a0a0a":"#aaa",padding:"9px 12px",fontSize:11,outline:"none",cursor:"pointer",fontFamily:"Verdana,sans-serif" }}>
+                  <option value="">{t.allGalleries}</option>
+                  {ALAS.map(a=><option key={a.id} value={a.id}>{t.alas[a.id]}</option>)}
+                </select>
+                {(filter||filterAla)&&<button onClick={()=>{setFilt("");setFA("");}} style={{ background:"none",border:"none",color:"#ccc",cursor:"pointer",fontSize:16 }}>✕</button>}
+              </div>
+            )}
+            {filtered.length===0
+              ?<div style={{ textAlign:"center",padding:"80px 0" }}>
+                  <div style={{ opacity:.06,marginBottom:16,display:"inline-block" }}><Logo/></div>
+                  <p style={{ fontSize:11,color:"#ccc",fontFamily:"Verdana,sans-serif" }}>{col.length===0?t.empty:"—"}</p>
+                  {col.length===0&&<button onClick={()=>setTab("buscar")} style={{ marginTop:14,background:"#0a0a0a",border:"none",borderRadius:2,color:"#fff",padding:"10px 24px",cursor:"pointer",fontSize:10,fontFamily:"Verdana,sans-serif",letterSpacing:1 }}>{t.browse}</button>}
+                </div>
+              :<>
+                  <p style={{ fontSize:10,color:"#bbb",fontFamily:"Verdana,sans-serif",marginBottom:16 }}>{t.artworks(filtered.length)}</p>
+                  <div className="artworks-grid" style={{ display:"grid",gap:18 }}>
+                    {filtered.map(a=><Card key={a.id} art={a} lang={lang} onRemove={remove} onNavigate={navigate} t={t}/>)}
+                  </div>
+                </>
+            }
+          </div>
+        )}
+
+        {/* CURADORIA */}
+        {tab==="curadoria"&&<CuradoriaTab col={col} onClickAla={ala=>{clickAla(ala);setTab("buscar");}} t={t} lang={lang}/>}
+
+        {/* MANUAL */}
+        {tab==="manual"&&(
+          <div style={{ maxWidth:680 }}>
+            <h2 style={{ margin:"0 0 4px",fontSize:20,fontWeight:700,fontFamily:"Verdana,sans-serif" }}>{t.addTitle}</h2>
+            <p style={{ margin:"0 0 24px",fontSize:11,color:"#bbb",fontFamily:"Verdana,sans-serif" }}>{t.addSub}</p>
+            <ManualForm onAdd={art=>{add(art);setTab("acervo");}} t={t}/>
+          </div>
+        )}
+      </main>
+
+      <footer className="germ-footer" style={{ borderTop:"1px solid #ece9e2",padding:"14px 36px",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
+        <Logo small/>
+        <p style={{ margin:0,fontSize:9,color:"#ccc",fontFamily:"Verdana,sans-serif",letterSpacing:2 }}>{t.footer}</p>
+      </footer>
+    </div>
+  );
+}
