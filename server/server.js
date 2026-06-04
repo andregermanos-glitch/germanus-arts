@@ -123,13 +123,30 @@ async function saveArtwork(art) {
   } catch {}
 }
 
+// Constrói URL de alta resolução para zoom a partir da URL da miniatura
+function toHd(url) {
+  if (!url) return url;
+  // AIC IIIF: /full/400,/ → /full/1686,/ (resolução recomendada do AIC)
+  if (url.includes("artic.edu/iiif")) {
+    return url.replace(/\/full\/[^/]+\//, "/full/1686,/");
+  }
+  // Wikimedia: /800px-Nome → /1600px-Nome
+  if (url.includes("upload.wikimedia.org") && url.includes("/thumb/")) {
+    return url.replace(/\/\d+px-/, "/1600px-");
+  }
+  // Met, Cleveland, Rijksmuseum e outros — a URL guardada já é boa resolução
+  return url;
+}
+
 function mapRow(r) {
-  const imageUrl = (r.image_cached_at > 0) ? `/api/image/${r.id}` : r.image_url;
+  // Servir directamente da URL original (CDN do museu) — não usa volume do banco
+  const imageUrl = r.image_url;
+  const imageHd  = toHd(r.image_url);
   return {
     id: r.id, source: r.source, title: r.title, artist: r.artist, date: r.date,
     medium: r.medium, dimensions: r.dimensions, origin: r.origin, style: r.style,
     museum: r.museum, description: r.description, credit: r.credit,
-    imageUrl, externalUrl: r.external_url, alaId: r.ala_id,
+    imageUrl, imageHd, externalUrl: r.external_url, alaId: r.ala_id,
     isCached: (r.image_cached_at > 0),
     wiki: { en: r.wiki_en || null, fr: r.wiki_fr || null, es: r.wiki_es || null, it: r.wiki_it || null }
   };
@@ -860,10 +877,12 @@ async function start() {
     setInterval(equilibrar, 90 * 60 * 1000);  // a cada 90 minutos
   }, 8 * 60 * 1000);
 
-  setTimeout(() => {
-    downloadAndCacheImages();
-    setInterval(downloadAndCacheImages, CACHE_PERIOD);
-  }, CACHE_DELAY);
+  // Cache de imagens DESACTIVADO — imagens servidas directamente das URLs dos museus
+  // (evita encher o volume do Postgres). Para reactivar, descomentar abaixo:
+  // setTimeout(() => {
+  //   downloadAndCacheImages();
+  //   setInterval(downloadAndCacheImages, CACHE_PERIOD);
+  // }, CACHE_DELAY);
 
   setInterval(validateAndCleanImages, CLEANUP_PERIOD);
 
