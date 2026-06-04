@@ -53,7 +53,7 @@ async function buscarMet(artista, maxN) {
         if (medium.includes("bronze") && !medium.includes("oil")) continue;
         if (!artistaCorresponde(artista, d.artistDisplayName || "")) continue;
         resultados.push({
-          imageUrl: d.primaryImageSmall || d.primaryImage,
+          imageUrl: d.primaryImage || d.primaryImageSmall,  // full-res para zoom
           museum:   `${d.repository || "The Metropolitan Museum of Art"}, Nova York`,
           title:    d.title || "",
           artist:   d.artistDisplayName || artista,
