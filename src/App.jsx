@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import "./germanus.css";
 
 // ─── Persistência ─────────────────────────────────────────────────────────────
@@ -403,7 +404,7 @@ function ZoomViewer({ art, onClose, lang = "fr" }) {
   const onMouseUp = () => setDrag(null);
   const reset = () => { setScale(1); setPos({ x: 0, y: 0 }); };
 
-  return (
+  return createPortal(
     <div onClick={onClose}
       style={{ position:"fixed", top:0, left:0, right:0, bottom:0, width:"100vw", height:"100vh",
         zIndex:99999, background:"rgba(10,10,10,0.95)",
@@ -438,10 +439,11 @@ function ZoomViewer({ art, onClose, lang = "fr" }) {
         <ZoomBtn onClick={e => { e.stopPropagation(); onClose(); }} close>✕</ZoomBtn>
       </div>
 
-      <p style={{ position:"fixed", top:24, left:24, margin:0, fontSize:10, color:"#777", fontFamily:"Verdana,sans-serif", letterSpacing:1, pointerEvents:"none" }}>
-        RODA = ZOOM · ARRASTAR = MOVER · DUPLO-CLIQUE · ESC = FECHAR
+      <p style={{ position:"fixed", bottom:70, left:"50%", transform:"translateX(-50%)", margin:0, fontSize:10, color:"#888", fontFamily:"Verdana,sans-serif", letterSpacing:1, pointerEvents:"none", textAlign:"center" }}>
+        RODA = ZOOM · ARRASTAR = MOVER · ESC = FECHAR
       </p>
-    </div>
+    </div>,
+    document.body
   );
 }
 
