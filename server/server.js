@@ -76,9 +76,9 @@ const ALA_TERMS = {
 
 const memCache  = new Map();
 const CACHE_TTL    = 300000;
-const CACHE_BATCH  = 200;
+const CACHE_BATCH  = 300;
 const CACHE_DELAY  = 60 * 1000;
-const CACHE_PERIOD = 30 * 1000;        // 30 segundos entre lotes
+const CACHE_PERIOD = 20 * 1000;        // 30 segundos entre lotes
 const CLEANUP_DELAY  =  5 * 60 * 1000;
 const CLEANUP_PERIOD =  2 * 60 * 60 * 1000; // 2h — desbloqueia URLs falhadas
 
@@ -187,31 +187,41 @@ async function downloadAndCacheImages() {
       [CACHE_BATCH]
     );
     if (r.rows.length === 0) return;
-    console.log(`📦 Cache de imagens — baixando ${r.rows.length} obras...`);
-    let saved = 0;
-    for (const row of r.rows) {
+    console.log(`📦 Cache — baixando ${r.rows.length} obras em paralelo...`);
+
+    // Baixar uma imagem
+    async function baixarUma(row) {
       try {
         const res = await fetch(row.image_url, {
           signal: AbortSignal.timeout(15000),
           headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
         });
-        if (!res.ok) continue;
+        if (!res.ok) throw new Error("HTTP " + res.status);
         const contentType = res.headers.get("content-type") || "image/jpeg";
-        if (!contentType.startsWith("image/")) continue;
+        if (!contentType.startsWith("image/")) throw new Error("not image");
         const buf = await res.arrayBuffer();
-        if (buf.byteLength < 5000) continue;
+        if (buf.byteLength < 5000) throw new Error("too small");
         await pool.query(
           `UPDATE artworks SET image_data=$1, image_mime=$2, image_cached_at=$3, download_attempts=0 WHERE id=$4`,
           [Buffer.from(buf), contentType, Math.floor(Date.now() / 1000), row.id]
         );
-        saved++;
+        return true;
       } catch {
         await pool.query(
-          `UPDATE artworks SET download_attempts=COALESCE(download_attempts,0)+1 WHERE id=$1`,
+          `UPDATE artworks SET download_attempts=COALESCE(download_attempts,0)+1, last_attempt_at=EXTRACT(EPOCH FROM NOW())::BIGINT WHERE id=$1`,
           [row.id]
         );
+        return false;
       }
-      await new Promise(r => setTimeout(r, 200));
+    }
+
+    // Processar em lotes paralelos de CONCORRENCIA imagens de cada vez
+    const CONCORRENCIA = 12;
+    let saved = 0;
+    for (let i = 0; i < r.rows.length; i += CONCORRENCIA) {
+      const lote = r.rows.slice(i, i + CONCORRENCIA);
+      const resultados = await Promise.all(lote.map(baixarUma));
+      saved += resultados.filter(Boolean).length;
     }
     if (saved > 0) console.log(`📦 Cache concluído — ${saved}/${r.rows.length} imagens`);
   } catch (e) { console.error("[downloadAndCacheImages]", e.message); }
