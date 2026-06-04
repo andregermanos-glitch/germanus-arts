@@ -418,8 +418,9 @@ function ZoomViewer({ art, onClose, lang = "fr" }) {
           </div>
         )}
         <img src={src} alt={art.title} draggable={false} onLoad={() => setLoaded(true)}
-          style={{ width:"auto", height:"88vh", maxWidth:"94vw", objectFit:"contain",
+          style={{ maxWidth:"94vw", maxHeight:"90vh", width:"auto", height:"auto", objectFit:"contain", display:"block",
             transform:`translate(${pos.x}px, ${pos.y}px) scale(${scale})`,
+            transformOrigin:"center center",
             transition: drag ? "none" : "transform .15s ease-out",
             opacity: loaded ? 1 : 0, userSelect:"none" }}/>
       </div>
