@@ -405,7 +405,8 @@ function ZoomViewer({ art, onClose, lang = "fr" }) {
 
   return (
     <div onClick={onClose}
-      style={{ position:"fixed", inset:0, zIndex:9999, background:"rgba(10,10,10,0.94)",
+      style={{ position:"fixed", top:0, left:0, right:0, bottom:0, width:"100vw", height:"100vh",
+        zIndex:99999, background:"rgba(10,10,10,0.95)",
         display:"flex", alignItems:"center", justifyContent:"center",
         cursor: scale > 1 ? (drag ? "grabbing" : "grab") : "default" }}>
       <div onClick={e => e.stopPropagation()} onWheel={onWheel}
@@ -430,11 +431,11 @@ function ZoomViewer({ art, onClose, lang = "fr" }) {
         <p style={{ margin:"2px 0 0", fontSize:12, color:"#999" }}>{art.artist}{art.date ? ` · ${art.date}` : ""}</p>
       </div>
 
-      <div style={{ position:"fixed", top:20, right:20, display:"flex", gap:8 }}>
+      <div style={{ position:"fixed", top:16, right:16, display:"flex", gap:8, zIndex:100000 }}>
         <ZoomBtn onClick={e => { e.stopPropagation(); setScale(s => Math.min(s + 0.5, 8)); }}>+</ZoomBtn>
         <ZoomBtn onClick={e => { e.stopPropagation(); setScale(s => Math.max(s - 0.5, 1)); }}>−</ZoomBtn>
         <ZoomBtn onClick={e => { e.stopPropagation(); reset(); }}>⟲</ZoomBtn>
-        <ZoomBtn onClick={e => { e.stopPropagation(); onClose(); }}>✕</ZoomBtn>
+        <ZoomBtn onClick={e => { e.stopPropagation(); onClose(); }} close>✕</ZoomBtn>
       </div>
 
       <p style={{ position:"fixed", top:24, left:24, margin:0, fontSize:10, color:"#777", fontFamily:"Verdana,sans-serif", letterSpacing:1, pointerEvents:"none" }}>
@@ -444,15 +445,16 @@ function ZoomViewer({ art, onClose, lang = "fr" }) {
   );
 }
 
-function ZoomBtn({ children, onClick }) {
+function ZoomBtn({ children, onClick, close }) {
   const [h, setH] = useState(false);
   return (
     <button onClick={onClick} onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
-      style={{ width:38, height:38, borderRadius:4,
-        background: h ? "#fff" : "rgba(255,255,255,0.12)",
-        border:"1px solid rgba(255,255,255,0.3)", color: h ? "#0a0a0a" : "#fff",
-        fontSize:18, cursor:"pointer", transition:"all .15s",
-        display:"flex", alignItems:"center", justifyContent:"center" }}>
+      style={{ width:44, height:44, borderRadius:6,
+        background: close ? (h ? "#d41515" : "rgba(212,21,21,0.8)") : (h ? "#fff" : "rgba(255,255,255,0.15)"),
+        border:"1px solid rgba(255,255,255,0.4)", color:"#fff",
+        fontSize:20, fontWeight:700, cursor:"pointer", transition:"all .15s",
+        display:"flex", alignItems:"center", justifyContent:"center",
+        boxShadow:"0 2px 8px rgba(0,0,0,0.4)" }}>
       {children}
     </button>
   );
