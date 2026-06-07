@@ -11,6 +11,7 @@ const { expandirAla }      = require("./expansor");
 const { iniciarSemeador, semearArtista } = require("./semeador");
 const { buscarObrasPorAla, carregarTodasAlas, salvarObras, ARTISTAS_RUSSOS, ALA_TERMOS } = require("./commons");
 const { buscarPorCategoria, listarCategoriasWikimedia, CATEGORIAS_WIKIMEDIA, CATEGORIAS_EXTRA } = require("./categorias");
+const { enviarParaR2, r2Ativo } = require("./r2");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -876,6 +877,40 @@ async function start() {
     try { await equilibrar(); } catch(e) { console.log("🎯 Equilibrador erro:", e.message); }
     setInterval(equilibrar, 90 * 60 * 1000);  // a cada 90 minutos
   }, 8 * 60 * 1000);
+
+  // Migração automática para R2 — move imagens de URLs de museus para o R2
+  // Corre 3min após boot, depois a cada 4min, em pequenos lotes (suave)
+  if (r2Ativo()) {
+    setTimeout(() => {
+      async function migrarLoteR2() {
+        try {
+          const r = await pool.query(
+            `SELECT id, image_url FROM artworks
+             WHERE image_url IS NOT NULL AND image_url != ''
+               AND image_url NOT LIKE '%r2.dev%'
+               AND image_url NOT LIKE '%r2.cloudflarestorage%'
+             ORDER BY indexed_at DESC NULLS LAST
+             LIMIT 20`
+          );
+          if (r.rows.length === 0) return;
+          let migradas = 0;
+          await Promise.all(r.rows.map(async (row) => {
+            const novaUrl = await enviarParaR2(row.id, row.image_url);
+            if (novaUrl) {
+              await pool.query(`UPDATE artworks SET image_url=$1 WHERE id=$2`, [novaUrl, row.id]);
+              migradas++;
+            }
+          }));
+          if (migradas > 0) console.log(`☁️  R2 — ${migradas}/${r.rows.length} imagens migradas`);
+        } catch (e) { console.log("☁️  R2 erro:", e.message); }
+      }
+      migrarLoteR2();
+      setInterval(migrarLoteR2, 4 * 60 * 1000);
+    }, 3 * 60 * 1000);
+    console.log("☁️  Migração automática para R2 activada");
+  } else {
+    console.log("☁️  R2 não configurado — imagens servidas das URLs dos museus");
+  }
 
   // Cache de imagens DESACTIVADO — imagens servidas directamente das URLs dos museus
   // (evita encher o volume do Postgres). Para reactivar, descomentar abaixo:
