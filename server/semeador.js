@@ -1,6 +1,13 @@
 // server/semeador.js — Semeador Turbinado v2
 // APIs: Met Museum + AIC + Cleveland + Rijksmuseum
 // 541 artistas × 18 alas → até ~4300 obras
+// ─── ALTERAÇÃO 12/06/2026 ─────────────────────────────────────────────────────
+// gravar(): ON CONFLICT agora ACTUALIZA image_url (antes era DO NOTHING).
+// Isto faz com que cada ciclo do semeador repare automaticamente as obras cujas
+// URLs foram sobrescritas pela antiga migração R2 (bucket vazio → URLs mortas),
+// restaurando a URL original do museu. Só actualiza se a obra ainda não tiver
+// imagem em cache, para não mexer no que já está resolvido.
+// ──────────────────────────────────────────────────────────────────────────────
 
 const fs   = require("fs");
 const path = require("path");
@@ -157,11 +164,18 @@ async function gravar(pool, obra, ala) {
   if (norm(artist).includes("unknown") || norm(artist).includes("desconhecido")) return false;
   const id = `seed_${(api_id || "").replace(/[^a-zA-Z0-9]/g, "_").slice(0, 50)}`;
   try {
-    await pool.query(
+    // ON CONFLICT actualiza a URL apenas se a obra ainda não tem imagem cacheada.
+    // Repara automaticamente URLs mortas (ex.: contaminadas pela antiga migração R2)
+    // sem tocar nas obras já resolvidas.
+    const r = await pool.query(
       `INSERT INTO artworks
          (id,source,title,artist,date,medium,dimensions,origin,style,museum,description,credit,image_url,external_url,ala_id)
        VALUES ($1,'semeador',$2,$3,$4,'','','','','','','GERMANUS.Art',$5,'',$6)
-       ON CONFLICT (id) DO NOTHING`,
+       ON CONFLICT (id) DO UPDATE
+         SET image_url = EXCLUDED.image_url,
+             download_attempts = 0
+       WHERE artworks.image_cached_at = 0
+         AND artworks.image_url IS DISTINCT FROM EXCLUDED.image_url`,
       [id, title, artist, date, imageUrl, ala]
     );
     return true;
@@ -174,7 +188,8 @@ async function artistaJaSemeado(pool, artista, ala) {
     const apelido = artista.split(" ").filter(w => w.length > 3).pop() || artista;
     const r = await pool.query(
       `SELECT COUNT(*) AS n FROM artworks
-        WHERE ala_id=$1 AND source='semeador' AND artist ILIKE $2`,
+        WHERE ala_id=$1 AND source='semeador' AND artist ILIKE $2
+          AND image_cached_at > 0`,
       [ala, `%${apelido}%`]
     );
     return parseInt(r.rows[0].n, 10) >= 3;
