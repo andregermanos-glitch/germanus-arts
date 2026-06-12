@@ -92,7 +92,7 @@ const ALA_TERMS = {
 
 const memCache  = new Map();
 const CACHE_TTL    = 300000;
-const CACHE_BATCH  = 100;              // lote por ciclo (era 300 — mais suave agora)
+const CACHE_BATCH  = 30;               // lote por ciclo — ritmo educado p/ Wikimedia (~0,5 req/s)
 const CACHE_DELAY  = 60 * 1000;        // 1 min após boot
 const CACHE_PERIOD = 60 * 1000;        // 1 lote por minuto (~100 imagens/min)
 const CLEANUP_DELAY  =  5 * 60 * 1000;
@@ -222,13 +222,14 @@ async function downloadAndCacheImages() {
     if (r.rows.length === 0) return;
     console.log(`📦 Cache — baixando ${r.rows.length} obras em paralelo...`);
 
-    // Baixar uma imagem
+    // Baixar uma imagem — devolve "ok", "429" (rate limit) ou "falha"
     async function baixarUma(row) {
       try {
         const res = await fetch(row.image_url, {
           signal: AbortSignal.timeout(15000),
           headers: { "User-Agent": UA },
         });
+        if (res.status === 429) return "429";   // rate limit: NÃO conta como tentativa da obra
         if (!res.ok) throw new Error("HTTP " + res.status);
         const contentType = res.headers.get("content-type") || "image/jpeg";
         if (!contentType.startsWith("image/")) throw new Error("not image");
@@ -238,25 +239,32 @@ async function downloadAndCacheImages() {
           `UPDATE artworks SET image_data=$1, image_mime=$2, image_cached_at=$3, download_attempts=0 WHERE id=$4`,
           [Buffer.from(buf), contentType, Math.floor(Date.now() / 1000), row.id]
         );
-        return true;
+        return "ok";
       } catch (e) {
         await pool.query(
           `UPDATE artworks SET download_attempts=COALESCE(download_attempts,0)+1, last_attempt_at=EXTRACT(EPOCH FROM NOW())::BIGINT WHERE id=$1`,
           [row.id]
         );
-        return false;
+        return "falha";
       }
     }
 
-    // Processar em lotes paralelos de CONCORRENCIA imagens de cada vez
-    const CONCORRENCIA = 5;   // era 12 — reduzido para não irritar a Wikimedia
-    let saved = 0;
+    // Ritmo educado: pares em paralelo, pausa entre pares, e recuo imediato
+    // se a fonte começar a devolver 429 (espera o próximo ciclo de 60s)
+    const CONCORRENCIA = 2;
+    let saved = 0, rate429 = 0;
     for (let i = 0; i < r.rows.length; i += CONCORRENCIA) {
       const lote = r.rows.slice(i, i + CONCORRENCIA);
       const resultados = await Promise.all(lote.map(baixarUma));
-      saved += resultados.filter(Boolean).length;
+      saved   += resultados.filter(x => x === "ok").length;
+      rate429 += resultados.filter(x => x === "429").length;
+      if (rate429 >= 4) {
+        console.log(`📦 Cache — rate limit (429) detectado, recuando até o próximo ciclo`);
+        break;
+      }
+      await new Promise(s => setTimeout(s, 1500));
     }
-    if (saved > 0) console.log(`📦 Cache concluído — ${saved}/${r.rows.length} imagens`);
+    if (saved > 0) console.log(`📦 Cache concluído — ${saved}/${r.rows.length} imagens${rate429 ? ` (${rate429}× 429)` : ""}`);
   } catch (e) { console.error("[downloadAndCacheImages]", e.message); }
 }
 
@@ -274,6 +282,17 @@ async function validateAndCleanImages() {
         AND image_url IS NOT NULL AND image_url != ''
         AND last_attempt_at < EXTRACT(EPOCH FROM NOW()) - 7200
     `);
+  } catch {}
+}
+
+// Reset único: obras bloqueadas por 429 (rate limit) não são URLs mortas — liberta-as
+async function resetarBloqueiosInjustos() {
+  try {
+    const r = await pool.query(`
+      UPDATE artworks SET download_attempts = 0
+      WHERE download_attempts >= 3 AND image_cached_at = 0
+        AND image_url IS NOT NULL AND image_url != ''`);
+    if (r.rowCount > 0) console.log(`🔓 ${r.rowCount} obras desbloqueadas para nova tentativa`);
   } catch {}
 }
 
@@ -526,14 +545,18 @@ app.get("/api/cache/forcar", async (req, res) => {
       } catch (e) {
         const motivo = (e.name === "TimeoutError" || e.name === "AbortError") ? "timeout" : e.message;
         motivos[motivo] = (motivos[motivo] || 0) + 1;
-        await pool.query(
-          `UPDATE artworks SET download_attempts=COALESCE(download_attempts,0)+1,
-                  last_attempt_at=EXTRACT(EPOCH FROM NOW())::BIGINT
-           WHERE id=$1`,
-          [row.id]
-        );
+        // 429 = rate limit da fonte, não é culpa da URL — não consome tentativa
+        if (motivo !== "HTTP_429") {
+          await pool.query(
+            `UPDATE artworks SET download_attempts=COALESCE(download_attempts,0)+1,
+                    last_attempt_at=EXTRACT(EPOCH FROM NOW())::BIGINT
+             WHERE id=$1`,
+            [row.id]
+          );
+        }
+        if ((motivos["HTTP_429"] || 0) >= 5) break;  // recuo imediato sob rate limit
       }
-      await new Promise(s => setTimeout(s, 300));
+      await new Promise(s => setTimeout(s, 1000));
     }
     res.json({ ok: true, processadas: r.rows.length, baixadas, motivos });
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -866,6 +889,7 @@ app.get("*", (req, res) => {
 // ─── Start ────────────────────────────────────────────────────────────────────
 async function start() {
   await initDB();
+  await resetarBloqueiosInjustos();
 
   console.log("🌱 Iniciando curadoria...");
   indexarCuradoria(pool, KEYS).catch(e => console.error("Curadoria erro:", e.message));
@@ -989,7 +1013,7 @@ async function start() {
     downloadAndCacheImages();
     setInterval(downloadAndCacheImages, CACHE_PERIOD);
   }, CACHE_DELAY);
-  console.log("📦 Cache automático de imagens ACTIVADO (100/min, concorrência 5)");
+  console.log("📦 Cache automático ACTIVADO (30/min, concorrência 2, recuo automático em 429)");
 
   setInterval(validateAndCleanImages, CLEANUP_PERIOD);
 
