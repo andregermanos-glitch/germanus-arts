@@ -1,4 +1,12 @@
 // server/server.js — Germanus.Art Backend (versão final com curadoria manual)
+// ─── ALTERAÇÕES 12/06/2026 ───────────────────────────────────────────────────
+// 1. Migração R2 DESATIVADA (estava a reescrever image_url para bucket vazio)
+// 2. /api/cache/forcar corrigido: incrementa download_attempts, ORDER BY RANDOM,
+//    User-Agent descritivo e relatório de motivos de falha
+// 3. Nova rota /api/cache/diagnostico — pendentes por domínio
+// 4. Cache automático REATIVADO (CONCORRENCIA 5, lotes de 100/min)
+// 5. /api/cache/status agora mostra o tamanho do banco (medidor de combustível)
+// ─────────────────────────────────────────────────────────────────────────────
 require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 const express  = require("express");
 const cors     = require("cors");
@@ -32,6 +40,13 @@ const KEYS = {
   harvard:   process.env.HARVARD_KEY   || "",
   europeana: process.env.EUROPEANA_KEY || "",
 };
+
+// Estratégia actual: imagens de exibição em BYTEA no Postgres (volume 5 GB).
+// R2 fica reservado para a fase HD — reactivar só quando o banco se aproximar de 4 GB.
+const R2_MIGRACAO_ATIVA = false;
+
+// User-Agent descritivo — exigido pela Wikimedia (o "Mozilla/5.0" pelado leva 403)
+const UA = "GermanusArt/1.0 (https://germanus.art; contato@germanus.art)";
 
 const ALA_HINTS = {
   retratos:      "portrait bust figure man woman classical painting face",
@@ -77,9 +92,9 @@ const ALA_TERMS = {
 
 const memCache  = new Map();
 const CACHE_TTL    = 300000;
-const CACHE_BATCH  = 300;
-const CACHE_DELAY  = 60 * 1000;
-const CACHE_PERIOD = 20 * 1000;        // 30 segundos entre lotes
+const CACHE_BATCH  = 100;              // lote por ciclo (era 300 — mais suave agora)
+const CACHE_DELAY  = 60 * 1000;        // 1 min após boot
+const CACHE_PERIOD = 60 * 1000;        // 1 lote por minuto (~100 imagens/min)
 const CLEANUP_DELAY  =  5 * 60 * 1000;
 const CLEANUP_PERIOD =  2 * 60 * 60 * 1000; // 2h — desbloqueia URLs falhadas
 
@@ -212,7 +227,7 @@ async function downloadAndCacheImages() {
       try {
         const res = await fetch(row.image_url, {
           signal: AbortSignal.timeout(15000),
-          headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+          headers: { "User-Agent": UA },
         });
         if (!res.ok) throw new Error("HTTP " + res.status);
         const contentType = res.headers.get("content-type") || "image/jpeg";
@@ -224,7 +239,7 @@ async function downloadAndCacheImages() {
           [Buffer.from(buf), contentType, Math.floor(Date.now() / 1000), row.id]
         );
         return true;
-      } catch {
+      } catch (e) {
         await pool.query(
           `UPDATE artworks SET download_attempts=COALESCE(download_attempts,0)+1, last_attempt_at=EXTRACT(EPOCH FROM NOW())::BIGINT WHERE id=$1`,
           [row.id]
@@ -234,7 +249,7 @@ async function downloadAndCacheImages() {
     }
 
     // Processar em lotes paralelos de CONCORRENCIA imagens de cada vez
-    const CONCORRENCIA = 12;
+    const CONCORRENCIA = 5;   // era 12 — reduzido para não irritar a Wikimedia
     let saved = 0;
     for (let i = 0; i < r.rows.length; i += CONCORRENCIA) {
       const lote = r.rows.slice(i, i + CONCORRENCIA);
@@ -454,6 +469,7 @@ app.get("/api/image/:id", async (req, res) => {
   } catch(e) { res.status(500).send("Error"); }
 });
 
+// Medidor de combustível: total de obras, cache, pendentes e TAMANHO DO BANCO
 app.get("/api/cache/status", async (req, res) => {
   try {
     const r = await pool.query(`
@@ -462,10 +478,21 @@ app.get("/api/cache/status", async (req, res) => {
              COUNT(*) FILTER (WHERE image_url IS NOT NULL AND image_url!='' AND image_cached_at=0) as imagens_pendentes
       FROM artworks WHERE image_url IS NOT NULL AND image_url!=''
     `);
-    res.json(r.rows[0]);
+    let tamanho = null, tamanho_bytes = null;
+    try {
+      const t = await pool.query(`
+        SELECT pg_size_pretty(pg_database_size(current_database())) AS tamanho,
+               pg_database_size(current_database()) AS bytes
+      `);
+      tamanho = t.rows[0].tamanho;
+      tamanho_bytes = parseInt(t.rows[0].bytes);
+    } catch {}
+    res.json({ ...r.rows[0], tamanho_banco: tamanho, tamanho_banco_bytes: tamanho_bytes, limite_volume: "5 GB" });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+// CORRIGIDO: incrementa download_attempts nas falhas, ORDER BY RANDOM
+// (não fica preso nas mesmas 200), User-Agent descritivo e relatório de motivos
 app.get("/api/cache/forcar", async (req, res) => {
   try {
     const limite = parseInt(req.query.limit) || 100;
@@ -473,29 +500,59 @@ app.get("/api/cache/forcar", async (req, res) => {
       `SELECT id, image_url FROM artworks
        WHERE image_url IS NOT NULL AND image_url!=''
          AND (image_data IS NULL OR image_cached_at=0)
-         AND download_attempts<3
-       LIMIT $1`,
+         AND COALESCE(download_attempts,0) < 3
+       ORDER BY RANDOM() LIMIT $1`,
       [limite]
     );
     if (r.rows.length === 0) return res.json({ message: "Nenhuma imagem pendente", total: 0 });
     let baixadas = 0;
+    const motivos = {};
     for (const row of r.rows) {
       try {
-        await new Promise(r => setTimeout(r, 500));
-        const resposta = await fetch(row.image_url, { signal: AbortSignal.timeout(15000), headers: { "User-Agent": "Mozilla/5.0" } });
-        if (!resposta.ok) continue;
+        const resposta = await fetch(row.image_url, {
+          signal: AbortSignal.timeout(15000),
+          headers: { "User-Agent": UA }
+        });
+        if (!resposta.ok) throw new Error("HTTP_" + resposta.status);
         const contentType = resposta.headers.get("content-type") || "image/jpeg";
-        if (!contentType.startsWith("image/")) continue;
+        if (!contentType.startsWith("image/")) throw new Error("nao_e_imagem");
         const buffer = await resposta.arrayBuffer();
-        if (buffer.byteLength < 5000) continue;
+        if (buffer.byteLength < 5000) throw new Error("muito_pequena");
         await pool.query(
-          `UPDATE artworks SET image_data=$1, image_mime=$2, image_cached_at=$3 WHERE id=$4`,
+          `UPDATE artworks SET image_data=$1, image_mime=$2, image_cached_at=$3, download_attempts=0 WHERE id=$4`,
           [Buffer.from(buffer), contentType, Math.floor(Date.now() / 1000), row.id]
         );
         baixadas++;
-      } catch {}
+      } catch (e) {
+        const motivo = (e.name === "TimeoutError" || e.name === "AbortError") ? "timeout" : e.message;
+        motivos[motivo] = (motivos[motivo] || 0) + 1;
+        await pool.query(
+          `UPDATE artworks SET download_attempts=COALESCE(download_attempts,0)+1,
+                  last_attempt_at=EXTRACT(EPOCH FROM NOW())::BIGINT
+           WHERE id=$1`,
+          [row.id]
+        );
+      }
+      await new Promise(s => setTimeout(s, 300));
     }
-    res.json({ ok: true, processadas: r.rows.length, baixadas });
+    res.json({ ok: true, processadas: r.rows.length, baixadas, motivos });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// NOVO: pendentes agrupadas por domínio — mostra de onde vêm as falhas
+app.get("/api/cache/diagnostico", async (req, res) => {
+  try {
+    const dominios = await pool.query(`
+      SELECT substring(image_url from '//([^/]+)') AS dominio,
+             COUNT(*) AS pendentes,
+             COUNT(*) FILTER (WHERE COALESCE(download_attempts,0) >= 3) AS bloqueadas
+      FROM artworks
+      WHERE image_url IS NOT NULL AND image_url!='' AND image_cached_at=0
+      GROUP BY 1 ORDER BY 2 DESC`);
+    const r2 = await pool.query(`
+      SELECT COUNT(*) AS n FROM artworks
+      WHERE image_url LIKE '%r2.dev%' OR image_url LIKE '%r2.cloudflarestorage%'`);
+    res.json({ urls_apontando_para_r2: parseInt(r2.rows[0].n), pendentes_por_dominio: dominios.rows });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -644,6 +701,13 @@ app.get("/banco", async (req, res) => {
       GROUP BY ala_id, source ORDER BY ala_id, source
     `);
 
+    // Tamanho do banco — medidor de combustível rumo aos 5 GB
+    let tamanhoBanco = "—";
+    try {
+      const t = await pool.query(`SELECT pg_size_pretty(pg_database_size(current_database())) AS s`);
+      tamanhoBanco = t.rows[0].s;
+    } catch {}
+
     const t    = tot.rows[0];
     const rows = alas.rows;
 
@@ -671,7 +735,8 @@ app.get("/banco", async (req, res) => {
     ];
     const SRC_COLOR = {
       curadoria:"#1D9E75", semeador:"#185FA5",
-      curadoria_manual:"#BA7517", direto:"#BA7517", expansao:"#534AB7"
+      curadoria_manual:"#BA7517", direto:"#BA7517", expansao:"#534AB7",
+      wikimedia_commons:"#1D9E75"
     };
 
     const maxN = Math.max(...Object.values(porAla).map(d => d.total), 1);
@@ -728,7 +793,7 @@ h1{font-size:20px;font-weight:600;color:#fff;margin-bottom:4px}
 .card{background:#141414;border:1px solid #222;border-radius:10px;padding:14px 16px}
 .card .v{font-size:28px;font-weight:700;color:#fff;line-height:1}
 .card .l{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
-.card.g .v{color:#1D9E75}.card.b .v{color:#185FA5}.card.a .v{color:#BA7517}
+.card.g .v{color:#1D9E75}.card.b .v{color:#185FA5}.card.a .v{color:#BA7517}.card.r .v{color:#E24B4A}
 h2{font-size:13px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.5px;margin:0 0 10px}
 table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:28px}
 th{text-align:left;padding:8px 12px;color:#444;font-size:10px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #1a1a1a}
@@ -752,6 +817,7 @@ a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
   <div class="card g"><div class="v">${parseInt(t.cached).toLocaleString("pt-PT")}</div><div class="l">imagens cached</div></div>
   <div class="card a"><div class="v">${parseInt(t.artistas).toLocaleString("pt-PT")}</div><div class="l">artistas únicos</div></div>
   <div class="card b"><div class="v">${t.alas}</div><div class="l">alas activas</div></div>
+  <div class="card r"><div class="v" style="font-size:20px">${tamanhoBanco}</div><div class="l">tamanho do banco / 5 GB</div></div>
 </div>
 
 <div class="legend">
@@ -777,6 +843,8 @@ a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
 <div class="actions">
   <a class="btn" href="/">← Voltar ao site</a>
   <a class="btn" href="/api/cache/forcar?limit=200">Forçar cache</a>
+  <a class="btn" href="/api/cache/diagnostico">Diagnóstico</a>
+  <a class="btn" href="/api/cache/status">Status + tamanho</a>
   <a class="btn" href="/api/carregar/psyche">Carregar Psyché</a>
   <a class="btn" href="/api/carregar/mestres">Carregar Mestres</a>
   <a class="btn" href="/api/curadoria/status">JSON raw</a>
@@ -878,9 +946,12 @@ async function start() {
     setInterval(equilibrar, 90 * 60 * 1000);  // a cada 90 minutos
   }, 8 * 60 * 1000);
 
-  // Migração automática para R2 — move imagens de URLs de museus para o R2
-  // Corre 3min após boot, depois a cada 4min, em pequenos lotes (suave)
-  if (r2Ativo()) {
+  // ─── Migração R2: DESATIVADA ────────────────────────────────────────────────
+  // O job reescrevia image_url para o R2 antes de confirmar que o bucket tinha
+  // os arquivos, gerando URLs mortas. Reactivar apenas na fase HD (banco ~4 GB),
+  // e quando reactivar: gravar numa coluna nova (image_hd_url) em vez de
+  // sobrescrever image_url. Controlado pela constante R2_MIGRACAO_ATIVA.
+  if (R2_MIGRACAO_ATIVA && r2Ativo()) {
     setTimeout(() => {
       async function migrarLoteR2() {
         try {
@@ -909,15 +980,16 @@ async function start() {
     }, 3 * 60 * 1000);
     console.log("☁️  Migração automática para R2 activada");
   } else {
-    console.log("☁️  R2 não configurado — imagens servidas das URLs dos museus");
+    console.log("☁️  Migração R2 desactivada — imagens em BYTEA no Postgres (fase HD futura)");
   }
 
-  // Cache de imagens DESACTIVADO — imagens servidas directamente das URLs dos museus
-  // (evita encher o volume do Postgres). Para reactivar, descomentar abaixo:
-  // setTimeout(() => {
-  //   downloadAndCacheImages();
-  //   setInterval(downloadAndCacheImages, CACHE_PERIOD);
-  // }, CACHE_DELAY);
+  // Cache de imagens REATIVADO — volume agora tem 5 GB.
+  // Lotes de 100 por minuto, 5 downloads em paralelo, User-Agent descritivo.
+  setTimeout(() => {
+    downloadAndCacheImages();
+    setInterval(downloadAndCacheImages, CACHE_PERIOD);
+  }, CACHE_DELAY);
+  console.log("📦 Cache automático de imagens ACTIVADO (100/min, concorrência 5)");
 
   setInterval(validateAndCleanImages, CLEANUP_PERIOD);
 
