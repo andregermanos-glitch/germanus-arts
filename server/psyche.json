@@ -1,92 +1,66 @@
 [
   {
-    "ala": "fase",
-    "titulo": "The Persistence of Memory",
-    "artista": "Salvador Dali",
-    "ano": "1931",
-    "museu": "Museum of Modern Art, New York",
-    "imageUrl": "https://images.metmuseum.org/CRDImages/ep/original/DP-20134-001.jpg",
-    "api_id": "dali_persistence"
+    "titulo": "The Nightmare",
+    "artista": "Henry Fuseli",
+    "ano": "1781",
+    "museu": "Detroit Institute of Arts, Detroit, EUA",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/John_Henry_Fuseli_-_The_Nightmare.JPG?width=900",
+    "api_id": "fuseli_nightmare"
   },
   {
-    "ala": "fase",
-    "titulo": "The Son of Man",
-    "artista": "Rene Magritte",
-    "ano": "1964",
-    "museu": "Private Collection",
-    "imageUrl": "https://uploads5.wikiart.org/images/rene-magritte/the-son-of-man.jpg",
-    "api_id": "magritte_son_of_man"
+    "titulo": "Saturno devorando a su hijo",
+    "artista": "Francisco Goya",
+    "ano": "1819-1823",
+    "museu": "Museo del Prado, Madrid, Espanha",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Francisco_de_Goya,_Saturno_devorando_a_su_hijo_(1819-1823).jpg?width=900",
+    "api_id": "goya_saturno"
   },
   {
-    "ala": "fase",
-    "titulo": "The Treachery of Images (Ceci n'est pas une pipe)",
-    "artista": "Rene Magritte",
-    "ano": "1929",
-    "museu": "LACMA, Los Angeles",
-    "imageUrl": "https://cdn.britannica.com/92/192592-050-2B7A6C65/Rene-Magritte-The-Treachery-of-Images-1929.jpg",
-    "api_id": "magritte_treachery"
+    "titulo": "The Great Red Dragon and the Woman Clothed in Sun",
+    "artista": "William Blake",
+    "ano": "1805",
+    "museu": "Brooklyn Museum, Nova York, EUA",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/The_Great_Red_Dragon_and_the_Woman_Clothed_in_Sun.jpg?width=900",
+    "api_id": "blake_red_dragon"
   },
   {
-    "ala": "fase",
-    "titulo": "The Elephants",
-    "artista": "Salvador Dali",
-    "ano": "1948",
-    "museu": "Private Collection",
-    "imageUrl": "https://www.salvadordali.com/images/paintings/1948-the-elephants.jpg",
-    "api_id": "dali_elephants"
+    "titulo": "Die Toteninsel (A Ilha dos Mortos), III",
+    "artista": "Arnold Böcklin",
+    "ano": "1883",
+    "museu": "Alte Nationalgalerie, Berlim, Alemanha",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Arnold_B%C3%B6cklin_-_Die_Toteninsel_III_(Alte_Nationalgalerie,_Berlin).jpg?width=900",
+    "api_id": "bocklin_toteninsel"
   },
   {
-    "ala": "fase",
-    "titulo": "Golconda",
-    "artista": "Rene Magritte",
-    "ano": "1953",
-    "museu": "Menil Collection, Houston",
-    "imageUrl": "https://cdn.britannica.com/44/193444-050-858AF747/Rene-Magritte-Golconda-1953.jpg",
-    "api_id": "magritte_golconda"
+    "titulo": "Demônio Sentado",
+    "artista": "Mikhail Vrubel",
+    "ano": "1890",
+    "museu": "Galeria Tretyakov, Moscovo, Rússia",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Vrubel_Demon.jpg?width=900",
+    "api_id": "vrubel_demon_sentado"
   },
   {
-    "ala": "fase",
-    "titulo": "The Great Masturbator",
-    "artista": "Salvador Dali",
-    "ano": "1929",
-    "museu": "Reina Sofia, Madrid",
-    "imageUrl": "https://www.salvadordali.com/images/paintings/1929-the-great-masturbator.jpg",
-    "api_id": "dali_masturbator"
+    "titulo": "O Ciclope",
+    "artista": "Odilon Redon",
+    "ano": "c. 1914",
+    "museu": "Kröller-Müller Museum, Otterlo, Países Baixos",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Redon.cyclops.jpg?width=900",
+    "api_id": "redon_ciclope"
   },
   {
-    "ala": "fase",
-    "titulo": "The Lovers",
-    "artista": "Rene Magritte",
-    "ano": "1928",
-    "museu": "MoMA, New York",
-    "imageUrl": "https://www.moma.org/media/W1siZiIsIjMxNzU1OCJd.jpg",
-    "api_id": "magritte_lovers"
+    "titulo": "La Bohémienne endormie (A Cigana Adormecida)",
+    "artista": "Henri Rousseau",
+    "ano": "1897",
+    "museu": "Museum of Modern Art, Nova York, EUA",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/La_Boh%C3%A9mienne_endormie.jpg?width=900",
+    "api_id": "rousseau_bohemienne"
   },
   {
-    "ala": "fase",
-    "titulo": "Swans Reflecting Elephants",
-    "artista": "Salvador Dali",
-    "ano": "1937",
-    "museu": "Private Collection",
-    "imageUrl": "https://www.salvadordali.com/images/paintings/1937-swans-reflecting-elephants.jpg",
-    "api_id": "dali_swans"
-  },
-  {
-    "ala": "fase",
-    "titulo": "The Human Condition",
-    "artista": "Rene Magritte",
-    "ano": "1933",
-    "museu": "National Gallery of Art, Washington",
-    "imageUrl": "https://www.nga.gov/collection/art-object-page.69436.html",
-    "api_id": "magritte_human_condition"
-  },
-  {
-    "ala": "fase",
-    "titulo": "The Temptation of St. Anthony",
-    "artista": "Salvador Dali",
-    "ano": "1946",
-    "museu": "Royal Museums of Fine Arts, Brussels",
-    "imageUrl": "https://www.salvadordali.com/images/paintings/1946-the-temptation-of-st-anthony.jpg",
-    "api_id": "dali_temptation"
+    "titulo": "Caresses (As Carícias / A Esfinge)",
+    "artista": "Fernand Khnopff",
+    "ano": "1896",
+    "museu": "Musées royaux des Beaux-Arts, Bruxelas, Bélgica",
+    "imageUrl": "https://commons.wikimedia.org/wiki/Special:FilePath/Fernand_Khnopff_-_Caresses_-_Google_Art_Project.jpg?width=900",
+    "api_id": "khnopff_caresses"
   }
 ]
