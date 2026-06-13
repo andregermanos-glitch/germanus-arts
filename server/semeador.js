@@ -7,6 +7,15 @@
 // URLs foram sobrescritas pela antiga migração R2 (bucket vazio → URLs mortas),
 // restaurando a URL original do museu. Só actualiza se a obra ainda não tiver
 // imagem em cache, para não mexer no que já está resolvido.
+// ─── ALTERAÇÃO 13/06/2026 (anti-churn R2) ─────────────────────────────────────
+// PROBLEMA: depois que a migrarLoteR2 movia uma obra para o bucket (image_url →
+// r2.dev, image_cached_at=0), o semeador a re-processava e revertia a URL de
+// volta para o museu, gerando um ciclo infinito migração↔reversão a cada 8h.
+// CORREÇÃO em DOIS pontos:
+//   1. gravar(): nunca sobrescrever uma image_url que já aponta para o R2.
+//   2. artistaJaSemeado(): contar obras já no R2 como "resolvidas" — senão o
+//      artista nunca é considerado pronto e é re-processado para sempre.
+// Uma obra no R2 fica SELADA: nenhum ciclo do semeador a toca novamente.
 // ──────────────────────────────────────────────────────────────────────────────
 
 const fs   = require("fs");
@@ -164,9 +173,10 @@ async function gravar(pool, obra, ala) {
   if (norm(artist).includes("unknown") || norm(artist).includes("desconhecido")) return false;
   const id = `seed_${(api_id || "").replace(/[^a-zA-Z0-9]/g, "_").slice(0, 50)}`;
   try {
-    // ON CONFLICT actualiza a URL apenas se a obra ainda não tem imagem cacheada.
-    // Repara automaticamente URLs mortas (ex.: contaminadas pela antiga migração R2)
-    // sem tocar nas obras já resolvidas.
+    // ON CONFLICT actualiza a URL apenas se a obra ainda não tem imagem cacheada
+    // E ainda NÃO foi migrada para o R2. Isto:
+    //   - repara automaticamente URLs mortas (URLs de museu quebradas);
+    //   - NUNCA reverte uma obra que já vive no bucket R2 (anti-churn).
     const r = await pool.query(
       `INSERT INTO artworks
          (id,source,title,artist,date,medium,dimensions,origin,style,museum,description,credit,image_url,external_url,ala_id)
@@ -175,6 +185,8 @@ async function gravar(pool, obra, ala) {
          SET image_url = EXCLUDED.image_url,
              download_attempts = 0
        WHERE artworks.image_cached_at = 0
+         AND artworks.image_url NOT LIKE '%r2.dev%'
+         AND artworks.image_url NOT LIKE '%r2.cloudflarestorage%'
          AND artworks.image_url IS DISTINCT FROM EXCLUDED.image_url`,
       [id, title, artist, date, imageUrl, ala]
     );
@@ -186,10 +198,15 @@ async function gravar(pool, obra, ala) {
 async function artistaJaSemeado(pool, artista, ala) {
   try {
     const apelido = artista.split(" ").filter(w => w.length > 3).pop() || artista;
+    // Uma obra conta como "resolvida" se tem cache BYTEA (legado) OU já está no R2.
+    // Sem a cláusula do R2, artistas migrados para o bucket eram tratados como
+    // não-semeados e re-processados em todo ciclo — a raiz do churn.
     const r = await pool.query(
       `SELECT COUNT(*) AS n FROM artworks
         WHERE ala_id=$1 AND source='semeador' AND artist ILIKE $2
-          AND image_cached_at > 0`,
+          AND (image_cached_at > 0
+               OR image_url LIKE '%r2.dev%'
+               OR image_url LIKE '%r2.cloudflarestorage%')`,
       [ala, `%${apelido}%`]
     );
     return parseInt(r.rows[0].n, 10) >= 3;
