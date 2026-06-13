@@ -770,12 +770,12 @@ app.get("/api/r2/testar", async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// VACUUM para recuperar espaço físico. VACUUM normal (não FULL) não trava a tabela
-// e funciona mesmo com pouco espaço livre; devolve espaço ao SO gradualmente.
+// VACUUM FULL — reescreve a tabela e DEVOLVE o espaço físico ao disco.
+// Requer espaço temporário livre (agora há 100 GB) e trava a tabela durante a
+// execução (rode fora do horário de pico). É o que realmente encolhe o banco.
 app.get("/api/r2/vacuum", async (req, res) => {
   try {
-    // VACUUM não pode rodar dentro de transação; o pool do pg executa fora por padrão
-    await pool.query(`VACUUM (VERBOSE, ANALYZE) artworks`);
+    await pool.query(`VACUUM (FULL, VERBOSE, ANALYZE) artworks`);
     let tamanho = null;
     try {
       const t = await pool.query(`SELECT pg_size_pretty(pg_database_size(current_database())) AS s`);
