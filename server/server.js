@@ -705,6 +705,72 @@ app.post("/api/commons/categorias", async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
+// CARGA EM MASSA — desce recursivamente nas subcategorias do Commons
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Lista as subcategorias diretas de uma categoria do Commons
+async function listarSubcategorias(categoria) {
+  const url = `https://commons.wikimedia.org/w/api.php?action=query&list=categorymembers`
+    + `&cmtitle=${encodeURIComponent("Category:" + categoria)}&cmtype=subcat&cmlimit=500&format=json&origin=*`;
+  try {
+    const r = await fetch(url, { signal: AbortSignal.timeout(10000), headers: { "User-Agent": UA } });
+    const d = await r.json();
+    return (d.query?.categorymembers || []).map(m => (m.title || "").replace(/^Category:/, ""));
+  } catch { return []; }
+}
+
+// Carrega uma categoria e, opcionalmente, as suas subcategorias (1 nível de profundidade)
+async function carregarCategoriaProfunda(categoria, ala, limitePorCat, descer) {
+  const visitar = [categoria];
+  if (descer) {
+    const subs = await listarSubcategorias(categoria);
+    visitar.push(...subs);
+  }
+  let salvas = 0, encontradas = 0;
+  for (const cat of visitar) {
+    try {
+      const obras = await buscarPorCategoria(cat, limitePorCat);
+      encontradas += obras.length;
+      for (const obra of obras) {
+        try {
+          await pool.query(
+            `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit,image_cached_at)
+             VALUES ($1,'wikimedia_commons',$2,$3,$4,$5,$6,$7,$8,0)
+             ON CONFLICT (id) DO UPDATE SET ala_id=EXCLUDED.ala_id`,
+            [`commons_${obra.pageid}`, obra.title, obra.artist, obra.date, obra.museum, obra.imageUrl, ala, obra.credit]
+          );
+          salvas++;
+        } catch {}
+      }
+    } catch {}
+    await new Promise(r => setTimeout(r, 400)); // ritmo educado entre subcategorias
+  }
+  return { categoria, subcategorias: visitar.length - 1, encontradas, salvas };
+}
+
+// POST /api/commons/massa
+// Body: { lotes: [ {categoria, ala, descer}, ... ], limitePorCat }
+// Dispara em sequência (não em paralelo) para respeitar o rate limit do Commons.
+app.post("/api/commons/massa", async (req, res) => {
+  try {
+    const { lotes, limitePorCat = 100 } = req.body || {};
+    if (!Array.isArray(lotes) || !lotes.length)
+      return res.status(400).json({ error: "Envie { lotes: [{categoria, ala, descer}], limitePorCat }" });
+    const resultados = [];
+    let totalSalvas = 0;
+    for (const lote of lotes) {
+      const r = await carregarCategoriaProfunda(
+        lote.categoria, lote.ala || "retratos", limitePorCat, lote.descer !== false
+      );
+      resultados.push(r);
+      totalSalvas += r.salvas;
+      console.log(`📥 Massa [${lote.categoria}] → ${r.salvas} salvas (${r.subcategorias} subcats)`);
+    }
+    res.json({ ok: true, total_salvas: totalSalvas, resultados });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
 // /banco — PAINEL VISUAL (v2)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -888,8 +954,21 @@ app.get("*", (req, res) => {
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 async function start() {
-  await initDB();
-  await resetarBloqueiosInjustos();
+  // 1) ABRIR A PORTA PRIMEIRO — o healthcheck do Railway precisa de resposta
+  //    imediata; toda a inicialização pesada acontece depois, em segundo plano.
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`📊 Banco: /banco`);
+  });
+
+  // 2) Inicialização do banco (não-fatal: se falhar, o servidor continua de pé
+  //    e as rotas devolvem erros tratados em vez de derrubar o healthcheck)
+  try {
+    await initDB();
+    await resetarBloqueiosInjustos();
+  } catch (e) {
+    console.error("⚠ initDB falhou (servidor continua no ar):", e.message);
+  }
 
   console.log("🌱 Iniciando curadoria...");
   indexarCuradoria(pool, KEYS).catch(e => console.error("Curadoria erro:", e.message));
@@ -1017,14 +1096,12 @@ async function start() {
 
   setInterval(validateAndCleanImages, CLEANUP_PERIOD);
 
-  app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-    console.log(`📊 Banco: /banco`);
-    console.log(`🎨 Carregar Psyché: /api/carregar/psyche`);
-    console.log(`🎨 Carregar Mestres: /api/carregar/mestres`);
-  });
+  console.log(`🎨 Carregar Psyché: /api/carregar/psyche`);
+  console.log(`🎨 Carregar Mestres: /api/carregar/mestres`);
 }
 
-start().catch(e => { console.error("❌ Fatal:", e.message); process.exit(1); });
+// Nunca derrubar o processo por falha de inicialização — a porta fica aberta
+// e o healthcheck passa; os erros aparecem nos logs para diagnóstico.
+start().catch(e => { console.error("❌ Erro na inicialização (servidor segue no ar):", e.message); });
 
 module.exports = app;
