@@ -43,7 +43,10 @@ const KEYS = {
 
 // Estratégia actual: imagens de exibição em BYTEA no Postgres (volume 5 GB).
 // R2 fica reservado para a fase HD — reactivar só quando o banco se aproximar de 4 GB.
-const R2_MIGRACAO_ATIVA = false;
+// Arquitetura R2: imagens moram no bucket, Postgres guarda só a URL.
+const R2_MIGRACAO_ATIVA = true;
+// Cache BYTEA no Postgres DESATIVADO (era o que enchia o disco)
+const CACHE_BYTEA_ATIVO = false;
 
 // User-Agent descritivo — exigido pela Wikimedia (o "Mozilla/5.0" pelado leva 403)
 const UA = "GermanusArt/1.0 (https://germanus.art; contato@germanus.art)";
@@ -705,6 +708,57 @@ app.post("/api/commons/categorias", async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
+// MIGRAÇÃO R2 — status e manutenção de disco
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Progresso da migração para o R2 + tamanho do banco
+app.get("/api/r2/status", async (req, res) => {
+  try {
+    const r = await pool.query(`
+      SELECT
+        COUNT(*) FILTER (WHERE image_url LIKE '%r2.dev%' OR image_url LIKE '%r2.cloudflarestorage%') AS no_r2,
+        COUNT(*) FILTER (WHERE image_url IS NOT NULL AND image_url != ''
+              AND image_url NOT LIKE '%r2.dev%' AND image_url NOT LIKE '%r2.cloudflarestorage%') AS pendentes,
+        COUNT(*) FILTER (WHERE image_data IS NOT NULL) AS ainda_com_bytea
+      FROM artworks`);
+    let tamanho = null;
+    try {
+      const t = await pool.query(`SELECT pg_size_pretty(pg_database_size(current_database())) AS s`);
+      tamanho = t.rows[0].s;
+    } catch {}
+    res.json({ ...r.rows[0], tamanho_banco: tamanho, r2_ativo: r2Ativo() });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Limpa BYTEA órfão (imagens que já estão no R2 mas ainda têm bytes no Postgres)
+// e roda VACUUM para devolver o espaço ao disco.
+app.get("/api/r2/limpar-bytea", async (req, res) => {
+  try {
+    const upd = await pool.query(`
+      UPDATE artworks SET image_data = NULL, image_cached_at = 0
+      WHERE image_data IS NOT NULL
+        AND (image_url LIKE '%r2.dev%' OR image_url LIKE '%r2.cloudflarestorage%')`);
+    res.json({ ok: true, bytea_limpos: upd.rowCount,
+               nota: "Rode /api/r2/vacuum para devolver o espaço ao disco" });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// VACUUM para recuperar espaço físico. VACUUM normal (não FULL) não trava a tabela
+// e funciona mesmo com pouco espaço livre; devolve espaço ao SO gradualmente.
+app.get("/api/r2/vacuum", async (req, res) => {
+  try {
+    // VACUUM não pode rodar dentro de transação; o pool do pg executa fora por padrão
+    await pool.query(`VACUUM (VERBOSE, ANALYZE) artworks`);
+    let tamanho = null;
+    try {
+      const t = await pool.query(`SELECT pg_size_pretty(pg_database_size(current_database())) AS s`);
+      tamanho = t.rows[0].s;
+    } catch {}
+    res.json({ ok: true, mensagem: "VACUUM concluído", tamanho_banco: tamanho });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
 // CARGA EM MASSA — desce recursivamente nas subcategorias do Commons
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1058,41 +1112,70 @@ async function start() {
     setTimeout(() => {
       async function migrarLoteR2() {
         try {
+          // Pega obras que ainda NÃO estão no R2
           const r = await pool.query(
             `SELECT id, image_url FROM artworks
              WHERE image_url IS NOT NULL AND image_url != ''
                AND image_url NOT LIKE '%r2.dev%'
                AND image_url NOT LIKE '%r2.cloudflarestorage%'
-             ORDER BY indexed_at DESC NULLS LAST
-             LIMIT 20`
+               AND COALESCE(download_attempts,0) < 3
+             ORDER BY (image_cached_at > 0) DESC, indexed_at DESC NULLS LAST
+             LIMIT 15`
           );
-          if (r.rows.length === 0) return;
-          let migradas = 0;
-          await Promise.all(r.rows.map(async (row) => {
-            const novaUrl = await enviarParaR2(row.id, row.image_url);
-            if (novaUrl) {
-              await pool.query(`UPDATE artworks SET image_url=$1 WHERE id=$2`, [novaUrl, row.id]);
-              migradas++;
+          if (r.rows.length === 0) {
+            console.log("☁️  R2 — migração completa, nada pendente");
+            return;
+          }
+          let migradas = 0, rate429 = 0;
+          for (const row of r.rows) {
+            try {
+              const novaUrl = await enviarParaR2(row.id, row.image_url);
+              if (novaUrl) {
+                // Grava URL do R2 E limpa o BYTEA no mesmo UPDATE (libera disco)
+                await pool.query(
+                  `UPDATE artworks
+                   SET image_url=$1, image_data=NULL, image_cached_at=0, download_attempts=0
+                   WHERE id=$2`,
+                  [novaUrl, row.id]
+                );
+                migradas++;
+              }
+            } catch (e) {
+              if (e.code === 429 || e.message === "HTTP_429") {
+                rate429++;
+                if (rate429 >= 3) { console.log("☁️  R2 — rate limit, recuando"); break; }
+              } else {
+                await pool.query(
+                  `UPDATE artworks SET download_attempts=COALESCE(download_attempts,0)+1,
+                          last_attempt_at=EXTRACT(EPOCH FROM NOW())::BIGINT WHERE id=$1`,
+                  [row.id]
+                );
+              }
             }
-          }));
-          if (migradas > 0) console.log(`☁️  R2 — ${migradas}/${r.rows.length} imagens migradas`);
+            await new Promise(s => setTimeout(s, 1200)); // ritmo educado
+          }
+          if (migradas > 0) console.log(`☁️  R2 — ${migradas}/${r.rows.length} imagens migradas para o bucket`);
         } catch (e) { console.log("☁️  R2 erro:", e.message); }
       }
       migrarLoteR2();
-      setInterval(migrarLoteR2, 4 * 60 * 1000);
-    }, 3 * 60 * 1000);
-    console.log("☁️  Migração automática para R2 activada");
+      setInterval(migrarLoteR2, 90 * 1000); // a cada 90s
+    }, 2 * 60 * 1000);
+    console.log("☁️  Migração para R2 ACTIVADA — imagens vão para o bucket, BYTEA é limpo");
   } else {
-    console.log("☁️  Migração R2 desactivada — imagens em BYTEA no Postgres (fase HD futura)");
+    console.log("☁️  R2 não configurado — verifique as variáveis R2_* no Railway");
   }
 
-  // Cache de imagens REATIVADO — volume agora tem 5 GB.
-  // Lotes de 100 por minuto, 5 downloads em paralelo, User-Agent descritivo.
-  setTimeout(() => {
-    downloadAndCacheImages();
-    setInterval(downloadAndCacheImages, CACHE_PERIOD);
-  }, CACHE_DELAY);
-  console.log("📦 Cache automático ACTIVADO (30/min, concorrência 2, recuo automático em 429)");
+  // Cache BYTEA no Postgres DESATIVADO — as imagens agora vão para o R2.
+  // (era o que enchia o disco do volume). Para reactivar, mude CACHE_BYTEA_ATIVO.
+  if (CACHE_BYTEA_ATIVO) {
+    setTimeout(() => {
+      downloadAndCacheImages();
+      setInterval(downloadAndCacheImages, CACHE_PERIOD);
+    }, CACHE_DELAY);
+    console.log("📦 Cache BYTEA activado");
+  } else {
+    console.log("📦 Cache BYTEA desactivado — imagens servidas do R2");
+  }
 
   setInterval(validateAndCleanImages, CLEANUP_PERIOD);
 
