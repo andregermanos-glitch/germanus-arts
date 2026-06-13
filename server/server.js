@@ -743,6 +743,33 @@ app.get("/api/r2/limpar-bytea", async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+// TESTE: migra UMA obra e devolve o erro exato (diagnóstico da migração R2)
+app.get("/api/r2/testar", async (req, res) => {
+  try {
+    if (!r2Ativo()) return res.json({ erro: "r2Ativo()=false — variáveis incompletas" });
+    // Pega uma obra que tenha BYTEA (mais garantido) ou URL externa
+    const r = await pool.query(
+      `SELECT id, image_url FROM artworks
+       WHERE image_url IS NOT NULL AND image_url != ''
+         AND image_url NOT LIKE '%r2.dev%'
+         AND image_url NOT LIKE '%r2.cloudflarestorage%'
+       ORDER BY (image_cached_at > 0) DESC
+       LIMIT 1`
+    );
+    if (r.rows.length === 0) return res.json({ mensagem: "Nenhuma obra pendente" });
+    const obra = r.rows[0];
+    try {
+      const novaUrl = await enviarParaR2(obra.id, obra.image_url);
+      if (novaUrl) {
+        return res.json({ ok: true, id: obra.id, url_origem: obra.image_url, url_r2: novaUrl });
+      }
+      return res.json({ ok: false, id: obra.id, motivo: "enviarParaR2 devolveu null", url_origem: obra.image_url });
+    } catch (e) {
+      return res.json({ ok: false, id: obra.id, erro: e.message, nome: e.name, code: e.code || null, url_origem: obra.image_url });
+    }
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // VACUUM para recuperar espaço físico. VACUUM normal (não FULL) não trava a tabela
 // e funciona mesmo com pouco espaço livre; devolve espaço ao SO gradualmente.
 app.get("/api/r2/vacuum", async (req, res) => {
