@@ -6,6 +6,11 @@
 // 3. Nova rota /api/cache/diagnostico — pendentes por domínio
 // 4. Cache automático REATIVADO (CONCORRENCIA 5, lotes de 100/min)
 // 5. /api/cache/status agora mostra o tamanho do banco (medidor de combustível)
+// ─── ALTERAÇÃO 13/06/2026 ─────────────────────────────────────────────────────
+// 6. Painel /banco: "imagens prontas" agora conta BYTEA legado + obras no R2.
+//    Antes contava só image_cached_at > 0, o que fazia o número CAIR conforme a
+//    migração movia obras pro bucket (R2 deixa cached_at = 0). Agora soma as duas
+//    e expõe um card separado "no R2" para acompanhar a migração.
 // ─────────────────────────────────────────────────────────────────────────────
 require("dotenv").config({ path: require("path").join(__dirname, "../.env") });
 const express  = require("express");
@@ -857,9 +862,20 @@ app.post("/api/commons/massa", async (req, res) => {
 
 app.get("/banco", async (req, res) => {
   try {
+    // ALTERAÇÃO 13/06/2026: "prontas" = BYTEA legado (image_cached_at>0) + obras
+    // já no R2. Sem isto o número caía conforme a migração movia obras pro bucket
+    // (o R2 deixa cached_at=0). Card "no R2" exposto para acompanhar a migração.
     const tot = await pool.query(`
       SELECT COUNT(*) AS total,
-             COUNT(*) FILTER (WHERE image_cached_at > 0) AS cached,
+             COUNT(*) FILTER (
+               WHERE image_cached_at > 0
+                  OR image_url LIKE '%r2.dev%'
+                  OR image_url LIKE '%r2.cloudflarestorage%'
+             ) AS cached,
+             COUNT(*) FILTER (
+               WHERE image_url LIKE '%r2.dev%'
+                  OR image_url LIKE '%r2.cloudflarestorage%'
+             ) AS no_r2,
              COUNT(DISTINCT artist) AS artistas,
              COUNT(DISTINCT ala_id) FILTER (WHERE ala_id IS NOT NULL) AS alas
       FROM artworks
@@ -947,6 +963,9 @@ app.get("/banco", async (req, res) => {
 
     const now = new Date().toLocaleString("pt-PT", { timeZone: "America/Sao_Paulo" });
 
+    // % de migração para o R2 (sobre o total de obras)
+    const pctR2 = t.total > 0 ? Math.round((parseInt(t.no_r2) / parseInt(t.total)) * 100) : 0;
+
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.send(`<!DOCTYPE html>
 <html lang="pt">
@@ -963,7 +982,7 @@ h1{font-size:20px;font-weight:600;color:#fff;margin-bottom:4px}
 .card{background:#141414;border:1px solid #222;border-radius:10px;padding:14px 16px}
 .card .v{font-size:28px;font-weight:700;color:#fff;line-height:1}
 .card .l{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
-.card.g .v{color:#1D9E75}.card.b .v{color:#185FA5}.card.a .v{color:#BA7517}.card.r .v{color:#E24B4A}
+.card.g .v{color:#1D9E75}.card.b .v{color:#185FA5}.card.a .v{color:#BA7517}.card.r .v{color:#E24B4A}.card.p .v{color:#534AB7}
 h2{font-size:13px;font-weight:500;color:#666;text-transform:uppercase;letter-spacing:.5px;margin:0 0 10px}
 table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:28px}
 th{text-align:left;padding:8px 12px;color:#444;font-size:10px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid #1a1a1a}
@@ -984,7 +1003,8 @@ a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
 
 <div class="cards">
   <div class="card"><div class="v">${parseInt(t.total).toLocaleString("pt-PT")}</div><div class="l">obras totais</div></div>
-  <div class="card g"><div class="v">${parseInt(t.cached).toLocaleString("pt-PT")}</div><div class="l">imagens cached</div></div>
+  <div class="card g"><div class="v">${parseInt(t.cached).toLocaleString("pt-PT")}</div><div class="l">imagens prontas</div></div>
+  <div class="card p"><div class="v">${parseInt(t.no_r2).toLocaleString("pt-PT")}</div><div class="l">no R2 · ${pctR2}%</div></div>
   <div class="card a"><div class="v">${parseInt(t.artistas).toLocaleString("pt-PT")}</div><div class="l">artistas únicos</div></div>
   <div class="card b"><div class="v">${t.alas}</div><div class="l">alas activas</div></div>
   <div class="card r"><div class="v" style="font-size:20px">${tamanhoBanco}</div><div class="l">tamanho do banco / 5 GB</div></div>
@@ -1012,7 +1032,7 @@ a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
 
 <div class="actions">
   <a class="btn" href="/">← Voltar ao site</a>
-  <a class="btn" href="/api/cache/forcar?limit=200">Forçar cache</a>
+  <a class="btn" href="/api/r2/status">Status R2</a>
   <a class="btn" href="/api/cache/diagnostico">Diagnóstico</a>
   <a class="btn" href="/api/cache/status">Status + tamanho</a>
   <a class="btn" href="/api/carregar/psyche">Carregar Psyché</a>
@@ -1130,11 +1150,10 @@ async function start() {
     setInterval(equilibrar, 90 * 60 * 1000);  // a cada 90 minutos
   }, 8 * 60 * 1000);
 
-  // ─── Migração R2: DESATIVADA ────────────────────────────────────────────────
-  // O job reescrevia image_url para o R2 antes de confirmar que o bucket tinha
-  // os arquivos, gerando URLs mortas. Reactivar apenas na fase HD (banco ~4 GB),
-  // e quando reactivar: gravar numa coluna nova (image_hd_url) em vez de
-  // sobrescrever image_url. Controlado pela constante R2_MIGRACAO_ATIVA.
+  // ─── Migração R2 ────────────────────────────────────────────────────────────
+  // Move imagens dos museus para o bucket R2 e grava a URL do R2 no banco.
+  // Os patches anti-churn no curador.js e semeador.js garantem que uma obra já
+  // migrada NÃO seja revertida para a URL do museu nos ciclos seguintes.
   if (R2_MIGRACAO_ATIVA && r2Ativo()) {
     setTimeout(() => {
       async function migrarLoteR2() {
