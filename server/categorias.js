@@ -1,5 +1,19 @@
 // server/categorias.js — Busca por Categoria do Wikimedia Commons
 // Categorias reais e curadas do Commons (não busca por palavras-chave)
+// ─── ALTERAÇÃO 13/06/2026 (fim do roubo entre alas) ───────────────────────────
+// Três pares de alas compartilhavam a mesma categoria do Commons e roubavam
+// obras entre si a cada ciclo (o id é commons_<pageid>, único por imagem):
+//   familiar ↔ povo            → "Genre paintings"
+//   retratos ↔ pessoas_reais   → "Portrait paintings"
+//   cores ↔ luz_sol            → "Impressionist paintings"
+// Com o COALESCE no server.js, a 1ª ala trancava a categoria e a 2ª ficava vazia.
+// Agora cada ala tem categorias EXCLUSIVAS. Onde a separação conceitual é difícil
+// (ex.: pessoas_reais vs retratos), usei categorias por artista ("Paintings by X"),
+// que têm arquivos diretos e não colidem com as categorias-de-gênero.
+// Objets também ganhou categorias por artista (de Heem, Ruysch) porque
+// "Still-life paintings" é categoria-contêiner (quase só subcategorias) e o
+// fetcher só lê arquivos diretos — por isso Objets quase não enchia pelo Commons.
+// ──────────────────────────────────────────────────────────────────────────────
 
 // ─── Mapeamento: cada ala → categorias reais do Wikimedia Commons ─────────────
 const CATEGORIAS_WIKIMEDIA = {
@@ -7,10 +21,9 @@ const CATEGORIAS_WIKIMEDIA = {
   // Psyché — Surrealismo
   fase: [
     "Surrealist paintings",
-    "Surrealism",
+    "Metaphysical paintings",
     "Paintings by Salvador Dalí",
-    "Paintings by Max Ernst",
-    "Metaphysical paintings"
+    "Paintings by Max Ernst"
   ],
 
   // Émotion — Abstração + Expressionismo + Dadaísmo
@@ -22,16 +35,16 @@ const CATEGORIAS_WIKIMEDIA = {
     "Paintings by Wassily Kandinsky"
   ],
 
-  // Couleurs — Fauvismo + Impressionismo + Construtivismo
+  // Couleurs — Fauvismo + Pós-Impressionismo (Impressionismo cedido a luz_sol)
   cores: [
     "Fauvist paintings",
-    "Impressionist paintings",
     "Constructivism",
     "Post-Impressionist paintings",
-    "Pointillist paintings"
+    "Pointillist paintings",
+    "Paintings by Paul Gauguin"
   ],
 
-  // Perspective — Cubismo (importante!)
+  // Perspective — Cubismo
   perspectiva: [
     "Cubist paintings",
     "Cubism",
@@ -47,7 +60,7 @@ const CATEGORIAS_WIKIMEDIA = {
     "Crucifixion of Jesus in paintings"
   ],
 
-  // Retratos — Portrait
+  // Retratos — retrato como gênero (fica com "Portrait paintings")
   retratos: [
     "Portrait paintings",
     "Self-portraits",
@@ -55,17 +68,21 @@ const CATEGORIAS_WIKIMEDIA = {
     "Portrait paintings of women"
   ],
 
-  // Restantes alas — categorias adicionais do Commons
   historico: [
     "History paintings",
     "Battle paintings",
     "Napoleonic Wars in art"
   ],
 
+  // Objets — naturezas-mortas. "Still-life paintings" é contêiner (poucos arquivos
+  // diretos); as categorias por artista garantem obras já no equilibrador.
+  // Para volume real, usar /api/commons/massa com descer:true (ver nota no fim).
   objetos: [
-    "Still-life paintings",
     "Vanitas paintings",
-    "Flower paintings"
+    "Flower paintings",
+    "Paintings by Jan Davidsz. de Heem",
+    "Paintings by Rachel Ruysch",
+    "Paintings by Willem Kalf"
   ],
 
   lugares: [
@@ -80,10 +97,12 @@ const CATEGORIAS_WIKIMEDIA = {
     "Marine art"
   ],
 
+  // Familiale — interiores domésticos (NÃO usa mais "Genre paintings")
   familiar: [
-    "Genre paintings",
     "Interiors in art",
-    "Domestic scenes in art"
+    "Domestic scenes in art",
+    "Paintings by Pieter de Hooch",
+    "Paintings by Gabriel Metsu"
   ],
 
   nudes: [
@@ -104,22 +123,28 @@ const CATEGORIAS_WIKIMEDIA = {
     "Architecture in art"
   ],
 
+  // Peuple — trabalho/rua/campo (fica com "Genre paintings")
   povo: [
     "Genre paintings",
     "Peasants in art",
-    "Rural life in art"
+    "Rural life in art",
+    "Paintings by Adriaen van Ostade"
   ],
 
+  // Lumière — Impressionismo (cedido por cores)
   luz_sol: [
     "Impressionist paintings",
     "Luminism (Impressionism)",
     "Plein air paintings"
   ],
 
+  // Personnages — pessoas identificadas (NÃO usa mais "Portrait paintings";
+  // usa retratos de grupo/equestres e por artista para não roubar de Retratos)
   pessoas_reais: [
-    "Portrait paintings",
     "Group portraits",
-    "Equestrian portraits"
+    "Equestrian portraits",
+    "Paintings by Anthony van Dyck",
+    "Paintings by Diego Velázquez"
   ],
 
   femininas: [
