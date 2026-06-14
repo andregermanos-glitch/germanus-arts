@@ -25,8 +25,14 @@ fs.readdirSync(CURADORIA_DIR)
   });
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+// User-Agent descritivo — Met e Wikimedia bloqueiam (403) chamadas sem isto
+const UA = "GermanusArt/1.0 (https://germanus.art; contato@germanus.art)";
+
 const get = async (url, headers = {}) => {
-  const r = await fetch(url, { signal: AbortSignal.timeout(8000), headers });
+  const r = await fetch(url, {
+    signal: AbortSignal.timeout(8000),
+    headers: { "User-Agent": UA, ...headers },
+  });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
 };
