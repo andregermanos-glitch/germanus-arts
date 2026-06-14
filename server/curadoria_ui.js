@@ -222,10 +222,30 @@ h1{font-size:20px;color:#fff;margin-bottom:4px}
 .box button.go:hover{filter:brightness(1.3)}
 @media(max-width:700px){.boxes{grid-template-columns:1fr}}
 a.voltar{color:#555;font-size:12px;text-decoration:none}a.voltar:hover{color:#aaa}
+.import{background:#120d04;border:1px solid #3a2e15;border-radius:10px;padding:12px 14px;margin-bottom:16px}
+.import-label{font-size:12px;color:#e0a23a;display:block;margin-bottom:8px}
+.import-btns{display:flex;flex-wrap:wrap;gap:6px}
+.import-btns button{font-size:12px;padding:6px 12px;border-radius:7px;border:1px solid #BA751755;background:#BA751718;color:#e0a23a;cursor:pointer}
+.import-btns button:hover{background:#BA751733;color:#fff}
+.import-status{font-size:11px;color:#aaa;margin-top:10px;min-height:14px}
 </style></head><body>
 
 <h1>GERMANUS.Art — Curadoria</h1>
 <p class="sub"><a class="voltar" href="/banco">← painel do banco</a> &nbsp;·&nbsp; vendo: <b style="color:#1D9E75">${tituloAba}</b> &nbsp;·&nbsp; ${total} obras</p>
+
+<div class="import">
+  <span class="import-label">📥 Importar bloco de movimento para a Entrada:</span>
+  <div class="import-btns">
+    <button onclick="importar('impressionismo')">Impressionismo</button>
+    <button onclick="importar('cubismo')">Cubismo</button>
+    <button onclick="importar('surrealismo')">Surrealismo</button>
+    <button onclick="importar('fauvismo')">Fauvismo</button>
+    <button onclick="importar('pop_art')">Pop Art</button>
+    <button onclick="importar('abstracionismo')">Abstracionismo</button>
+    <button onclick="importar('vanguarda')">Vanguarda</button>
+  </div>
+  <div id="importStatus" class="import-status"></div>
+</div>
 
 <div class="alas">${botoes}</div>
 
@@ -254,6 +274,23 @@ a.voltar{color:#555;font-size:12px;text-decoration:none}a.voltar:hover{color:#aa
 
 <script>
 function copiarId(id){ navigator.clipboard?.writeText(id); }
+async function importar(movimento){
+  const total = prompt("Quantas obras de "+movimento+" puxar para a Entrada? (ex.: 500, 1000, 2000)", "1000");
+  if(total===null) return;
+  const n = parseInt(total,10);
+  if(!n || n<1) return alert("Número inválido.");
+  const st = document.getElementById('importStatus');
+  st.textContent = "⏳ Iniciando importação de "+movimento+" (até "+n+")...";
+  try{
+    const r = await fetch("/api/importar/movimento",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({movimento, total:n})});
+    const d = await r.json();
+    if(d.ok){
+      st.innerHTML = "✅ "+d.mensagem+" <a href='/curadoria?ala=entrada&offset=0' style='color:#e0a23a'>→ ver Entrada</a>";
+    } else {
+      st.textContent = "❌ "+(d.error||"erro");
+    }
+  }catch(e){ st.textContent = "❌ Falha ao iniciar: "+e.message; }
+}
 function addArquivar(id){ const t=document.getElementById('boxArquivar'); t.value=(t.value.trim()?t.value.trim()+"\\n":"")+id; }
 function addMover(id){ const t=document.getElementById('boxMover'); t.value=(t.value.trim()?t.value.trim()+"\\n":"")+id+" "; t.focus(); }
 async function enviarArquivar(){
