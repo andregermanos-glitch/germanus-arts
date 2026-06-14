@@ -203,6 +203,7 @@ async function searchCuradoria(alaId, excludeIds = [], limit = 500, offset = 0) 
       SELECT *, image_cached_at FROM artworks
       WHERE ala_id = $1
         AND image_url IS NOT NULL AND image_url != ''
+        AND COALESCE(status,'publicada') = 'publicada'
     `;
     const params = [alaId];
     if (excl.length > 0) {
@@ -673,7 +674,7 @@ app.get("/api/commons/categoria/:nome", async (req, res) => {
         await pool.query(
           `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit,image_cached_at)
            VALUES ($1,'wikimedia_commons',$2,$3,$4,$5,$6,$7,$8,0)
-           ON CONFLICT (id) DO UPDATE SET ala_id=EXCLUDED.ala_id`,
+           ON CONFLICT (id) DO UPDATE SET ala_id = COALESCE(artworks.ala_id, EXCLUDED.ala_id)`,
           [id, obra.title, obra.artist, obra.date, obra.museum, obra.imageUrl, ala, obra.credit]
         );
         salvas++;
@@ -699,7 +700,7 @@ app.post("/api/commons/categorias", async (req, res) => {
           await pool.query(
             `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit,image_cached_at)
              VALUES ($1,'wikimedia_commons',$2,$3,$4,$5,$6,$7,$8,0)
-             ON CONFLICT (id) DO UPDATE SET ala_id=EXCLUDED.ala_id`,
+             ON CONFLICT (id) DO UPDATE SET ala_id = COALESCE(artworks.ala_id, EXCLUDED.ala_id)`,
             [`commons_${obra.pageid}`, obra.title, obra.artist, obra.date, obra.museum, obra.imageUrl, ala, obra.credit]
           );
           salvas++;
@@ -822,7 +823,7 @@ async function carregarCategoriaProfunda(categoria, ala, limitePorCat, descer) {
           await pool.query(
             `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit,image_cached_at)
              VALUES ($1,'wikimedia_commons',$2,$3,$4,$5,$6,$7,$8,0)
-             ON CONFLICT (id) DO UPDATE SET ala_id=EXCLUDED.ala_id`,
+             ON CONFLICT (id) DO UPDATE SET ala_id = COALESCE(artworks.ala_id, EXCLUDED.ala_id)`,
             [`commons_${obra.pageid}`, obra.title, obra.artist, obra.date, obra.museum, obra.imageUrl, ala, obra.credit]
           );
           salvas++;
@@ -1044,6 +1045,10 @@ a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
   } catch(e) { res.status(500).send(`<pre style="color:red">Erro: ${e.message}</pre>`); }
 });
 
+// ─── Módulos de curadoria e importação (ANTES do catch-all "*") ───────────────
+require("./curadoria_ui").montarCuradoria(app, pool);
+require("./importador_movimento").montarImportador(app, pool);
+
 // ─── Frontend estático ────────────────────────────────────────────────────────
 const distPath = path.join(__dirname, "../dist");
 app.use(express.static(distPath));
@@ -1095,7 +1100,8 @@ async function start() {
   }, 5 * 60 * 1000);
 
   // Auto-equilibrador — enche cada ala até META obras. Corre 8min após boot, depois a cada 90min
-  const META_POR_ALA = 200;
+  // 13/06/2026: META subida 200 → 400 (rumo a ~5.000 obras no acervo).
+  const META_POR_ALA = 400;
   setTimeout(async () => {
     async function equilibrar() {
       const alas = Object.keys(CATEGORIAS_WIKIMEDIA);
@@ -1135,7 +1141,7 @@ async function start() {
               await pool.query(
                 `INSERT INTO artworks (id,source,title,artist,date,museum,image_url,ala_id,credit,image_cached_at)
                  VALUES ($1,'wikimedia_commons',$2,$3,$4,$5,$6,$7,$8,0)
-                 ON CONFLICT (id) DO UPDATE SET ala_id=EXCLUDED.ala_id`,
+                 ON CONFLICT (id) DO UPDATE SET ala_id = COALESCE(artworks.ala_id, EXCLUDED.ala_id)`,
                 [`commons_${obra.pageid}`, obra.title, obra.artist, obra.date, obra.museum, obra.imageUrl, ala, obra.credit]
               );
               salvas++;
