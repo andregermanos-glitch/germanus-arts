@@ -11,6 +11,7 @@ const saveLang = l  => { try { localStorage.setItem("germ_lang", l); } catch {} 
 // ─── Rotatividade — rastreia obras vistas (30 min) ───────────────────────────
 const SEEN_KEY = "germ_seen";
 const SEEN_TTL = 30 * 60 * 1000;
+const PAGE = 18; // obras por página / por clique em "carregar mais"
 
 function getSeenIds() {
   try {
@@ -47,6 +48,7 @@ const T = {
     explore: "Explorer à partir de cette œuvre",
     moreAla: "Plus dans cette galerie",
     samePeriod: "+ Même période",
+    loadMore: "Voir 18 de plus",
     add: "+ COLLECTION", saved: "✓ SAUVÉ",
     details: "▼ DÉTAILS", close: "▲ FERMER",
     remove: "✕",
@@ -72,7 +74,7 @@ const T = {
     footer: "18 GALERIES · MUSÉES MONDIAUX · COLLECTION PERSONNELLE",
     global: "Collection d'Art Mondial",
     alas: {
-      retratos:"Portraits", pessoas_reais:"Personnages Réels", historico:"Histoire", emocao:"Émotion", cidades:"Émotion",
+      retratos:"Portraits", pessoas_reais:"Personnages Réels", historico:"Histoire", cidades:"Émotion",
       objetos:"Objets", lugares:"Lieux Connus",
       natureza:"Nature", familiar:"Ambiance Familiale", nudes:"Nus Féminins",
       esoterico:"Ésotérisme", sacro:"Sacré", arquitetura:"Architecture",
@@ -92,6 +94,7 @@ const T = {
     explore: "Explore from this artwork",
     moreAla: "More in this gallery",
     samePeriod: "+ Same period",
+    loadMore: "Show 18 more",
     add: "+ COLLECTION", saved: "✓ SAVED",
     details: "▼ DETAILS", close: "▲ CLOSE",
     remove: "✕",
@@ -117,7 +120,7 @@ const T = {
     footer: "18 GALLERIES · GLOBAL MUSEUMS · PERSONAL COLLECTION",
     global: "Global Art Collection",
     alas: {
-      retratos:"Portraits", pessoas_reais:"Real People", historico:"History", emocao:"Emotion", cidades:"Emotion",
+      retratos:"Portraits", pessoas_reais:"Real People", historico:"History", cidades:"Emotion",
       objetos:"Objects", lugares:"Famous Places",
       natureza:"Nature", familiar:"Home Environment", nudes:"Female Nudes",
       esoterico:"Esotericism", sacro:"Sacred", arquitetura:"Architecture",
@@ -137,6 +140,7 @@ const T = {
     explore: "Explorar desde esta obra",
     moreAla: "Más en esta galería",
     samePeriod: "+ Mismo período",
+    loadMore: "Ver 18 más",
     add: "+ COLECCIÓN", saved: "✓ GUARDADO",
     details: "▼ DETALLES", close: "▲ CERRAR",
     remove: "✕",
@@ -162,7 +166,7 @@ const T = {
     footer: "18 GALERÍAS · MUSEOS GLOBALES · COLECCIÓN PERSONAL",
     global: "Colección de Arte Global",
     alas: {
-      retratos:"Retratos", pessoas_reais:"Personas Reales", historico:"Historia", emocao:"Emoción", cidades:"Emoción",
+      retratos:"Retratos", pessoas_reais:"Personas Reales", historico:"Historia", cidades:"Emoción",
       objetos:"Objetos", lugares:"Lugares Conocidos",
       natureza:"Naturaleza", familiar:"Ambiente Familiar", nudes:"Desnudos Femeninos",
       esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Arquitectura",
@@ -182,6 +186,7 @@ const T = {
     explore: "Esplora da questa opera",
     moreAla: "Altro in questa galleria",
     samePeriod: "+ Stesso periodo",
+    loadMore: "Mostra altre 18",
     add: "+ COLLEZIONE", saved: "✓ SALVATO",
     details: "▼ DETTAGLI", close: "▲ CHIUDI",
     remove: "✕",
@@ -207,7 +212,7 @@ const T = {
     footer: "18 GALLERIE · MUSEI GLOBALI · COLLEZIONE PERSONALE",
     global: "Collezione d'Arte Globale",
     alas: {
-      retratos:"Ritratti", pessoas_reais:"Persone Reali", historico:"Storia", emocao:"Emozione", cidades:"Emozione",
+      retratos:"Ritratti", pessoas_reais:"Persone Reali", historico:"Storia", cidades:"Emozione",
       objetos:"Oggetti", lugares:"Luoghi Noti",
       natureza:"Natura", familiar:"Ambiente Familiare", nudes:"Nudi Femminili",
       esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Architettura",
@@ -272,20 +277,21 @@ async function getWeather() {
 }
 
 // ─── Busca ────────────────────────────────────────────────────────────────────
-async function searchArt(query, ala, fromYear, toYear, lang) {
-  const p = new URLSearchParams({ q: query, lang: lang || "fr" });
+async function searchArt(query, ala, fromYear, toYear, lang, limit = PAGE) {
+  const p = new URLSearchParams({ q: query, lang: lang || "fr", limit: String(limit) });
   if (ala) { p.append("ala", ala.nameEn||ala.id); p.append("alaHint", ala.hint||""); p.append("alaId", ala.id); }
   if (fromYear) p.append("fromYear", fromYear);
   if (toYear)   p.append("toYear", toYear);
   const seen = getSeenIds();
-  if (seen.length > 0) p.append("exclude", seen.slice(0, 80).join(","));
+  if (seen.length > 0) p.append("exclude", seen.slice(0, 200).join(","));
   const res = await fetch(`/api/search?${p}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
   if (data.error) throw new Error(data.error);
   const results = (data.results || []).map((o, i) => ({ ...o, id: o.id || `art_${Date.now()}_${i}` }));
   addSeenIds(results.map(r => r.id));
-  return results;
+  // Página cheia => provavelmente há mais; página parcial => acabou
+  return { results, hasMore: results.length >= limit };
 }
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
@@ -300,7 +306,7 @@ function Logo({ small }) {
   );
 }
 
-// ─── Seletor de idioma ────────────────────────────────────────────────────────
+// ─── Seletor de idioma — horizontal no desktop, quadrado 2×2 no celular ───────
 function LangSwitcher({ lang, setLang }) {
   const langs = [
     { code:"fr", flag:"🇫🇷" },
@@ -309,7 +315,7 @@ function LangSwitcher({ lang, setLang }) {
     { code:"it", flag:"🇮🇹" },
   ];
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+    <div className="lang-switcher">
       {langs.map(l => (
         <button key={l.code} onClick={() => { setLang(l.code); saveLang(l.code); }}
           style={{
@@ -665,27 +671,36 @@ export default function App() {
   const [errMsg,setErr]    = useState("");
   const [filter,setFilt]   = useState("");
   const [filterAla,setFA]  = useState("");
+  const [hasMore,setHasMore] = useState(false);
+  const [lastTerm,setLastTerm] = useState("");
 
   useEffect(()=>{ setCol(loadCol()); },[]);
+
+  // Ping de visita — conta 1×/dia por navegador, sem guardar IP (lado do servidor)
+  useEffect(()=>{ fetch("/api/visita").catch(()=>{}); },[]);
 
   const add    = useCallback(art=>setCol(p=>{if(p.find(a=>a.id===art.id))return p;const n=[art,...p];saveCol(n);return n;}),[]);
   const remove = useCallback(id=>setCol(p=>{const n=p.filter(a=>a.id!==id);saveCol(n);return n;}),[]);
 
   const clickAla = useCallback(async (ala) => {
-    if (activeAla?.id===ala.id) { setAla(null);setRes([]);setPhase("idle");return; }
-    setAla(ala);setRes([]);setErr("");setPhase("searching");setTab("buscar");
+    if (activeAla?.id===ala.id) { setAla(null);setRes([]);setPhase("idle");setHasMore(false);return; }
+    setAla(ala);setRes([]);setErr("");setPhase("searching");setTab("buscar");setHasMore(false);
+    clearSeen();
+    setLastTerm(ala.hint);
     try {
-      const arts = await searchArt(ala.hint, ala, fromYear, toYear, lang);
-      setRes(arts);setPhase("done");
+      const { results: arts, hasMore: more } = await searchArt(ala.hint, ala, fromYear, toYear, lang);
+      setRes(arts);setHasMore(more);setPhase("done");
     } catch(e){setErr(e.message);setPhase("error");}
-  },[activeAla,fromYear,toYear]);
+  },[activeAla,fromYear,toYear,lang]);
 
   const doSearch = async () => {
     if (!query.trim()||phase==="searching") return;
-    setRes([]);setErr("");setPhase("searching");
+    setRes([]);setErr("");setPhase("searching");setHasMore(false);
+    clearSeen();
+    setLastTerm(query);
     try {
-      const arts = await searchArt(query, activeAla, fromYear, toYear, lang);
-      setRes(arts);setPhase("done");
+      const { results: arts, hasMore: more } = await searchArt(query, activeAla, fromYear, toYear, lang);
+      setRes(arts);setHasMore(more);setPhase("done");
     } catch(e){setErr(e.message);setPhase("error");}
   };
 
@@ -693,13 +708,27 @@ export default function App() {
     const ala=alaId?ALAS.find(a=>a.id===alaId):activeAla;
     if(alaId)setAla(ALAS.find(a=>a.id===alaId)||null);
     if(term)setQuery(term);
-    setTab("buscar");setRes([]);setPhase("idle");
+    setTab("buscar");setRes([]);setPhase("idle");setHasMore(false);
+    clearSeen();
+    const term2 = term||query;
+    setLastTerm(term2);
     setTimeout(async()=>{
       setPhase("searching");
-      try{const arts=await searchArt(term||query,ala,fromYear,toYear,lang);setRes(arts);setPhase("done");}
+      try{const { results: arts, hasMore: more }=await searchArt(term2,ala,fromYear,toYear,lang);setRes(arts);setHasMore(more);setPhase("done");}
       catch(e){setErr(e.message);setPhase("error");}
     },50);
-  },[activeAla,query,fromYear,toYear]);
+  },[activeAla,query,fromYear,toYear,lang]);
+
+  const loadMore = async () => {
+    if (phase==="searching") return;
+    setPhase("searching");
+    try {
+      const { results: arts, hasMore: more } = await searchArt(lastTerm, activeAla, fromYear, toYear, lang);
+      setRes(prev => [...prev, ...arts]);
+      setHasMore(more);
+      setPhase("done");
+    } catch(e){ setErr(e.message); setPhase("error"); }
+  };
 
   const busy=phase==="searching";
   const ids=new Set(col.map(a=>a.id));
@@ -719,14 +748,14 @@ export default function App() {
   return (
     <div className="germ-app" style={{ minHeight:"100vh",color:"#0a0a0a",fontFamily:"'Cormorant Garamond',Georgia,serif" }}>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
-      <style>{`*{box-sizing:border-box}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <style>{`*{box-sizing:border-box}@keyframes spin{to{transform:rotate(360deg)}}.lang-switcher{display:flex;align-items:center;gap:6px}@media(max-width:768px){.lang-switcher{display:grid;grid-template-columns:repeat(2,auto);gap:6px;justify-content:end}}`}</style>
 
       <AmbientBar/>
 
       <header className="germ-header" style={{ borderBottom:"1px solid #e8e4dc",padding:"18px 36px 0" }}>
         <div style={{ maxWidth:1300,margin:"0 auto" }}>
           <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:16 }}>
-            <Logo/>
+            <div onClick={()=>window.location.reload()} style={{ cursor:"pointer" }} title="Recarregar a página"><Logo/></div>
             <div style={{ display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6 }}>
               <LangSwitcher lang={lang} setLang={setLang}/>
               <p style={{ margin:0,fontSize:9,color:"#bbb",fontFamily:"Verdana,sans-serif",letterSpacing:2,textTransform:"uppercase" }}>{t.global}</p>
@@ -776,6 +805,15 @@ export default function App() {
             {results.length>0&&(
               <div className="artworks-grid" style={{ display:"grid",gap:18 }}>
                 {results.map(a=><Card key={a.id} art={a} lang={lang} onAdd={add} inCollection={ids.has(a.id)} onNavigate={navigate} t={t}/>)}
+              </div>
+            )}
+
+            {results.length>0&&hasMore&&(
+              <div style={{ textAlign:"center",marginTop:26 }}>
+                <button onClick={loadMore} disabled={busy}
+                  style={{ background:busy?"#888":"#0a0a0a",border:"none",borderRadius:3,color:"#fff",padding:"12px 30px",cursor:busy?"default":"pointer",fontSize:11,fontFamily:"Verdana,sans-serif",letterSpacing:1.5,textTransform:"uppercase",transition:"all .18s" }}>
+                  {busy?<span style={{ display:"inline-block",animation:"spin 1s linear infinite" }}>⟳</span>:`+ ${t.loadMore}`}
+                </button>
               </div>
             )}
 
@@ -832,7 +870,7 @@ export default function App() {
       </main>
 
       <footer className="germ-footer" style={{ borderTop:"1px solid #ece9e2",padding:"14px 36px",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-        <Logo small/>
+        <div onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{ cursor:"pointer" }} title="Voltar ao topo"><Logo small/></div>
         <p style={{ margin:0,fontSize:9,color:"#ccc",fontFamily:"Verdana,sans-serif",letterSpacing:2 }}>{t.footer}</p>
       </footer>
     </div>
