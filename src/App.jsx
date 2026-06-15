@@ -294,6 +294,15 @@ async function searchArt(query, ala, fromYear, toYear, lang, limit = PAGE) {
   return { results, hasMore: results.length >= limit };
 }
 
+// ─── Galeria com rotação estável (cookie anônimo, sequência fixa por usuário) ──
+async function fetchGaleria(alaId, page) {
+  const res = await fetch(`/api/galeria/${encodeURIComponent(alaId)}?page=${page}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return { results: data.results || [], hasMore: !!data.hasMore, total: data.total || 0 };
+}
+
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 function Logo({ small }) {
   const n=small?16:40, d=small?26:68, a=small?16:44;
@@ -673,6 +682,8 @@ export default function App() {
   const [filterAla,setFA]  = useState("");
   const [hasMore,setHasMore] = useState(false);
   const [lastTerm,setLastTerm] = useState("");
+  const [mode,setMode]     = useState("idle"); // "ala" (rotação estável) | "search" (busca por texto)
+  const [galPage,setGalPage] = useState(0);
 
   useEffect(()=>{ setCol(loadCol()); },[]);
 
@@ -682,34 +693,58 @@ export default function App() {
   const add    = useCallback(art=>setCol(p=>{if(p.find(a=>a.id===art.id))return p;const n=[art,...p];saveCol(n);return n;}),[]);
   const remove = useCallback(id=>setCol(p=>{const n=p.filter(a=>a.id!==id);saveCol(n);return n;}),[]);
 
-  const clickAla = useCallback(async (ala) => {
-    if (activeAla?.id===ala.id) { setAla(null);setRes([]);setPhase("idle");setHasMore(false);return; }
-    setAla(ala);setRes([]);setErr("");setPhase("searching");setTab("buscar");setHasMore(false);
-    clearSeen();
-    setLastTerm(ala.hint);
+  // Avança ou inicia uma ala (rotação estável). Clicar a mesma ala = +18.
+  async function loadMore() {
+    if (phase==="searching") return;
+    setPhase("searching");
     try {
-      const { results: arts, hasMore: more } = await searchArt(ala.hint, ala, fromYear, toYear, lang);
+      let arts, more;
+      if (mode==="ala" && activeAla) {
+        const np = galPage + 1;
+        const r = await fetchGaleria(activeAla.id, np);
+        arts = r.results; more = r.hasMore; setGalPage(np);
+      } else {
+        const r = await searchArt(lastTerm, activeAla, fromYear, toYear, lang);
+        arts = r.results; more = r.hasMore;
+      }
+      setRes(prev => [...prev, ...arts]);
+      setHasMore(more);
+      setPhase("done");
+    } catch(e){ setErr(e.message); setPhase("error"); }
+  }
+
+  async function clickAla(ala) {
+    // mesma ala já ativa → avança para os próximos 18 (rotação estável)
+    if (activeAla?.id===ala.id && mode==="ala") { if (hasMore) loadMore(); return; }
+    setAla(ala);setRes([]);setErr("");setPhase("searching");setTab("buscar");setHasMore(false);
+    setMode("ala");setGalPage(0);setQuery("");
+    try {
+      const { results: arts, hasMore: more } = await fetchGaleria(ala.id, 0);
       setRes(arts);setHasMore(more);setPhase("done");
     } catch(e){setErr(e.message);setPhase("error");}
-  },[activeAla,fromYear,toYear,lang]);
+  }
 
-  const doSearch = async () => {
+  async function doSearch() {
     if (!query.trim()||phase==="searching") return;
     setRes([]);setErr("");setPhase("searching");setHasMore(false);
-    clearSeen();
-    setLastTerm(query);
+    setMode("search");clearSeen();setLastTerm(query);
     try {
       const { results: arts, hasMore: more } = await searchArt(query, activeAla, fromYear, toYear, lang);
       setRes(arts);setHasMore(more);setPhase("done");
     } catch(e){setErr(e.message);setPhase("error");}
-  };
+  }
 
-  const navigate = useCallback((term,alaId)=>{
+  function navigate(term,alaId) {
+    // "Mais nesta galeria" (sem termo) → entra na rotação estável da ala
+    if (!term && alaId) {
+      const ala = ALAS.find(a=>a.id===alaId);
+      if (ala) { clickAla(ala); return; }
+    }
     const ala=alaId?ALAS.find(a=>a.id===alaId):activeAla;
     if(alaId)setAla(ALAS.find(a=>a.id===alaId)||null);
     if(term)setQuery(term);
     setTab("buscar");setRes([]);setPhase("idle");setHasMore(false);
-    clearSeen();
+    setMode("search");clearSeen();
     const term2 = term||query;
     setLastTerm(term2);
     setTimeout(async()=>{
@@ -717,18 +752,7 @@ export default function App() {
       try{const { results: arts, hasMore: more }=await searchArt(term2,ala,fromYear,toYear,lang);setRes(arts);setHasMore(more);setPhase("done");}
       catch(e){setErr(e.message);setPhase("error");}
     },50);
-  },[activeAla,query,fromYear,toYear,lang]);
-
-  const loadMore = async () => {
-    if (phase==="searching") return;
-    setPhase("searching");
-    try {
-      const { results: arts, hasMore: more } = await searchArt(lastTerm, activeAla, fromYear, toYear, lang);
-      setRes(prev => [...prev, ...arts]);
-      setHasMore(more);
-      setPhase("done");
-    } catch(e){ setErr(e.message); setPhase("error"); }
-  };
+  }
 
   const busy=phase==="searching";
   const ids=new Set(col.map(a=>a.id));
