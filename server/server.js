@@ -895,6 +895,15 @@ app.get("/banco", async (req, res) => {
       tamanhoBanco = t.rows[0].s;
     } catch {}
 
+    // Visitas por país (agregado, sem IP)
+    let visitasTotal = 0, visitasRows = [];
+    try {
+      const v = await pool.query(`SELECT pais, total FROM visitas_pais ORDER BY total DESC LIMIT 60`);
+      visitasRows = v.rows;
+      const vt = await pool.query(`SELECT COALESCE(SUM(total),0) AS s FROM visitas_pais`);
+      visitasTotal = parseInt(vt.rows[0].s, 10);
+    } catch {}
+
     const t    = tot.rows[0];
     const rows = alas.rows;
 
@@ -964,6 +973,26 @@ app.get("/banco", async (req, res) => {
 
     const now = new Date().toLocaleString("pt-PT", { timeZone: "America/Sao_Paulo" });
 
+    // Linhas de visitas por país (bandeira + nome + total)
+    const PAIS_NOME_BANCO = {
+      BR:"Brasil", PT:"Portugal", US:"Estados Unidos", GB:"Reino Unido", FR:"França",
+      ES:"Espanha", IT:"Itália", DE:"Alemanha", NL:"Países Baixos", CA:"Canadá",
+      MX:"México", AR:"Argentina", JP:"Japão", CN:"China", RU:"Rússia",
+      AU:"Austrália", AO:"Angola", MZ:"Moçambique", "??":"Desconhecido"
+    };
+    const flagOf = c => (c && c.length === 2 && c !== "??")
+      ? String.fromCodePoint(...[...c.toUpperCase()].map(x => 0x1F1E6 + x.charCodeAt(0) - 65))
+      : "🌐";
+    const visitaRows = visitasRows.map(r => {
+      const n = parseInt(r.total, 10);
+      const pct = visitasTotal > 0 ? (n / visitasTotal * 100).toFixed(1) : 0;
+      return `<tr>
+        <td style="padding:6px 12px;color:#e0e0e0">${flagOf(r.pais)} ${PAIS_NOME_BANCO[r.pais] || r.pais}</td>
+        <td style="padding:6px 12px;text-align:right;color:#aaa">${n.toLocaleString("pt-PT")}</td>
+        <td style="padding:6px 12px;text-align:right;color:#666;font-size:11px">${pct}%</td>
+      </tr>`;
+    }).join("");
+
     // % de migração para o R2 (sobre o total de obras)
     const pctR2 = t.total > 0 ? Math.round((parseInt(t.no_r2) / parseInt(t.total)) * 100) : 0;
 
@@ -1031,6 +1060,12 @@ a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
   <tbody>${fonteRows}</tbody>
 </table>
 
+<h2>visitas por país &nbsp;·&nbsp; ${visitasTotal.toLocaleString("pt-PT")} no total</h2>
+<table>
+  <thead><tr><th>País</th><th style="text-align:right">Visitas</th><th style="text-align:right">%</th></tr></thead>
+  <tbody>${visitaRows || '<tr><td colspan="3" style="padding:10px 12px;color:#555">Ainda sem visitas registradas.</td></tr>'}</tbody>
+</table>
+
 <div class="actions">
   <a class="btn" href="/">← Voltar ao site</a>
   <a class="btn" href="/api/r2/status">Status R2</a>
@@ -1048,6 +1083,7 @@ a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
 // ─── Módulos de curadoria e importação (ANTES do catch-all "*") ───────────────
 require("./curadoria_ui").montarCuradoria(app, pool);
 require("./importador_movimento").montarImportador(app, pool);
+require("./visitas").montarVisitas(app, pool);
 
 // ─── Frontend estático ────────────────────────────────────────────────────────
 const distPath = path.join(__dirname, "../dist");
