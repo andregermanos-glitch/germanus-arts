@@ -247,6 +247,22 @@ a.voltar{color:#555;font-size:12px;text-decoration:none}a.voltar:hover{color:#aa
   <div id="importStatus" class="import-status"></div>
 </div>
 
+<div class="import import-commons">
+  <span class="import-label">📥 Importar do Wikimedia Commons → Entrada (milhares, em 2º plano):</span>
+  <div class="import-btns">
+    <button onclick="impCommons('Portrait paintings')">Retratos</button>
+    <button onclick="impCommons('Still-life paintings')">Naturezas-mortas</button>
+    <button onclick="impCommons('Landscape paintings')">Paisagens</button>
+    <button onclick="impCommons('Religious paintings')">Sacro</button>
+    <button onclick="impCommons('Nude paintings')">Nus</button>
+    <button onclick="impCommons('History paintings')">Histórico</button>
+    <button onclick="impCommons('Genre paintings')">Cotidiano</button>
+    <button onclick="impCommons('Impressionist paintings')">Impressionismo</button>
+    <button onclick="impCommons('')">Outra categoria…</button>
+  </div>
+  <div id="commonsStatus" class="import-status"></div>
+</div>
+
 <div class="alas">${botoes}</div>
 
 <div class="nav">
@@ -274,6 +290,24 @@ a.voltar{color:#555;font-size:12px;text-decoration:none}a.voltar:hover{color:#aa
 
 <script>
 function copiarId(id){ navigator.clipboard?.writeText(id); }
+async function impCommons(categoria){
+  if(!categoria){
+    categoria = prompt("Nome EXATO da categoria do Commons (em inglês, sem 'Category:').\\nEx.: Baroque paintings, Cubist paintings, Marine art", "");
+    if(!categoria) return;
+  }
+  const total = prompt("Quantas obras de \\""+categoria+"\\" puxar para a Entrada? (ex.: 1000, 3000, 5000)", "2000");
+  if(total===null) return;
+  const n = parseInt(total,10);
+  if(!n||n<1) return alert("Número inválido.");
+  const st = document.getElementById('commonsStatus');
+  st.textContent = "⏳ Iniciando carga de \\""+categoria+"\\" (até "+n+")... isso roda em segundo plano.";
+  try{
+    const r = await fetch("/api/commons/entrada",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({categoria, total:n})});
+    const d = await r.json();
+    if(d.ok){ st.innerHTML = "✅ "+d.mensagem+" <a href='/curadoria?ala=entrada&offset=0' style='color:#e0a23a'>→ ver Entrada</a>"; }
+    else { st.textContent = "❌ "+(d.error||"erro"); }
+  }catch(e){ st.textContent = "❌ Falha ao iniciar: "+e.message; }
+}
 async function importar(movimento){
   const total = prompt("Quantas obras de "+movimento+" puxar para a Entrada? (ex.: 500, 1000, 2000)", "1000");
   if(total===null) return;
