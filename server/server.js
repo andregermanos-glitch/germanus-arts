@@ -1085,6 +1085,7 @@ require("./curadoria_ui").montarCuradoria(app, pool);
 require("./importador_movimento").montarImportador(app, pool);
 require("./visitas").montarVisitas(app, pool);
 require("./galeria").montarGaleria(app, pool);
+require("./commons_entrada").montarCommonsEntrada(app, pool);
 
 // ─── Frontend estático ────────────────────────────────────────────────────────
 const distPath = path.join(__dirname, "../dist");
