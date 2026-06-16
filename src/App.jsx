@@ -693,29 +693,20 @@ export default function App() {
   const add    = useCallback(art=>setCol(p=>{if(p.find(a=>a.id===art.id))return p;const n=[art,...p];saveCol(n);return n;}),[]);
   const remove = useCallback(id=>setCol(p=>{const n=p.filter(a=>a.id!==id);saveCol(n);return n;}),[]);
 
-  // Avança ou inicia uma ala (rotação estável). Clicar a mesma ala = +18.
-  async function loadMore() {
-    if (phase==="searching") return;
-    setPhase("searching");
-    try {
-      let arts, more;
-      if (mode==="ala" && activeAla) {
-        const np = galPage + 1;
-        const r = await fetchGaleria(activeAla.id, np);
-        arts = r.results; more = r.hasMore; setGalPage(np);
-      } else {
-        const r = await searchArt(lastTerm, activeAla, fromYear, toYear, lang);
-        arts = r.results; more = r.hasMore;
-      }
-      setRes(prev => [...prev, ...arts]);
-      setHasMore(more);
-      setPhase("done");
-    } catch(e){ setErr(e.message); setPhase("error"); }
-  }
-
+  // Inicia uma ala ou, se já ativa, troca pelos PRÓXIMOS 18 (substitui, não acumula).
+  // Ao chegar ao fim da sequência, volta ao início (rotação estável).
   async function clickAla(ala) {
-    // mesma ala já ativa → avança para os próximos 18 (rotação estável)
-    if (activeAla?.id===ala.id && mode==="ala") { if (hasMore) loadMore(); return; }
+    if (phase==="searching") return;
+    if (activeAla?.id===ala.id && mode==="ala") {
+      const np = hasMore ? galPage + 1 : 0;
+      setPhase("searching");
+      try {
+        const { results: arts, hasMore: more } = await fetchGaleria(ala.id, np);
+        setGalPage(np); setRes(arts); setHasMore(more); setPhase("done");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch(e){ setErr(e.message); setPhase("error"); }
+      return;
+    }
     setAla(ala);setRes([]);setErr("");setPhase("searching");setTab("buscar");setHasMore(false);
     setMode("ala");setGalPage(0);setQuery("");
     try {
@@ -729,8 +720,8 @@ export default function App() {
     setRes([]);setErr("");setPhase("searching");setHasMore(false);
     setMode("search");clearSeen();setLastTerm(query);
     try {
-      const { results: arts, hasMore: more } = await searchArt(query, activeAla, fromYear, toYear, lang);
-      setRes(arts);setHasMore(more);setPhase("done");
+      const { results: arts } = await searchArt(query, activeAla, fromYear, toYear, lang);
+      setRes(arts);setPhase("done");
     } catch(e){setErr(e.message);setPhase("error");}
   }
 
@@ -738,7 +729,11 @@ export default function App() {
     // "Mais nesta galeria" (sem termo) → entra na rotação estável da ala
     if (!term && alaId) {
       const ala = ALAS.find(a=>a.id===alaId);
-      if (ala) { clickAla(ala); return; }
+      if (ala) {
+        if (activeAla?.id===alaId && mode==="ala") { clickAla(ala); }
+        else { setAla(null); setMode("idle"); setTimeout(()=>clickAla(ala),0); }
+        return;
+      }
     }
     const ala=alaId?ALAS.find(a=>a.id===alaId):activeAla;
     if(alaId)setAla(ALAS.find(a=>a.id===alaId)||null);
@@ -749,7 +744,7 @@ export default function App() {
     setLastTerm(term2);
     setTimeout(async()=>{
       setPhase("searching");
-      try{const { results: arts, hasMore: more }=await searchArt(term2,ala,fromYear,toYear,lang);setRes(arts);setHasMore(more);setPhase("done");}
+      try{const { results: arts }=await searchArt(term2,ala,fromYear,toYear,lang);setRes(arts);setPhase("done");}
       catch(e){setErr(e.message);setPhase("error");}
     },50);
   }
@@ -829,15 +824,6 @@ export default function App() {
             {results.length>0&&(
               <div className="artworks-grid" style={{ display:"grid",gap:18 }}>
                 {results.map(a=><Card key={a.id} art={a} lang={lang} onAdd={add} inCollection={ids.has(a.id)} onNavigate={navigate} t={t}/>)}
-              </div>
-            )}
-
-            {results.length>0&&hasMore&&(
-              <div style={{ textAlign:"center",marginTop:26 }}>
-                <button onClick={loadMore} disabled={busy}
-                  style={{ background:busy?"#888":"#0a0a0a",border:"none",borderRadius:3,color:"#fff",padding:"12px 30px",cursor:busy?"default":"pointer",fontSize:11,fontFamily:"Verdana,sans-serif",letterSpacing:1.5,textTransform:"uppercase",transition:"all .18s" }}>
-                  {busy?<span style={{ display:"inline-block",animation:"spin 1s linear infinite" }}>⟳</span>:`+ ${t.loadMore}`}
-                </button>
               </div>
             )}
 
