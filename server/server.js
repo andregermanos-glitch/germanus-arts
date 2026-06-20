@@ -1087,6 +1087,7 @@ require("./visitas").montarVisitas(app, pool);
 require("./galeria").montarGaleria(app, pool);
 require("./commons_entrada").montarCommonsEntrada(app, pool);
 require("./imagens_mortas").montarImagensMortas(app, pool);
+require("./enriquecedor").montarEnriquecedor(app, pool);
 
 // ─── Frontend estático ────────────────────────────────────────────────────────
 const distPath = path.join(__dirname, "../dist");
