@@ -85,17 +85,19 @@ async function processarCategoria(pool, categoria, restante) {
       if (!img) continue;
       const md = ii.extmetadata || {};
       const id = `commons_${p.pageid}`;
-      const titulo = limpar(md.ObjectName?.value) || (p.title || "").replace(/^File:/, "").replace(/\.\w+$/, "");
+      const arquivo = (p.title || "").replace(/^File:/, "");
+      const hdUrl = arquivo ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(arquivo)}?width=2500` : null;
+      const titulo = limpar(md.ObjectName?.value) || arquivo.replace(/\.\w+$/, "");
       const autor  = limpar(md.Artist?.value) || "Desconhecido";
       const data   = limpar(md.DateTimeOriginal?.value).slice(0, 4);
       const credito = limpar(md.Credit?.value) || "Domínio Público — Wikimedia Commons";
       try {
         const r = await pool.query(
           `INSERT INTO artworks
-             (id,source,title,artist,date,museum,image_url,ala_id,credit,status,image_cached_at)
-           VALUES ($1,'wikimedia_commons',$2,$3,$4,'Wikimedia Commons',$5,'entrada',$6,'rascunho',0)
+             (id,source,title,artist,date,museum,image_url,hd_url,ala_id,credit,status,image_cached_at)
+           VALUES ($1,'wikimedia_commons',$2,$3,$4,'Wikimedia Commons',$5,$6,'entrada',$7,'rascunho',0)
            ON CONFLICT (id) DO NOTHING`,
-          [id, titulo, autor, data, img, credito]
+          [id, titulo, autor, data, img, hdUrl, credito]
         );
         if (r.rowCount) inseridas++;
       } catch {}
@@ -129,6 +131,7 @@ async function importarCommons(pool, categoria, total, descer) {
 
 function montarCommonsEntrada(app, pool) {
   pool.query(`ALTER TABLE artworks ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'publicada'`).catch(() => {});
+  pool.query(`ALTER TABLE artworks ADD COLUMN IF NOT EXISTS hd_url TEXT`).catch(() => {});
 
   app.post("/api/commons/entrada", async (req, res) => {
     const categoria = (req.body?.categoria || "").trim();
