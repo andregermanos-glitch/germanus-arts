@@ -165,7 +165,7 @@ function toHd(url) {
 function mapRow(r) {
   // Servir directamente da URL original (CDN do museu) — não usa volume do banco
   const imageUrl = r.image_url;
-  const imageHd  = toHd(r.image_url);
+  const imageHd  = r.hd_url || toHd(r.image_url); // zoom usa HD guardado; senão tenta upscale
   return {
     id: r.id, source: r.source, title: r.title, artist: r.artist, date: r.date,
     medium: r.medium, dimensions: r.dimensions, origin: r.origin, style: r.style,
@@ -1088,6 +1088,7 @@ require("./galeria").montarGaleria(app, pool);
 require("./commons_entrada").montarCommonsEntrada(app, pool);
 require("./imagens_mortas").montarImagensMortas(app, pool);
 require("./enriquecedor").montarEnriquecedor(app, pool);
+require("./hd_recuperar").montarHdRecuperar(app, pool);
 
 // ─── Frontend estático ────────────────────────────────────────────────────────
 const distPath = path.join(__dirname, "../dist");
