@@ -51,7 +51,7 @@ function mapRow(r) {
     id: r.id, source: r.source, title: r.title, artist: r.artist, date: r.date,
     medium: r.medium, dimensions: r.dimensions, origin: r.origin, style: r.style,
     museum: r.museum, description: r.description, credit: r.credit,
-    imageUrl: r.image_url, imageHd: toHd(r.image_url),
+    imageUrl: r.image_url, imageHd: r.hd_url || toHd(r.image_url),
     externalUrl: r.external_url, alaId: r.ala_id,
     wiki: { en: r.wiki_en || null, fr: r.wiki_fr || null, es: r.wiki_es || null, it: r.wiki_it || null },
   };
