@@ -1071,10 +1071,33 @@ a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
   <a class="btn" href="/api/r2/status">Status R2</a>
   <a class="btn" href="/api/cache/diagnostico">Diagnóstico</a>
   <a class="btn" href="/api/cache/status">Status + tamanho</a>
+  <a class="btn" href="/enriquecimento">Enriquecimento</a>
+  <a class="btn" href="#" onclick="recuperarHD();return false;" id="btnHD">🔍 Recuperar HD</a>
   <a class="btn" href="/api/carregar/psyche">Carregar Psyché</a>
   <a class="btn" href="/api/carregar/mestres">Carregar Mestres</a>
   <a class="btn" href="/api/curadoria/status">JSON raw</a>
 </div>
+<p id="hdStatus" style="margin-top:14px;font-size:12px;color:#888"></p>
+<script>
+async function recuperarHD(){
+  const total = prompt("Quantas obras recuperar HD agora? (há ~8 mil recuperáveis)", "3000");
+  if(total===null) return;
+  const el = document.getElementById('hdStatus');
+  el.textContent = "⏳ Iniciando recuperação de HD em segundo plano...";
+  try{
+    const r = await fetch("/api/hd/recuperar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({total:parseInt(total,10)})});
+    const d = await r.json();
+    el.textContent = d.mensagem || JSON.stringify(d);
+    const acompanhar = setInterval(async()=>{
+      try{
+        const s = await (await fetch("/api/hd/status")).json();
+        el.textContent = "🔍 HD: "+s.com_hd+" com HD · "+s.recuperaveis+" ainda recuperáveis"+(s.rodando?" · rodando "+s.feitas:" · parado");
+        if(!s.rodando) clearInterval(acompanhar);
+      }catch{}
+    }, 5000);
+  }catch(e){ el.textContent = "❌ "+e.message; }
+}
+</script>
 </body>
 </html>`);
   } catch(e) { res.status(500).send(`<pre style="color:red">Erro: ${e.message}</pre>`); }
