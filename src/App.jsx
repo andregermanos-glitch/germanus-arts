@@ -428,14 +428,14 @@ function ZoomViewer({ art, onClose, lang = "fr" }) {
       <div onClick={e => e.stopPropagation()} onWheel={onWheel}
         onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
         onDoubleClick={() => scale > 1 ? reset() : setScale(2.5)}
-        style={{ overflow:"hidden", maxWidth:"94vw", maxHeight:"90vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        style={{ overflow:"hidden", width:"94vw", height:"90vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
         {!loaded && (
           <div style={{ position:"absolute", color:"#888", fontFamily:"Verdana,sans-serif", fontSize:13 }}>
             <span style={{ display:"inline-block", animation:"spin 1s linear infinite" }}>⟳</span> carregando alta resolução…
           </div>
         )}
         <img src={src} alt={art.title} draggable={false} onLoad={() => setLoaded(true)}
-          style={{ maxWidth:"94vw", maxHeight:"90vh", width:"auto", height:"auto", objectFit:"contain", display:"block",
+          style={{ width:"100%", height:"100%", objectFit:"contain", display:"block",
             transform:`translate(${pos.x}px, ${pos.y}px) scale(${scale})`,
             transformOrigin:"center center",
             transition: drag ? "none" : "transform .15s ease-out",
