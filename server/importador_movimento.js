@@ -80,6 +80,7 @@ async function importarMovimento(pool, qcode, alaDestino, total) {
       if (!qid || !imgRaw) continue;
       // Miniatura via Special:FilePath?width= — mantém o arquivo pequeno
       const imgUrl = imgRaw.includes("?") ? imgRaw : `${imgRaw}?width=${LARGURA}`;
+      const hdUrl  = imgRaw.includes("?") ? imgRaw.replace(/width=\d+/, "width=2500") : `${imgRaw}?width=2500`;
       const titulo = b.itemLabel?.value || qid;
       const autor  = b.autorLabel?.value || "Desconhecido";
       const data   = (b.data?.value || "").slice(0, 4);
@@ -87,11 +88,11 @@ async function importarMovimento(pool, qcode, alaDestino, total) {
       try {
         const r = await pool.query(
           `INSERT INTO artworks
-             (id,source,title,artist,date,museum,image_url,ala_id,credit,status,image_cached_at)
-           VALUES ($1,'wikidata',$2,$3,$4,'Wikidata / Wikimedia Commons',$5,$6,
+             (id,source,title,artist,date,museum,image_url,hd_url,ala_id,credit,status,image_cached_at)
+           VALUES ($1,'wikidata',$2,$3,$4,'Wikidata / Wikimedia Commons',$5,$6,$7,
                    'Domínio Público — Wikimedia Commons','rascunho',0)
            ON CONFLICT (id) DO NOTHING`,
-          [id, titulo, autor, data, imgUrl, alaDestino]
+          [id, titulo, autor, data, imgUrl, hdUrl, alaDestino]
         );
         if (r.rowCount) inseridas++;
       } catch {}
@@ -108,6 +109,7 @@ async function importarMovimento(pool, qcode, alaDestino, total) {
 function montarImportador(app, pool) {
   // Garante a coluna status (idempotente — também criada pelo curadoria_ui)
   pool.query(`ALTER TABLE artworks ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'publicada'`).catch(() => {});
+  pool.query(`ALTER TABLE artworks ADD COLUMN IF NOT EXISTS hd_url TEXT`).catch(() => {});
 
   app.post("/api/importar/movimento", async (req, res) => {
     const chave = req.body?.movimento;
