@@ -442,21 +442,12 @@ function ZoomViewer({ art, onClose, lang = "fr" }) {
             opacity: loaded ? 1 : 0, userSelect:"none" }}/>
       </div>
 
-      <div style={{ position:"fixed", bottom:20, left:"50%", transform:"translateX(-50%)", textAlign:"center", color:"#ccc", fontFamily:"'Cormorant Garamond',serif", pointerEvents:"none" }}>
-        <p style={{ margin:0, fontSize:16, fontStyle:"italic" }}>{art.title}</p>
-        <p style={{ margin:"2px 0 0", fontSize:12, color:"#999" }}>{art.artist}{art.date ? ` · ${art.date}` : ""}</p>
-      </div>
-
       <div style={{ position:"fixed", top:16, right:16, display:"flex", gap:8, zIndex:100000 }}>
         <ZoomBtn onClick={e => { e.stopPropagation(); setScale(s => Math.min(s + 0.5, 8)); }}>+</ZoomBtn>
         <ZoomBtn onClick={e => { e.stopPropagation(); setScale(s => Math.max(s - 0.5, 1)); }}>−</ZoomBtn>
         <ZoomBtn onClick={e => { e.stopPropagation(); reset(); }}>⟲</ZoomBtn>
         <ZoomBtn onClick={e => { e.stopPropagation(); onClose(); }} close>✕</ZoomBtn>
       </div>
-
-      <p style={{ position:"fixed", bottom:70, left:"50%", transform:"translateX(-50%)", margin:0, fontSize:10, color:"#888", fontFamily:"Verdana,sans-serif", letterSpacing:1, pointerEvents:"none", textAlign:"center" }}>
-        RODA = ZOOM · ARRASTAR = MOVER · ESC = FECHAR
-      </p>
     </div>,
     document.body
   );
@@ -495,7 +486,7 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, t, lang="fr" }) 
         {art.imageUrl&&!imgErr?(
           <>
             {!imgOk&&<div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"#f2f0eb" }}><div style={{ width:20, height:20, border:"2px solid #ddd", borderTopColor:"#888", borderRadius:"50%", animation:"spin 1s linear infinite" }}/></div>}
-            <img src={art.imageUrl} alt={art.title} className="artwork-card__img" onClick={()=>setZoom(true)} style={{ opacity:imgOk?1:0, transition:"opacity .3s", cursor:"zoom-in" }} onLoad={()=>setImgOk(true)} onError={()=>setImgErr(true)}/>
+            <img src={art.imageUrl} alt={art.title} className="artwork-card__img" onClick={()=>setZoom(true)} style={{ opacity:imgOk?1:0, transition:"opacity .3s", cursor:"zoom-in" }} onLoad={()=>setImgOk(true)} onError={()=>{ setImgErr(true); fetch("/api/obra/imagem-morta",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:art.id})}).catch(()=>{}); }}/>
           </>
         ):(
           <div className="artwork-card__placeholder" style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:12, textAlign:"center" }}>
