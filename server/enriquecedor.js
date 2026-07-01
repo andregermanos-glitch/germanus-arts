@@ -66,7 +66,7 @@ async function dadosDoArtista(nome) {
   if (!nome || /^(desconhecido|unknown|anonymous)/i.test(nome)) return null;
   const q = `
     SELECT ?p ?pLabel ?morte ?movLabel
-           ?en ?fr ?it ?es WHERE {
+           ?en ?fr ?it ?es ?pt ?de WHERE {
       ?p rdfs:label "${nome.replace(/"/g, '\\"')}"@en .
       ?p wdt:P31 wd:Q5 .
       OPTIONAL { ?p wdt:P570 ?morte. }
@@ -75,6 +75,8 @@ async function dadosDoArtista(nome) {
       OPTIONAL { ?fr schema:about ?p; schema:inLanguage "fr"; schema:isPartOf <https://fr.wikipedia.org/>. }
       OPTIONAL { ?it schema:about ?p; schema:inLanguage "it"; schema:isPartOf <https://it.wikipedia.org/>. }
       OPTIONAL { ?es schema:about ?p; schema:inLanguage "es"; schema:isPartOf <https://es.wikipedia.org/>. }
+      OPTIONAL { ?pt schema:about ?p; schema:inLanguage "pt"; schema:isPartOf <https://pt.wikipedia.org/>. }
+      OPTIONAL { ?de schema:about ?p; schema:inLanguage "de"; schema:isPartOf <https://de.wikipedia.org/>. }
       SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
     } LIMIT 1`;
   try {
@@ -88,7 +90,7 @@ async function dadosDoArtista(nome) {
     return {
       anoMorte,
       movimento: b.movLabel?.value || null,
-      artigos: { en: b.en?.value || null, fr: b.fr?.value || null, it: b.it?.value || null, es: b.es?.value || null },
+      artigos: { en: b.en?.value || null, fr: b.fr?.value || null, it: b.it?.value || null, es: b.es?.value || null, pt: b.pt?.value || null, de: b.de?.value || null },
     };
   } catch { return null; }
 }
@@ -145,12 +147,13 @@ async function enriquecerObra(pool, o) {
     faixa = "amarelo";
   }
 
-  // Wiki em 4 idiomas (resumo do artista)
-  let wikiEn = null, wikiFr = null, wikiIt = null, wikiEs = null;
+  // Wiki em 6 idiomas (resumo do artista)
+  let wikiEn = null, wikiFr = null, wikiIt = null, wikiEs = null, wikiPt = null, wikiDe = null;
   if (wd?.artigos) {
-    [wikiEn, wikiFr, wikiIt, wikiEs] = await Promise.all([
+    [wikiEn, wikiFr, wikiIt, wikiEs, wikiPt, wikiDe] = await Promise.all([
       resumoWiki(wd.artigos.en), resumoWiki(wd.artigos.fr),
       resumoWiki(wd.artigos.it), resumoWiki(wd.artigos.es),
+      resumoWiki(wd.artigos.pt), resumoWiki(wd.artigos.de),
     ]);
   }
 
@@ -168,12 +171,14 @@ async function enriquecerObra(pool, o) {
        wiki_fr = COALESCE(wiki_fr, $7),
        wiki_it = COALESCE(wiki_it, $8),
        wiki_es = COALESCE(wiki_es, $9),
+       wiki_pt = COALESCE(wiki_pt, $12),
+       wiki_de = COALESCE(wiki_de, $13),
        wiki_fetched_at = EXTRACT(EPOCH FROM NOW())::BIGINT,
        triagem = $10,
        status  = CASE WHEN $11::text IS NULL THEN status ELSE $11 END
      WHERE id = $1`,
     [o.id, tituloLimpo, artistaLimpo, anoNovo || null, wd?.movimento || null,
-     wikiEn, wikiFr, wikiIt, wikiEs, faixa, novoStatus]
+     wikiEn, wikiFr, wikiIt, wikiEs, faixa, novoStatus, wikiPt, wikiDe]
   );
 
   return faixa;
@@ -213,6 +218,33 @@ async function rodar(pool, total, escopo) {
 
 function montarEnriquecedor(app, pool) {
   pool.query(`ALTER TABLE artworks ADD COLUMN IF NOT EXISTS triagem TEXT DEFAULT ''`).catch(() => {});
+  pool.query(`ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_pt TEXT`).catch(() => {});
+  pool.query(`ALTER TABLE artworks ADD COLUMN IF NOT EXISTS wiki_de TEXT`).catch(() => {});
+
+  // RE-TRIAGEM POR ANO — instantânea, sem Wikidata. Promove obras antigas
+  // (ano da obra < 1875) que estavam presas em 🟡/🔴 direto para 🟢, e opcionalmente
+  // publica. Resolve "artista de 1700 bloqueado" e devolve a contagem exata.
+  app.post("/api/enriquecer/retriar-ano", async (req, res) => {
+    try {
+      const publicar = req.body?.publicar !== false; // padrão: publica
+      const corte = parseInt(req.body?.corte || "1875", 10) || 1875;
+      // extrai o primeiro ano de 4 dígitos do campo date; promove se < corte
+      const sql = publicar
+        ? `UPDATE artworks
+              SET triagem='verde',
+                  status = CASE WHEN COALESCE(status,'publicada')='rascunho' THEN 'publicada' ELSE status END
+            WHERE triagem IN ('amarelo','vermelho')
+              AND substring(date from '\\d{4}') IS NOT NULL
+              AND (substring(date from '\\d{4}'))::int < $1`
+        : `UPDATE artworks SET triagem='verde'
+            WHERE triagem IN ('amarelo','vermelho')
+              AND substring(date from '\\d{4}') IS NOT NULL
+              AND (substring(date from '\\d{4}'))::int < $1`;
+      const r = await pool.query(sql, [corte]);
+      console.log(`✨ Re-triagem por ano (<${corte}): ${r.rowCount} obras promovidas${publicar ? " e publicadas" : ""}`);
+      res.json({ ok: true, promovidas: r.rowCount, publicadas: publicar ? r.rowCount : 0, corte });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  });
 
   app.post("/api/enriquecer/iniciar", async (req, res) => {
     if (estado.rodando) return res.json({ ok: false, mensagem: "Já está rodando", estado });
@@ -273,6 +305,7 @@ table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}td{paddi
   <button class="go" onclick="iniciar('publicadas')">▶ Enriquecer publicadas</button>
   <button onclick="iniciar('entrada')">Entrada</button>
   <button onclick="iniciar('todas')">Todas</button>
+  <button onclick="retriarAno()" style="background:#1D9E7522;border-color:#1D9E7555;color:#5fd6a8">⚡ Re-triar antigas (&lt;1875) → publicar</button>
   <button onclick="location.reload()">↻ Atualizar</button>
 </div>
 <div class="bar"><div></div></div>
@@ -288,6 +321,14 @@ async function iniciar(escopo){
   const d = await r.json();
   alert(d.mensagem || JSON.stringify(d));
   setTimeout(()=>location.reload(), 1500);
+}
+async function retriarAno(){
+  if(!confirm("Promover todas as obras ANTERIORES a 1875 que estão em 🟡/🔴 para 🟢 e PUBLICAR?\\n\\nIsso resolve os 'artistas de 1700 bloqueados'. As obras sem ano ou recentes não são afetadas.")) return;
+  const r = await fetch("/api/enriquecer/retriar-ano",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({publicar:true})});
+  const d = await r.json();
+  if(d.ok) alert("✅ "+d.promovidas+" obras antigas promovidas para 🟢 e "+d.publicadas+" publicadas no site.");
+  else alert("❌ "+(d.error||"erro"));
+  setTimeout(()=>location.reload(), 1200);
 }
 ${estado.rodando ? "setTimeout(()=>location.reload(), 8000);" : ""}
 </script>
