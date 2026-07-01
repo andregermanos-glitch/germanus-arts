@@ -53,7 +53,7 @@ function mapRow(r) {
     museum: r.museum, description: r.description, credit: r.credit,
     imageUrl: r.image_url, imageHd: r.hd_url || toHd(r.image_url),
     externalUrl: r.external_url, alaId: r.ala_id,
-    wiki: { en: r.wiki_en || null, fr: r.wiki_fr || null, es: r.wiki_es || null, it: r.wiki_it || null },
+    wiki: { en: r.wiki_en || null, fr: r.wiki_fr || null, es: r.wiki_es || null, it: r.wiki_it || null, pt: r.wiki_pt || null, de: r.wiki_de || null },
   };
 }
 
