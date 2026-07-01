@@ -322,12 +322,16 @@ function LangSwitcher({ lang, setLang }) {
     { code:"fr", flag:"🇫🇷" },
     { code:"en", flag:"🇬🇧" },
     { code:"es", flag:"🇪🇸" },
-    { code:"pt", flag:"🇧🇷" },
+    { code:"pt", flag:"🇵🇹" },
   ];
   const outras = [
     { code:"it", flag:"🇮🇹", nome:"Italiano" },
     { code:"de", flag:"🇩🇪", nome:"Deutsch" },
   ];
+  const rotulo = {
+    fr:"autres langues", en:"other languages", es:"otros idiomas",
+    pt:"outros idiomas", it:"altre lingue", de:"andere Sprachen",
+  };
   const btn = (l) => (
     <button key={l.code} onClick={() => { setLang(l.code); saveLang(l.code); }}
       style={{
@@ -341,16 +345,16 @@ function LangSwitcher({ lang, setLang }) {
     </button>
   );
   return (
-    <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2 }}>
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:3 }}>
       <div className="lang-switcher">{principais.map(btn)}</div>
       <div style={{ position:"relative" }}>
         <span onClick={() => setAbrir(a => !a)}
-          style={{ fontSize:8, color:"#0a0a0a", cursor:"pointer", letterSpacing:0.5,
-                   textTransform:"lowercase", opacity:0.55, userSelect:"none" }}>
-          outras linguagens
+          style={{ fontSize:11, color:"#0a0a0a", cursor:"pointer", letterSpacing:0.3,
+                   opacity:0.65, userSelect:"none" }}>
+          {rotulo[lang] || rotulo.fr} ▾
         </span>
         {abrir && (
-          <div style={{ position:"absolute", right:0, top:"14px", background:"#fff",
+          <div style={{ position:"absolute", right:0, top:"18px", background:"#fff",
                         border:"1px solid #e0e0e0", borderRadius:6, boxShadow:"0 2px 8px rgba(0,0,0,.12)",
                         padding:4, zIndex:50, display:"flex", flexDirection:"column", gap:2 }}>
             {outras.map(l => (
