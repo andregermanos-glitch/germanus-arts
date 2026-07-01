@@ -676,7 +676,7 @@ function CuradoriaTab({ col, onClickAla, t, lang }) {
               onMouseLeave={e=>{ e.currentTarget.style.background=`linear-gradient(90deg, ${ala.color}18 0%, transparent 100%)`; e.currentTarget.style.borderColor=`${ala.color}33`; }}>
               <div style={{ flex:1,minWidth:0 }}>
                 <p style={{ margin:0,fontSize:12,fontFamily:"Verdana,sans-serif",fontWeight:600,color:"#0a0a0a",lineHeight:"1" }}>{t.alas[ala.id]}</p>
-                <p style={{ margin:"3px 0 0",fontSize:10.5,color:"#aaa",fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis" }}>{ala.desc[lang]}</p>
+                <p style={{ margin:"3px 0 0",fontSize:10.5,color:"#aaa",fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis" }}>{ala.desc[lang] || ala.desc.fr || ""}</p>
               </div>
               {c>0&&<span style={{ fontSize:9.5,color:ala.color,background:`${ala.color}18`,border:`1px solid ${ala.color}33`,borderRadius:10,padding:"1px 6px",fontFamily:"Verdana,sans-serif",flexShrink:0 }}>{c}</span>}
             </button>
@@ -690,7 +690,7 @@ function CuradoriaTab({ col, onClickAla, t, lang }) {
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [lang,setLang]     = useState(loadLang);
-  const t = T[lang];
+  const t = T[lang] || T.fr;
 
   const [tab,setTab]       = useState("buscar");
   const [col,setCol]       = useState([]);
