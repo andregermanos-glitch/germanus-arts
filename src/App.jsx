@@ -317,26 +317,53 @@ function Logo({ small }) {
 
 // ─── Seletor de idioma — horizontal no desktop, quadrado 2×2 no celular ───────
 function LangSwitcher({ lang, setLang }) {
-  const langs = [
+  const [abrir, setAbrir] = useState(false);
+  const principais = [
     { code:"fr", flag:"🇫🇷" },
     { code:"en", flag:"🇬🇧" },
     { code:"es", flag:"🇪🇸" },
-    { code:"it", flag:"🇮🇹" },
+    { code:"pt", flag:"🇧🇷" },
   ];
+  const outras = [
+    { code:"it", flag:"🇮🇹", nome:"Italiano" },
+    { code:"de", flag:"🇩🇪", nome:"Deutsch" },
+  ];
+  const btn = (l) => (
+    <button key={l.code} onClick={() => { setLang(l.code); saveLang(l.code); }}
+      style={{
+        background:"none", border:"none", cursor:"pointer",
+        fontSize:20, lineHeight:1, padding:"2px 3px",
+        opacity: lang===l.code ? 1 : 0.35,
+        borderBottom: lang===l.code ? "2px solid #0a0a0a" : "2px solid transparent",
+        transition:"all .2s"
+      }}>
+      {l.flag}
+    </button>
+  );
   return (
-    <div className="lang-switcher">
-      {langs.map(l => (
-        <button key={l.code} onClick={() => { setLang(l.code); saveLang(l.code); }}
-          style={{
-            background:"none", border:"none", cursor:"pointer",
-            fontSize:20, lineHeight:1, padding:"2px 3px",
-            opacity: lang===l.code ? 1 : 0.35,
-            borderBottom: lang===l.code ? "2px solid #0a0a0a" : "2px solid transparent",
-            transition:"all .2s"
-          }}>
-          {l.flag}
-        </button>
-      ))}
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2 }}>
+      <div className="lang-switcher">{principais.map(btn)}</div>
+      <div style={{ position:"relative" }}>
+        <span onClick={() => setAbrir(a => !a)}
+          style={{ fontSize:8, color:"#0a0a0a", cursor:"pointer", letterSpacing:0.5,
+                   textTransform:"lowercase", opacity:0.55, userSelect:"none" }}>
+          outras linguagens
+        </span>
+        {abrir && (
+          <div style={{ position:"absolute", right:0, top:"14px", background:"#fff",
+                        border:"1px solid #e0e0e0", borderRadius:6, boxShadow:"0 2px 8px rgba(0,0,0,.12)",
+                        padding:4, zIndex:50, display:"flex", flexDirection:"column", gap:2 }}>
+            {outras.map(l => (
+              <button key={l.code} onClick={() => { setLang(l.code); saveLang(l.code); setAbrir(false); }}
+                style={{ background: lang===l.code?"#f0f0f0":"none", border:"none", cursor:"pointer",
+                         fontSize:12, padding:"4px 10px", whiteSpace:"nowrap", textAlign:"left",
+                         display:"flex", alignItems:"center", gap:6, borderRadius:4 }}>
+                <span style={{ fontSize:16 }}>{l.flag}</span> {l.nome}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -518,7 +545,8 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, t, lang="fr" }) 
             {art.dimensions&&<p style={{ margin:0, fontSize:10.5, color:"#bbb", fontFamily:"monospace" }}>{art.dimensions}</p>}
             {art.description&&<p style={{ margin:0, fontSize:13, color:"#444", lineHeight:1.65, fontFamily:"'Cormorant Garamond',serif" }}>{art.description}</p>}
             {art.wiki&&(art.wiki[lang||"fr"]||art.wiki.en||art.wiki.fr)&&(()=>{
-              const wLang = (lang&&art.wiki[lang]) ? lang : (art.wiki.en?"en":(art.wiki.fr?"fr":(art.wiki.es?"es":"it")));
+              const ordem = [lang, "pt", "fr", "en", "es", "it", "de"].filter(Boolean);
+              const wLang = ordem.find(L => art.wiki[L]) || "fr";
               const wText = art.wiki[wLang];
               if (!wText) return null;
               return (
