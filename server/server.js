@@ -172,7 +172,7 @@ function mapRow(r) {
     museum: r.museum, description: r.description, credit: r.credit,
     imageUrl, imageHd, externalUrl: r.external_url, alaId: r.ala_id,
     isCached: (r.image_cached_at > 0),
-    wiki: { en: r.wiki_en || null, fr: r.wiki_fr || null, es: r.wiki_es || null, it: r.wiki_it || null }
+    wiki: { en: r.wiki_en || null, fr: r.wiki_fr || null, es: r.wiki_es || null, it: r.wiki_it || null, pt: r.wiki_pt || null, de: r.wiki_de || null }
   };
 }
 
@@ -315,7 +315,7 @@ async function initDB() {
       indexed_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW())::BIGINT,
       image_data BYTEA DEFAULT NULL, image_mime TEXT DEFAULT 'image/jpeg',
       image_cached_at BIGINT DEFAULT 0,
-      wiki_en TEXT, wiki_fr TEXT, wiki_es TEXT, wiki_it TEXT,
+      wiki_en TEXT, wiki_fr TEXT, wiki_es TEXT, wiki_it TEXT, wiki_pt TEXT, wiki_de TEXT,
       wiki_fetched_at BIGINT DEFAULT 0,
       download_attempts INT DEFAULT 0, last_attempt_at BIGINT DEFAULT 0
     );
