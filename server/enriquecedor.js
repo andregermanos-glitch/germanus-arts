@@ -122,13 +122,26 @@ async function enriquecerObra(pool, o) {
   // 2 + 3 + 4. Wikidata do artista
   const wd = await dadosDoArtista(artistaLimpo);
 
-  // Triagem de direitos (régua 70 anos)
-  let faixa = "amarelo"; // padrão: na dúvida, verificar
+  // ─── TRIAGEM DE DIREITOS (régua inteligente) ───────────────────────────────
+  // Via 1 (mais forte): data de morte do autor no Wikidata → régua 70 anos.
+  // Via 2 (rede de segurança): ano da OBRA. Obra muito antiga é domínio público
+  //   independente de acharmos o autor — resolve Cusco/colonial "autor desconhecido"
+  //   e obras cujo nome de artista veio sujo e não casou no Wikidata (ex.: Monet).
+  const anoObra = parseInt((anoNovo || "").slice(0, 4), 10) || null;
+  const ANTIGA_SEGURA = 1875; // obra anterior a isso: autor quase certamente morto há +70 anos
+
+  let faixa;
   if (wd?.anoMorte) {
+    // Via 1: sabemos quando o autor morreu — decisão firme
     faixa = (ANO_ATUAL - wd.anoMorte) > REGUA_PD ? "verde" : "vermelho";
-  } else if (/wikimedia|commons|domínio público|public domain/i.test(o.museum || o.credit || "")) {
-    // Sem data de morte, mas Commons/PD declarado → ainda assim "verificar" (amarelo),
-    // porque PD da imagem não garante PD da obra. Fica para o seu olho.
+  } else if (anoObra && anoObra < ANTIGA_SEGURA) {
+    // Via 2: sem data de morte, mas a obra é antiga o bastante → seguro
+    faixa = "verde";
+  } else if (anoObra && anoObra >= 1955) {
+    // Obra recente e autor não confirmado morto → risco real
+    faixa = "vermelho";
+  } else {
+    // Sem data de morte e sem ano decisivo → na dúvida, verificar
     faixa = "amarelo";
   }
 
@@ -284,4 +297,4 @@ ${estado.rodando ? "setTimeout(()=>location.reload(), 8000);" : ""}
   console.log("✨ Enriquecedor montado — /enriquecimento e POST /api/enriquecer/iniciar");
 }
 
-module.exports = { montarEnriquecedor };
+module.exports = { montarEnriquecedor, enriquecerObra };
