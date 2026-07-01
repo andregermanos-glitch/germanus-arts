@@ -74,7 +74,7 @@ const T = {
     footer: "18 GALERIES · MUSÉES MONDIAUX · COLLECTION PERSONNELLE",
     global: "Collection d'Art Mondial",
     alas: {
-      retratos:"Portraits", pessoas_reais:"Personnages Réels", historico:"Histoire", cidades:"Émotion",
+      retratos:"Portraits", pessoas_reais:"Personnages Connus", historico:"Histoire", cidades:"Émotion",
       objetos:"Objets", lugares:"Lieux Connus",
       natureza:"Nature", familiar:"Ambiance Familiale", nudes:"Nus Féminins",
       esoterico:"Ésotérisme", sacro:"Sacré", arquitetura:"Architecture",
@@ -120,7 +120,7 @@ const T = {
     footer: "18 GALLERIES · GLOBAL MUSEUMS · PERSONAL COLLECTION",
     global: "Global Art Collection",
     alas: {
-      retratos:"Portraits", pessoas_reais:"Real People", historico:"History", cidades:"Emotion",
+      retratos:"Portraits", pessoas_reais:"Known People", historico:"History", cidades:"Emotion",
       objetos:"Objects", lugares:"Famous Places",
       natureza:"Nature", familiar:"Home Environment", nudes:"Female Nudes",
       esoterico:"Esotericism", sacro:"Sacred", arquitetura:"Architecture",
@@ -166,7 +166,7 @@ const T = {
     footer: "18 GALERÍAS · MUSEOS GLOBALES · COLECCIÓN PERSONAL",
     global: "Colección de Arte Global",
     alas: {
-      retratos:"Retratos", pessoas_reais:"Personas Reales", historico:"Historia", cidades:"Emoción",
+      retratos:"Retratos", pessoas_reais:"Personas Conocidas", historico:"Historia", cidades:"Emoción",
       objetos:"Objetos", lugares:"Lugares Conocidos",
       natureza:"Naturaleza", familiar:"Ambiente Familiar", nudes:"Desnudos Femeninos",
       esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Arquitectura",
@@ -212,7 +212,7 @@ const T = {
     footer: "18 GALLERIE · MUSEI GLOBALI · COLLEZIONE PERSONALE",
     global: "Collezione d'Arte Globale",
     alas: {
-      retratos:"Ritratti", pessoas_reais:"Persone Reali", historico:"Storia", cidades:"Emozione",
+      retratos:"Ritratti", pessoas_reais:"Persone Note", historico:"Storia", cidades:"Emozione",
       objetos:"Oggetti", lugares:"Luoghi Noti",
       natureza:"Natura", familiar:"Ambiente Familiare", nudes:"Nudi Femminili",
       esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Architettura",
@@ -258,7 +258,7 @@ const T = {
     footer: "18 GALERIAS · MUSEUS MUNDIAIS · COLEÇÃO PESSOAL",
     global: "Coleção de Arte Mundial",
     alas: {
-      retratos:"Retratos", pessoas_reais:"Pessoas Reais", historico:"História", cidades:"Emoção",
+      retratos:"Retratos", pessoas_reais:"Pessoas Conhecidas", historico:"História", cidades:"Emoção",
       objetos:"Objetos", lugares:"Lugares Conhecidos",
       natureza:"Natureza", familiar:"Ambiente Familiar", nudes:"Nus Femininos",
       esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Arquitetura",
@@ -304,7 +304,7 @@ const T = {
     footer: "18 GALERIEN · WELTMUSEEN · PERSÖNLICHE SAMMLUNG",
     global: "Weltkunst-Sammlung",
     alas: {
-      retratos:"Porträts", pessoas_reais:"Reale Personen", historico:"Geschichte", cidades:"Emotion",
+      retratos:"Porträts", pessoas_reais:"Bekannte Persönlichkeiten", historico:"Geschichte", cidades:"Emotion",
       objetos:"Objekte", lugares:"Bekannte Orte",
       natureza:"Natur", familiar:"Familiäres Ambiente", nudes:"Weibliche Akte",
       esoterico:"Esoterik", sacro:"Sakrales", arquitetura:"Architektur",
