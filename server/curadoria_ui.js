@@ -267,9 +267,25 @@ a.voltar{color:#555;font-size:12px;text-decoration:none}a.voltar:hover{color:#aa
 
 <div class="nav">
   ${temAnt ? `<a href="/curadoria?ala=${ala}&offset=${offset - LIMIT}">← Anterior</a>` : `<a class="off">← Anterior</a>`}
-  <span style="color:#888">página ${pagina} de ${totalPags}</span>
+  <span style="color:#888">página
+    <input id="pgInput" type="number" min="1" max="${totalPags}" value="${pagina}"
+      style="width:56px;padding:3px 6px;border-radius:6px;border:1px solid #333;background:#111;color:#eee;text-align:center;font-size:13px"
+      onkeydown="if(event.key==='Enter'){irPagina()}">
+    de ${totalPags}</span>
+  <button onclick="irPagina()" style="padding:4px 12px;border-radius:6px;border:1px solid #378ADD55;background:#378ADD22;color:#8bc0f5;cursor:pointer;font-size:12px">ir →</button>
   ${temProx ? `<a href="/curadoria?ala=${ala}&offset=${offset + LIMIT}">Próxima →</a>` : `<a class="off">Próxima →</a>`}
 </div>
+<script>
+function irPagina(){
+  var el = document.getElementById('pgInput');
+  var p = parseInt(el.value, 10);
+  var max = ${totalPags};
+  if(!p || p < 1) p = 1;
+  if(p > max) p = max;
+  var off = (p - 1) * ${LIMIT};
+  location.href = "/curadoria?ala=${ala}&offset=" + off;
+}
+</script>
 
 <div class="grid">${cards || '<p style="color:#555">Nenhuma obra aqui.</p>'}</div>
 
