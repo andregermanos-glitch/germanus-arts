@@ -31,15 +31,19 @@ const QF_DIREITOS = 'RIGHTS:(' + DIREITOS_PD.map(u => `"${u}"`).join(' OR ') + '
 // estado do trabalho em background (para o painel acompanhar)
 let job = { rodando: false, instituicao: null, inseridas: 0, vistas: 0, alvo: 0, fim: null, erro: null };
 
-async function apiGet(params, qfExtra) {
+async function apiGet(params, qfExtras) {
   const u = new URL(API);
   u.searchParams.set("wskey", KEY);
   for (const [k, v] of Object.entries(params)) {
-    if (k === "qf ") continue; // chave-fantasma usada só para sinalizar; ignora
+    if (k === "qf ") continue;
     u.searchParams.set(k, v);
   }
-  // qf adicional: usa append (não set) para permitir múltiplos qf, que a API trata como AND
-  if (qfExtra) u.searchParams.append("qf", qfExtra);
+  // cada qf extra vira um parâmetro qf separado — a API trata múltiplos qf como AND
+  if (Array.isArray(qfExtras)) {
+    for (const q of qfExtras) if (q) u.searchParams.append("qf", q);
+  } else if (qfExtras) {
+    u.searchParams.append("qf", qfExtras);
+  }
   const r = await fetch(u, { signal: AbortSignal.timeout(25000) });
   if (!r.ok) throw new Error("Europeana HTTP " + r.status);
   return r.json();
@@ -65,24 +69,44 @@ function mapItem(it) {
   return { id, title, artist, date, image, museum, ext, rights };
 }
 
-// Filtro "só pintura": combina o tipo de item (proxy_dc_type) em vários idiomas
-// com o campo de assunto (what). Corta documento, foto, mapa, espécime, etc.
-const QF_PINTURA = [
-  'proxy_dc_type.en:(painting OR paintings)',
-  'proxy_dc_type.pt:(pintura OR pinturas)',
-  'proxy_dc_type.fr:(peinture OR peintures)',
-  'proxy_dc_type.de:(Gemälde OR Malerei)',
-  'proxy_dc_type.es:(pintura OR pinturas)',
-  'proxy_dc_type.it:(dipinto OR dipinti OR pittura)',
-  'what:painting',
-].map(s => `(${s})`).join(' OR ');
+// Filtro "só pintura" (rígido): exige que o TIPO do item seja pintura, em vários
+// idiomas, E exclui explicitamente os tipos que mais vazam (gravura, foto, desenho).
+// Sem "what:painting" — esse campo é de ASSUNTO e deixava passar foto/gravura DE
+// pinturas. Aqui exigimos pintura como MEIO/tipo do objeto.
+const QF_PINTURA_INCLUI =
+  '(' + [
+    'proxy_dc_type.en:(painting OR paintings)',
+    'proxy_dc_type.pt:(pintura OR pinturas)',
+    'proxy_dc_type.fr:(peinture OR peintures)',
+    'proxy_dc_type.de:(Gemälde OR Malerei)',
+    'proxy_dc_type.es:(pintura OR pinturas)',
+    'proxy_dc_type.it:(dipinto OR dipinti OR pittura)',
+    'proxy_dc_type.nl:(schilderij OR schilderijen)',
+    'proxy_dc_type.sv:(målning OR målningar)',
+    'proxy_dc_format:(oil OR canvas OR "oil on canvas" OR tela OR öl OR olie)',
+  ].join(' OR ') + ')';
+
+// tipos a excluir (gravura, fotografia, desenho, impresso, cartaz...)
+const QF_PINTURA_EXCLUI = [
+  '-proxy_dc_type.en:(print OR prints OR photograph OR photography OR photo OR drawing OR drawings OR engraving OR etching OR poster OR map)',
+  '-proxy_dc_type.nl:(prent OR prenten OR foto OR fotos OR tekening OR ets OR gravure)',
+  '-proxy_dc_type.de:(Druckgrafik OR Fotografie OR Zeichnung OR Stich OR Radierung OR Plakat)',
+  '-proxy_dc_type.sv:(fotografi OR teckning OR tryck OR gravyr)',
+  '-proxy_dc_type.pt:(gravura OR fotografia OR desenho OR estampa)',
+  '-proxy_dc_type.fr:(estampe OR photographie OR dessin OR gravure)',
+];
 
 async function processar(pool, instituicao, alvo, soPintura) {
   job = { rodando: true, instituicao, inseridas: 0, vistas: 0, alvo, fim: null, erro: null, soPintura: !!soPintura };
   let cursor = "*";
+  let lotes = 0;
+  const MAX_LOTES = 60; // trava de segurança: nunca varre mais que ~6000 registros
   try {
-    while (job.inseridas < alvo) {
-      const restante = Math.min(100, alvo - job.inseridas);
+    while (job.inseridas < alvo && lotes < MAX_LOTES) {
+      lotes++;
+      // com o filtro rígido na própria API, quase tudo que volta já é pintura,
+      // então podemos pedir lotes cheios (100) sem desperdício
+      const restante = soPintura ? 100 : Math.min(100, alvo - job.inseridas);
       const params = {
         query: "*:*",
         qf: `DATA_PROVIDER:"${instituicao}"`,
@@ -92,12 +116,14 @@ async function processar(pool, instituicao, alvo, soPintura) {
         cursor,
         profile: "rich",               // ESSENCIAL: traz edmIsShownBy (link do arquivo)
       };
-      const d = await apiGet(params, soPintura ? QF_PINTURA : null);
+      const qfPintura = soPintura ? [QF_PINTURA_INCLUI, ...QF_PINTURA_EXCLUI] : null;
+      const d = await apiGet(params, qfPintura);
       const items = d.items || [];
       if (items.length === 0) break;
       job.vistas += items.length;
 
       for (const it of items) {
+        if (job.inseridas >= alvo) break; // já atingiu o pedido — para
         const rights = primeiro(it.rights) || "";
         // trava dupla: só Public Domain Mark ou CC0
         const ok = DIREITOS_PD.some(u => rights.startsWith(u.replace(/\/$/, "")) || rights === u);
