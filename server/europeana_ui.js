@@ -140,15 +140,15 @@ async function processar(pool, instituicao, alvo, soPintura) {
           const r = await pool.query(
             `INSERT INTO artworks
                (id,source,title,artist,date,museum,image_url,external_url,ala_id,credit,status,triagem,image_cached_at,indexed_at)
-             VALUES ($1,'europeana',$2,$3,$4,$5,$6,$7,'entrada',$8,'rascunho','',0,NOW())
-             ON CONFLICT (id) DO UPDATE SET indexed_at = NOW()
+             VALUES ($1,'europeana',$2,$3,$4,$5,$6,$7,'entrada',$8,'rascunho','',0,EXTRACT(EPOCH FROM NOW())::BIGINT)
+             ON CONFLICT (id) DO UPDATE SET indexed_at = EXTRACT(EPOCH FROM NOW())::BIGINT
                WHERE COALESCE(artworks.status,'publicada') = 'rascunho'`,
             [o.id, o.title, o.artist, o.date, o.museum, o.image, o.ext,
              `${o.museum} · via Europeana · ${o.rights || 'Public Domain'}`]
           );
           // conta só o que realmente entrou/subiu; duplicata publicada vai para o outro contador
           if (r.rowCount > 0) job.inseridas++; else job.duplicadas++;
-        } catch (e) { /* segue */ }
+        } catch (e) { job.sql_erro = e.message; } // não engole mais: o último erro aparece no status
       }
 
       cursor = d.nextCursor;
@@ -163,15 +163,6 @@ async function processar(pool, instituicao, alvo, soPintura) {
 }
 
 function montarEuropeana(app, pool) {
-
-  // CURA AUTOMÁTICA no boot: obras da Europeana inseridas antes da correção do
-  // indexed_at ficaram sem data e afundavam no fim da Entrada. Aqui elas ganham
-  // data e sobem para a página 1. Idempotente: depois da 1ª vez, não há mais órfãs.
-  pool.query(
-    `UPDATE artworks SET indexed_at = NOW()
-      WHERE source='europeana' AND indexed_at IS NULL`
-  ).then(r => { if (r.rowCount) console.log(`🇪🇺 backfill: ${r.rowCount} obras europeana ganharam indexed_at`); })
-   .catch(e => console.log("🇪🇺 backfill falhou:", e.message));
 
   // 1) LISTA de instituições (facet) — uma chamada, sem baixar obras
   app.get("/api/europeana/instituicoes", async (req, res) => {
@@ -286,7 +277,7 @@ tr:hover{background:#141414}
 .prog>div{height:100%;background:#1D9E75;width:0;transition:width .4s}
 </style></head><body>
 <h1>GERMANUS.Art — Europeana por Instituição</h1>
-<p class="sub"><a href="/banco">← banco</a> · <a href="/curadoria">curadoria</a> · importa só <b>Domínio Público + CC0</b> · uma instituição por vez → Entrada · <span style="color:#8a6d2f">filtro pintura v5.3 (raio-x + funil)</span></p>
+<p class="sub"><a href="/banco">← banco</a> · <a href="/curadoria">curadoria</a> · importa só <b>Domínio Público + CC0</b> · uma instituição por vez → Entrada · <span style="color:#8a6d2f">filtro pintura v5.4 (epoch corrigido)</span></p>
 
 <div id="status"></div>
 
@@ -380,6 +371,7 @@ async function acompanhar(){
     box.innerHTML = '<b>'+(j.instituicao||'')+'</b> — '+j.inseridas+' inseridas · '+j.vistas+' vistas'+
       (j.pd_ok!==undefined?(' · '+j.pd_ok+' PD/CC0 ok · '+(j.duplicadas||0)+' duplicadas'):'')+
       (j.erro?(' · <span style="color:#e88">'+j.erro+'</span>'):'')+
+      (j.sql_erro?(' · <span style="color:#e88">SQL: '+j.sql_erro+'</span>'):'')+
       '<div class="prog"><div style="width:'+pct+'%"></div></div>'+
       (j.rodando?'':'<div style="color:#5fd6a8;margin-top:6px">✓ concluído — veja em <a href="/curadoria">Entrada</a></div>');
     if(!j.rodando){ clearInterval(t); }
