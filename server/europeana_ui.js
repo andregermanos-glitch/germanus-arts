@@ -102,7 +102,7 @@ const QF_PINTURA =
   ' OR proxy_dc_type.fr:(peinture))';
 
 async function processar(pool, instituicao, alvo, soPintura) {
-  job = { rodando: true, instituicao, inseridas: 0, vistas: 0, alvo, fim: null, erro: null, soPintura: !!soPintura };
+  job = { rodando: true, instituicao, inseridas: 0, vistas: 0, pd_ok: 0, duplicadas: 0, alvo, fim: null, erro: null, soPintura: !!soPintura };
   let cursor = "*";
   let lotes = 0;
   const MAX_LOTES = 60; // trava de segurança: nunca varre mais que ~6000 registros
@@ -133,6 +133,7 @@ async function processar(pool, instituicao, alvo, soPintura) {
         // trava dupla: só Public Domain Mark ou CC0
         const ok = DIREITOS_PD.some(u => rights.startsWith(u.replace(/\/$/, "")) || rights === u);
         if (!ok) continue;
+        job.pd_ok++;
         const o = mapItem(it);
         if (!o.image) continue;
         try {
@@ -145,8 +146,8 @@ async function processar(pool, instituicao, alvo, soPintura) {
             [o.id, o.title, o.artist, o.date, o.museum, o.image, o.ext,
              `${o.museum} · via Europeana · ${o.rights || 'Public Domain'}`]
           );
-          // conta só o que realmente entrou/subiu (duplicata publicada não conta)
-          if (r.rowCount > 0) job.inseridas++;
+          // conta só o que realmente entrou/subiu; duplicata publicada vai para o outro contador
+          if (r.rowCount > 0) job.inseridas++; else job.duplicadas++;
         } catch (e) { /* segue */ }
       }
 
@@ -209,6 +210,28 @@ function montarEuropeana(app, pool) {
   // status do trabalho
   app.get("/api/europeana/status", (req, res) => res.json(job));
 
+  // RAIO-X: o que JÁ EXISTE no banco de uma instituição? (responde em JSON no navegador)
+  // Uso: /api/europeana/no-banco?instituicao=Rijksmuseum
+  app.get("/api/europeana/no-banco", async (req, res) => {
+    const termo = (req.query.instituicao || "").trim();
+    if (!termo) return res.status(400).json({ error: "instituicao obrigatória" });
+    try {
+      const tot = await pool.query(
+        `SELECT COUNT(*)::int AS total,
+                COUNT(*) FILTER (WHERE indexed_at IS NULL)::int AS sem_data,
+                COUNT(*) FILTER (WHERE COALESCE(status,'publicada')='rascunho')::int AS rascunhos
+           FROM artworks
+          WHERE source='europeana' AND museum ILIKE '%'||$1||'%'`, [termo]);
+      const ult = await pool.query(
+        `SELECT id, title, COALESCE(status,'publicada') AS status, indexed_at
+           FROM artworks
+          WHERE source='europeana' AND museum ILIKE '%'||$1||'%'
+          ORDER BY indexed_at DESC NULLS LAST
+          LIMIT 10`, [termo]);
+      res.json({ instituicao: termo, ...tot.rows[0], ultimas_10: ult.rows });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  });
+
   // DIAGNÓSTICO: quais "tipos de item" uma instituição usa? (facet proxy_dc_type)
   // Responde "onde está pintura?" mostrando os valores reais + contagem.
   app.get("/api/europeana/tipos", async (req, res) => {
@@ -263,7 +286,7 @@ tr:hover{background:#141414}
 .prog>div{height:100%;background:#1D9E75;width:0;transition:width .4s}
 </style></head><body>
 <h1>GERMANUS.Art — Europeana por Instituição</h1>
-<p class="sub"><a href="/banco">← banco</a> · <a href="/curadoria">curadoria</a> · importa só <b>Domínio Público + CC0</b> · uma instituição por vez → Entrada · <span style="color:#8a6d2f">filtro pintura v5.1 (skos 47 + cura da entrada)</span></p>
+<p class="sub"><a href="/banco">← banco</a> · <a href="/curadoria">curadoria</a> · importa só <b>Domínio Público + CC0</b> · uma instituição por vez → Entrada · <span style="color:#8a6d2f">filtro pintura v5.3 (raio-x + funil)</span></p>
 
 <div id="status"></div>
 
@@ -355,6 +378,7 @@ async function acompanhar(){
     const j = await (await fetch('/api/europeana/status')).json();
     const pct = j.alvo ? Math.round(100*j.inseridas/j.alvo) : 0;
     box.innerHTML = '<b>'+(j.instituicao||'')+'</b> — '+j.inseridas+' inseridas · '+j.vistas+' vistas'+
+      (j.pd_ok!==undefined?(' · '+j.pd_ok+' PD/CC0 ok · '+(j.duplicadas||0)+' duplicadas'):'')+
       (j.erro?(' · <span style="color:#e88">'+j.erro+'</span>'):'')+
       '<div class="prog"><div style="width:'+pct+'%"></div></div>'+
       (j.rodando?'':'<div style="color:#5fd6a8;margin-top:6px">✓ concluído — veja em <a href="/curadoria">Entrada</a></div>');
