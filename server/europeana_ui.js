@@ -45,7 +45,15 @@ async function apiGet(params, qfExtras) {
     u.searchParams.append("qf", qfExtras);
   }
   const r = await fetch(u, { signal: AbortSignal.timeout(25000) });
-  if (!r.ok) throw new Error("Europeana HTTP " + r.status);
+  if (!r.ok) {
+    // a Europeana devolve JSON com "error" explicando o problema — mostra ele
+    let detalhe = "";
+    try { const e = await r.json(); detalhe = e.error || e.message || ""; } catch {}
+    // loga a URL (sem a chave) no Railway para depuração
+    u.searchParams.set("wskey", "***");
+    console.log("🇪🇺 ERRO", r.status, detalhe, "→", u.toString());
+    throw new Error("Europeana HTTP " + r.status + (detalhe ? " — " + detalhe : ""));
+  }
   return r.json();
 }
 
@@ -77,18 +85,21 @@ function mapItem(it) {
 // idiomas (sem sufixo de idioma, para casar em qualquer catalogação) + exclusão
 // dos tipos que mais vazam. Objetivo: trazer pintura sem zerar o resultado.
 // Para refinar por instituição, use o botão "🔎 tipos" que mostra os valores reais.
-// CONFIRMADO pelo diagnóstico (09/07/2026): o Rijksmuseum usa exatamente
-// proxy_dc_type.en = "painting" (4.271 obras). O termo genérico sem idioma
-// nem sempre alcança os subcampos .en/.nl/.sv, então incluímos ambos.
+// FILTRO v5 — baseado em DOCUMENTAÇÃO, não em chute:
+// 1) skos_concept "Painting" (concept 47) — é o MESMO filtro que o site da
+//    Europeana usa no tópico "Pintura". Normalizado, independe do idioma e de
+//    como cada museu catalogou. Cobre as duas formas do URI (nova e antiga).
+// 2) proxy_dc_type SEM idioma não é consultável (a doc oficial exige .en/.nl/etc),
+//    por isso as versões anteriores zeravam. Mantemos os campos QUALIFICADOS
+//    como reforço, com os valores confirmados pelo botão "🔎 tipos".
 const QF_PINTURA =
-  '(proxy_dc_type:(painting OR paintings OR pintura OR peinture OR Gemälde OR ' +
-  'schilderij OR målning OR dipinto OR pittura OR maleri OR maalaus) ' +
-  'OR proxy_dc_type.en:(painting OR paintings) ' +
-  'OR proxy_dc_type.nl:(schilderij OR schilderijen) ' +
-  'OR proxy_dc_type.sv:(målning OR oljemålning) ' +
-  'OR proxy_dc_type.de:(Gemälde) ' +
-  'OR proxy_dc_type.fr:(peinture) ' +
-  'OR proxy_dc_format:(canvas OR "oil on canvas" OR "óleo" OR "oil"))';
+  '(skos_concept:"http://data.europeana.eu/concept/47"' +
+  ' OR skos_concept:"http://data.europeana.eu/concept/base/47"' +
+  ' OR proxy_dc_type.en:(painting OR paintings)' +
+  ' OR proxy_dc_type.nl:(schilderij OR schilderijen)' +
+  ' OR proxy_dc_type.sv:(målning OR oljemålning)' +
+  ' OR proxy_dc_type.de:(Gemälde)' +
+  ' OR proxy_dc_type.fr:(peinture))';
 
 async function processar(pool, instituicao, alvo, soPintura) {
   job = { rodando: true, instituicao, inseridas: 0, vistas: 0, alvo, fim: null, erro: null, soPintura: !!soPintura };
@@ -155,6 +166,7 @@ function montarEuropeana(app, pool) {
     if (!KEY) return res.status(400).json({ error: "Falta EUROPEANA_KEY no Railway" });
     try {
       const busca = (req.query.q || "").trim();
+      const soPintura = req.query.pintura === "1";
       const d = await apiGet({
         query: "*:*",
         qf: QF_DIREITOS,            // conta só obras em domínio público / CC0
@@ -163,7 +175,7 @@ function montarEuropeana(app, pool) {
         profile: "facets",
         facet: "DATA_PROVIDER",
         "f.DATA_PROVIDER.facet.limit": "2000",
-      });
+      }, soPintura ? QF_PINTURA : null); // com ?pintura=1, conta SÓ pinturas por instituição
       let lista = (d.facets?.[0]?.fields || []).map(f => ({ nome: f.label, obras: f.count }));
       if (busca) lista = lista.filter(i => i.nome.toLowerCase().includes(busca.toLowerCase()));
       lista.sort((a, b) => b.obras - a.obras);
@@ -240,7 +252,7 @@ tr:hover{background:#141414}
 .prog>div{height:100%;background:#1D9E75;width:0;transition:width .4s}
 </style></head><body>
 <h1>GERMANUS.Art — Europeana por Instituição</h1>
-<p class="sub"><a href="/banco">← banco</a> · <a href="/curadoria">curadoria</a> · importa só <b>Domínio Público + CC0</b> · uma instituição por vez → Entrada</p>
+<p class="sub"><a href="/banco">← banco</a> · <a href="/curadoria">curadoria</a> · importa só <b>Domínio Público + CC0</b> · uma instituição por vez → Entrada · <span style="color:#8a6d2f">filtro pintura v5 (skos 47)</span></p>
 
 <div id="status"></div>
 
@@ -249,19 +261,21 @@ tr:hover{background:#141414}
   <button class="go" onclick="carregar()">🔍 Listar instituições</button>
 </div>
 <label style="display:flex;align-items:center;gap:8px;margin:-6px 0 16px;font-size:13px;color:#aaa;cursor:pointer">
-  <input type="checkbox" id="soPintura" checked style="width:16px;height:16px;cursor:pointer">
+  <input type="checkbox" id="soPintura" checked style="width:16px;height:16px;cursor:pointer" onchange="if(document.querySelectorAll('#lista tr td.n').length)carregar()">
   Importar <b style="color:#5fd6a8">só pinturas</b> (corta documentos, fotos, mapas, gravuras) — recomendado para as ecobags
 </label>
 
-<table><thead><tr><th>Instituição</th><th>Obras (PD+CC0)</th><th></th></tr></thead>
+<table><thead><tr><th>Instituição</th><th id="cabObras">Pinturas (PD+CC0)</th><th></th></tr></thead>
 <tbody id="lista"><tr><td colspan="3" style="color:#666">Clique em "Listar instituições" para começar.</td></tr></tbody></table>
 
 <script>
 async function carregar(){
   const q = document.getElementById('q').value.trim();
+  const so = document.getElementById('soPintura').checked;
   document.getElementById('lista').innerHTML = '<tr><td colspan="3" style="color:#666">Carregando...</td></tr>';
+  document.getElementById('cabObras').textContent = so ? 'Pinturas (PD+CC0)' : 'Obras (PD+CC0)';
   try{
-    const d = await (await fetch('/api/europeana/instituicoes'+(q?('?q='+encodeURIComponent(q)):''))).json();
+    const d = await (await fetch('/api/europeana/instituicoes?pintura='+(so?'1':'0')+(q?('&q='+encodeURIComponent(q)):''))).json();
     if(d.error){ document.getElementById('lista').innerHTML='<tr><td colspan=3 style="color:#e88">'+d.error+'</td></tr>'; return; }
     document.getElementById('lista').innerHTML = (d.instituicoes||[]).map(function(i){
       return '<tr><td>'+i.nome+'</td><td class="n">'+i.obras.toLocaleString('pt-BR')+'</td>'+
