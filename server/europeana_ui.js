@@ -163,6 +163,15 @@ async function processar(pool, instituicao, alvo, soPintura) {
 
 function montarEuropeana(app, pool) {
 
+  // CURA AUTOMÁTICA no boot: obras da Europeana inseridas antes da correção do
+  // indexed_at ficaram sem data e afundavam no fim da Entrada. Aqui elas ganham
+  // data e sobem para a página 1. Idempotente: depois da 1ª vez, não há mais órfãs.
+  pool.query(
+    `UPDATE artworks SET indexed_at = NOW()
+      WHERE source='europeana' AND indexed_at IS NULL`
+  ).then(r => { if (r.rowCount) console.log(`🇪🇺 backfill: ${r.rowCount} obras europeana ganharam indexed_at`); })
+   .catch(e => console.log("🇪🇺 backfill falhou:", e.message));
+
   // 1) LISTA de instituições (facet) — uma chamada, sem baixar obras
   app.get("/api/europeana/instituicoes", async (req, res) => {
     if (!KEY) return res.status(400).json({ error: "Falta EUROPEANA_KEY no Railway" });
@@ -254,7 +263,7 @@ tr:hover{background:#141414}
 .prog>div{height:100%;background:#1D9E75;width:0;transition:width .4s}
 </style></head><body>
 <h1>GERMANUS.Art — Europeana por Instituição</h1>
-<p class="sub"><a href="/banco">← banco</a> · <a href="/curadoria">curadoria</a> · importa só <b>Domínio Público + CC0</b> · uma instituição por vez → Entrada · <span style="color:#8a6d2f">filtro pintura v5 (skos 47)</span></p>
+<p class="sub"><a href="/banco">← banco</a> · <a href="/curadoria">curadoria</a> · importa só <b>Domínio Público + CC0</b> · uma instituição por vez → Entrada · <span style="color:#8a6d2f">filtro pintura v5.1 (skos 47 + cura da entrada)</span></p>
 
 <div id="status"></div>
 
