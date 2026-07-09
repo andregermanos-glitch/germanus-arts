@@ -118,11 +118,17 @@ function montarCuradoria(app, pool) {
       const ct = await pool.query(`SELECT COUNT(*) AS n FROM artworks WHERE ${filtro}`, params);
       const total = parseInt(ct.rows[0].n, 10);
 
+      // Ordenação: ENTRADA mostra as recém-chegadas primeiro (indexed_at).
+      // Alas publicadas mantêm R2 na frente (imagens que carregam com garantia).
+      const ordem = isEntrada
+        ? `indexed_at DESC NULLS LAST`
+        : `(image_url LIKE '%r2.dev%' OR image_url LIKE '%r2.cloudflarestorage%') DESC, indexed_at DESC`;
+
       const r = await pool.query(
         `SELECT id,title,artist,date,museum,description,image_url,ala_id,
                 wiki_en,wiki_fr,wiki_es,wiki_it, COALESCE(curado,false) AS curado
            FROM artworks WHERE ${filtro}
-          ORDER BY (image_url LIKE '%r2.dev%' OR image_url LIKE '%r2.cloudflarestorage%') DESC, indexed_at DESC
+          ORDER BY ${ordem}
           LIMIT ${LIMIT} OFFSET ${offset}`,
         params
       );

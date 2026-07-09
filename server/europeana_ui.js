@@ -136,15 +136,17 @@ async function processar(pool, instituicao, alvo, soPintura) {
         const o = mapItem(it);
         if (!o.image) continue;
         try {
-          await pool.query(
+          const r = await pool.query(
             `INSERT INTO artworks
-               (id,source,title,artist,date,museum,image_url,external_url,ala_id,credit,status,triagem,image_cached_at)
-             VALUES ($1,'europeana',$2,$3,$4,$5,$6,$7,'entrada',$8,'rascunho','',0)
-             ON CONFLICT (id) DO NOTHING`,
+               (id,source,title,artist,date,museum,image_url,external_url,ala_id,credit,status,triagem,image_cached_at,indexed_at)
+             VALUES ($1,'europeana',$2,$3,$4,$5,$6,$7,'entrada',$8,'rascunho','',0,NOW())
+             ON CONFLICT (id) DO UPDATE SET indexed_at = NOW()
+               WHERE COALESCE(artworks.status,'publicada') = 'rascunho'`,
             [o.id, o.title, o.artist, o.date, o.museum, o.image, o.ext,
              `${o.museum} · via Europeana · ${o.rights || 'Public Domain'}`]
           );
-          job.inseridas++;
+          // conta só o que realmente entrou/subiu (duplicata publicada não conta)
+          if (r.rowCount > 0) job.inseridas++;
         } catch (e) { /* segue */ }
       }
 
