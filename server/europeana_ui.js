@@ -77,9 +77,17 @@ function mapItem(it) {
 // idiomas (sem sufixo de idioma, para casar em qualquer catalogação) + exclusão
 // dos tipos que mais vazam. Objetivo: trazer pintura sem zerar o resultado.
 // Para refinar por instituição, use o botão "🔎 tipos" que mostra os valores reais.
+// CONFIRMADO pelo diagnóstico (09/07/2026): o Rijksmuseum usa exatamente
+// proxy_dc_type.en = "painting" (4.271 obras). O termo genérico sem idioma
+// nem sempre alcança os subcampos .en/.nl/.sv, então incluímos ambos.
 const QF_PINTURA =
   '(proxy_dc_type:(painting OR paintings OR pintura OR peinture OR Gemälde OR ' +
   'schilderij OR målning OR dipinto OR pittura OR maleri OR maalaus) ' +
+  'OR proxy_dc_type.en:(painting OR paintings) ' +
+  'OR proxy_dc_type.nl:(schilderij OR schilderijen) ' +
+  'OR proxy_dc_type.sv:(målning OR oljemålning) ' +
+  'OR proxy_dc_type.de:(Gemälde) ' +
+  'OR proxy_dc_type.fr:(peinture) ' +
   'OR proxy_dc_format:(canvas OR "oil on canvas" OR "óleo" OR "oil"))';
 
 async function processar(pool, instituicao, alvo, soPintura) {
@@ -274,9 +282,38 @@ async function verTipos(btn, nome){
       txt += '\\n';
     });
     if(!(d.grupos||[]).length) txt += '(nenhum tipo catalogado — a instituição não preenche esse campo)';
-    alert(txt);
+    mostrarTipos(txt);
   }catch(e){ alert('Erro: '+e.message); }
   finally{ btn.disabled=false; btn.textContent='🔎 tipos'; }
+}
+// Painel de tipos: texto selecionável (dá para copiar), com botão de copiar tudo.
+function mostrarTipos(txt){
+  var old = document.getElementById('painelTipos'); if(old) old.remove();
+  var div = document.createElement('div');
+  div.id = 'painelTipos';
+  div.style.cssText = 'position:fixed;top:8%;left:50%;transform:translateX(-50%);z-index:9999;'+
+    'background:#1c1c1c;border:1px solid #8a6d2f;border-radius:10px;padding:16px;'+
+    'max-width:640px;width:90%;max-height:75vh;display:flex;flex-direction:column;box-shadow:0 8px 40px #000c';
+  var pre = document.createElement('pre');
+  pre.textContent = txt;
+  pre.style.cssText = 'overflow:auto;flex:1;margin:0 0 12px;color:#ddd;font-size:13px;'+
+    'user-select:text;-webkit-user-select:text;white-space:pre-wrap';
+  var bar = document.createElement('div');
+  bar.style.cssText = 'display:flex;gap:8px;justify-content:flex-end';
+  var bCopiar = document.createElement('button');
+  bCopiar.textContent = '📋 Copiar tudo';
+  bCopiar.className = 'imp';
+  bCopiar.onclick = function(){
+    navigator.clipboard.writeText(txt).then(function(){ bCopiar.textContent='✅ Copiado!'; },
+      function(){ bCopiar.textContent='selecione e Ctrl+C'; });
+  };
+  var bFechar = document.createElement('button');
+  bFechar.textContent = 'Fechar';
+  bFechar.className = 'imp';
+  bFechar.onclick = function(){ div.remove(); };
+  bar.appendChild(bCopiar); bar.appendChild(bFechar);
+  div.appendChild(pre); div.appendChild(bar);
+  document.body.appendChild(div);
 }
 async function importar(btn, nome){
   var so = document.getElementById('soPintura').checked;
