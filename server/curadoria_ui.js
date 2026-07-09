@@ -164,8 +164,8 @@ function montarCuradoria(app, pool) {
         const meta = [o.artist, o.date].filter(Boolean).map(esc).join(" · ");
         const tagAla = isEntrada && o.ala_id ? `<span style="color:#BA7517">${esc(o.ala_id)}</span>` : "";
         return `<div class="card">
-          <div class="thumb"><img src="${img}" loading="lazy" alt="${esc(o.title)}"
-               onerror="this.parentElement.classList.add('err')"></div>
+          <div class="thumb"><img src="${img}" data-orig="${esc(o.image_url)}" loading="lazy" alt="${esc(o.title)}"
+               onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='https://api.europeana.eu/thumbnail/v2/url.json?type=IMAGE&size=w400&uri='+encodeURIComponent(this.dataset.orig);}else{this.parentElement.classList.add('err');}"></div>
           <div class="info">
             <div class="t">${esc(o.title) || "<i>sem título</i>"}</div>
             <div class="m">${meta}</div>
