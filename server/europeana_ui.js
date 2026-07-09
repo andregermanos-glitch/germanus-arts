@@ -73,28 +73,14 @@ function mapItem(it) {
 // idiomas, E exclui explicitamente os tipos que mais vazam (gravura, foto, desenho).
 // Sem "what:painting" — esse campo é de ASSUNTO e deixava passar foto/gravura DE
 // pinturas. Aqui exigimos pintura como MEIO/tipo do objeto.
-const QF_PINTURA_INCLUI =
-  '(' + [
-    'proxy_dc_type.en:(painting OR paintings)',
-    'proxy_dc_type.pt:(pintura OR pinturas)',
-    'proxy_dc_type.fr:(peinture OR peintures)',
-    'proxy_dc_type.de:(Gemälde OR Malerei)',
-    'proxy_dc_type.es:(pintura OR pinturas)',
-    'proxy_dc_type.it:(dipinto OR dipinti OR pittura)',
-    'proxy_dc_type.nl:(schilderij OR schilderijen)',
-    'proxy_dc_type.sv:(målning OR målningar)',
-    'proxy_dc_format:(oil OR canvas OR "oil on canvas" OR tela OR öl OR olie)',
-  ].join(' OR ') + ')';
-
-// tipos a excluir (gravura, fotografia, desenho, impresso, cartaz...)
-const QF_PINTURA_EXCLUI = [
-  '-proxy_dc_type.en:(print OR prints OR photograph OR photography OR photo OR drawing OR drawings OR engraving OR etching OR poster OR map)',
-  '-proxy_dc_type.nl:(prent OR prenten OR foto OR fotos OR tekening OR ets OR gravure)',
-  '-proxy_dc_type.de:(Druckgrafik OR Fotografie OR Zeichnung OR Stich OR Radierung OR Plakat)',
-  '-proxy_dc_type.sv:(fotografi OR teckning OR tryck OR gravyr)',
-  '-proxy_dc_type.pt:(gravura OR fotografia OR desenho OR estampa)',
-  '-proxy_dc_type.fr:(estampe OR photographie OR dessin OR gravure)',
-];
+// Filtro "só pintura" — TOLERANTE. Um único qf com termos de pintura em vários
+// idiomas (sem sufixo de idioma, para casar em qualquer catalogação) + exclusão
+// dos tipos que mais vazam. Objetivo: trazer pintura sem zerar o resultado.
+// Para refinar por instituição, use o botão "🔎 tipos" que mostra os valores reais.
+const QF_PINTURA =
+  '(proxy_dc_type:(painting OR paintings OR pintura OR peinture OR Gemälde OR ' +
+  'schilderij OR målning OR dipinto OR pittura OR maleri OR maalaus) ' +
+  'OR proxy_dc_format:(canvas OR "oil on canvas" OR "óleo" OR "oil"))';
 
 async function processar(pool, instituicao, alvo, soPintura) {
   job = { rodando: true, instituicao, inseridas: 0, vistas: 0, alvo, fim: null, erro: null, soPintura: !!soPintura };
@@ -116,7 +102,7 @@ async function processar(pool, instituicao, alvo, soPintura) {
         cursor,
         profile: "rich",               // ESSENCIAL: traz edmIsShownBy (link do arquivo)
       };
-      const qfPintura = soPintura ? [QF_PINTURA_INCLUI, ...QF_PINTURA_EXCLUI] : null;
+      const qfPintura = soPintura ? QF_PINTURA : null;
       const d = await apiGet(params, qfPintura);
       const items = d.items || [];
       if (items.length === 0) break;
@@ -192,6 +178,36 @@ function montarEuropeana(app, pool) {
   // status do trabalho
   app.get("/api/europeana/status", (req, res) => res.json(job));
 
+  // DIAGNÓSTICO: quais "tipos de item" uma instituição usa? (facet proxy_dc_type)
+  // Responde "onde está pintura?" mostrando os valores reais + contagem.
+  app.get("/api/europeana/tipos", async (req, res) => {
+    if (!KEY) return res.status(400).json({ error: "Falta EUROPEANA_KEY no Railway" });
+    const instituicao = (req.query.instituicao || "").trim();
+    if (!instituicao) return res.status(400).json({ error: "instituicao obrigatória" });
+    try {
+      // pede os facets de tipo em vários idiomas + o campo de formato (material)
+      const d = await apiGet({
+        query: "*:*",
+        qf: `DATA_PROVIDER:"${instituicao}"`,
+        reusability: "open",
+        rows: "0",
+        profile: "facets",
+        facet: "proxy_dc_type.en,proxy_dc_type.nl,proxy_dc_type.sv,proxy_dc_type.de,proxy_dc_type.fr,proxy_dc_format",
+        "f.proxy_dc_type.en.facet.limit": "40",
+        "f.proxy_dc_type.nl.facet.limit": "40",
+        "f.proxy_dc_type.sv.facet.limit": "40",
+        "f.proxy_dc_type.de.facet.limit": "40",
+        "f.proxy_dc_type.fr.facet.limit": "40",
+        "f.proxy_dc_format.facet.limit": "40",
+      });
+      const grupos = (d.facets || []).map(f => ({
+        campo: f.name,
+        valores: (f.fields || []).map(x => ({ valor: x.label, n: x.count })),
+      })).filter(g => g.valores.length > 0);
+      res.json({ instituicao, grupos });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  });
+
   // painel
   app.get("/europeana", (req, res) => {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -241,9 +257,26 @@ async function carregar(){
     if(d.error){ document.getElementById('lista').innerHTML='<tr><td colspan=3 style="color:#e88">'+d.error+'</td></tr>'; return; }
     document.getElementById('lista').innerHTML = (d.instituicoes||[]).map(function(i){
       return '<tr><td>'+i.nome+'</td><td class="n">'+i.obras.toLocaleString('pt-BR')+'</td>'+
-      '<td><button class="imp go" onclick="importar(this,\\''+i.nome.replace(/'/g,"\\\\'")+'\\')">Importar →</button></td></tr>';
+      '<td><button class="imp" onclick="verTipos(this,\\''+i.nome.replace(/'/g,"\\\\'")+'\\')" style="background:#378add22;border-color:#378add55;color:#8bc0f5">🔎 tipos</button> '+
+      '<button class="imp go" onclick="importar(this,\\''+i.nome.replace(/'/g,"\\\\'")+'\\')">Importar →</button></td></tr>';
     }).join('') || '<tr><td colspan=3 style="color:#666">Nada encontrado.</td></tr>';
   }catch(e){ document.getElementById('lista').innerHTML='<tr><td colspan=3 style="color:#e88">Erro: '+e.message+'</td></tr>'; }
+}
+async function verTipos(btn, nome){
+  btn.disabled = true; btn.textContent = '...';
+  try{
+    const d = await (await fetch('/api/europeana/tipos?instituicao='+encodeURIComponent(nome))).json();
+    if(d.error){ alert(d.error); return; }
+    let txt = '📋 TIPOS DE ITEM em "'+nome+'"\\n(use estes termos para o filtro de pintura)\\n\\n';
+    (d.grupos||[]).forEach(function(g){
+      txt += '── '+g.campo+' ──\\n';
+      g.valores.slice(0,15).forEach(function(v){ txt += '  '+v.n+' × '+v.valor+'\\n'; });
+      txt += '\\n';
+    });
+    if(!(d.grupos||[]).length) txt += '(nenhum tipo catalogado — a instituição não preenche esse campo)';
+    alert(txt);
+  }catch(e){ alert('Erro: '+e.message); }
+  finally{ btn.disabled=false; btn.textContent='🔎 tipos'; }
 }
 async function importar(btn, nome){
   var so = document.getElementById('soPintura').checked;
