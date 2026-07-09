@@ -31,10 +31,15 @@ const QF_DIREITOS = 'RIGHTS:(' + DIREITOS_PD.map(u => `"${u}"`).join(' OR ') + '
 // estado do trabalho em background (para o painel acompanhar)
 let job = { rodando: false, instituicao: null, inseridas: 0, vistas: 0, alvo: 0, fim: null, erro: null };
 
-async function apiGet(params) {
+async function apiGet(params, qfExtra) {
   const u = new URL(API);
   u.searchParams.set("wskey", KEY);
-  for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
+  for (const [k, v] of Object.entries(params)) {
+    if (k === "qf ") continue; // chave-fantasma usada só para sinalizar; ignora
+    u.searchParams.set(k, v);
+  }
+  // qf adicional: usa append (não set) para permitir múltiplos qf, que a API trata como AND
+  if (qfExtra) u.searchParams.append("qf", qfExtra);
   const r = await fetch(u, { signal: AbortSignal.timeout(25000) });
   if (!r.ok) throw new Error("Europeana HTTP " + r.status);
   return r.json();
@@ -60,13 +65,25 @@ function mapItem(it) {
   return { id, title, artist, date, image, museum, ext, rights };
 }
 
-async function processar(pool, instituicao, alvo) {
-  job = { rodando: true, instituicao, inseridas: 0, vistas: 0, alvo, fim: null, erro: null };
+// Filtro "só pintura": combina o tipo de item (proxy_dc_type) em vários idiomas
+// com o campo de assunto (what). Corta documento, foto, mapa, espécime, etc.
+const QF_PINTURA = [
+  'proxy_dc_type.en:(painting OR paintings)',
+  'proxy_dc_type.pt:(pintura OR pinturas)',
+  'proxy_dc_type.fr:(peinture OR peintures)',
+  'proxy_dc_type.de:(Gemälde OR Malerei)',
+  'proxy_dc_type.es:(pintura OR pinturas)',
+  'proxy_dc_type.it:(dipinto OR dipinti OR pittura)',
+  'what:painting',
+].map(s => `(${s})`).join(' OR ');
+
+async function processar(pool, instituicao, alvo, soPintura) {
+  job = { rodando: true, instituicao, inseridas: 0, vistas: 0, alvo, fim: null, erro: null, soPintura: !!soPintura };
   let cursor = "*";
   try {
     while (job.inseridas < alvo) {
       const restante = Math.min(100, alvo - job.inseridas);
-      const d = await apiGet({
+      const params = {
         query: "*:*",
         qf: `DATA_PROVIDER:"${instituicao}"`,
         reusability: "open",           // atalho: só conteúdo aberto (PD, CC0, CC BY, CC BY-SA)
@@ -74,7 +91,8 @@ async function processar(pool, instituicao, alvo) {
         rows: String(restante),
         cursor,
         profile: "rich",               // ESSENCIAL: traz edmIsShownBy (link do arquivo)
-      });
+      };
+      const d = await apiGet(params, soPintura ? QF_PINTURA : null);
       const items = d.items || [];
       if (items.length === 0) break;
       job.vistas += items.length;
@@ -139,9 +157,10 @@ function montarEuropeana(app, pool) {
     if (job.rodando) return res.status(409).json({ error: "Já há uma importação rodando", job });
     const instituicao = (req.body?.instituicao || "").trim();
     const alvo = Math.min(parseInt(req.body?.total || "500", 10) || 500, 20000);
+    const soPintura = req.body?.soPintura !== false; // padrão: só pintura
     if (!instituicao) return res.status(400).json({ error: "instituicao obrigatória" });
-    processar(pool, instituicao, alvo); // não await — roda em segundo plano
-    res.json({ ok: true, mensagem: `Importando até ${alvo} obras (Public Domain + CC0) de "${instituicao}" para a Entrada. Acompanhe o progresso.` });
+    processar(pool, instituicao, alvo, soPintura); // não await — roda em segundo plano
+    res.json({ ok: true, mensagem: `Importando até ${alvo} ${soPintura ? "pinturas" : "obras"} (Public Domain + CC0) de "${instituicao}" para a Entrada.` });
   });
 
   // status do trabalho
@@ -179,6 +198,10 @@ tr:hover{background:#141414}
   <input id="q" placeholder="Filtrar instituições (ex.: Rijksmuseum, Nationalmuseum...)" onkeydown="if(event.key==='Enter')carregar()">
   <button class="go" onclick="carregar()">🔍 Listar instituições</button>
 </div>
+<label style="display:flex;align-items:center;gap:8px;margin:-6px 0 16px;font-size:13px;color:#aaa;cursor:pointer">
+  <input type="checkbox" id="soPintura" checked style="width:16px;height:16px;cursor:pointer">
+  Importar <b style="color:#5fd6a8">só pinturas</b> (corta documentos, fotos, mapas, gravuras) — recomendado para as ecobags
+</label>
 
 <table><thead><tr><th>Instituição</th><th>Obras (PD+CC0)</th><th></th></tr></thead>
 <tbody id="lista"><tr><td colspan="3" style="color:#666">Clique em "Listar instituições" para começar.</td></tr></tbody></table>
@@ -197,10 +220,11 @@ async function carregar(){
   }catch(e){ document.getElementById('lista').innerHTML='<tr><td colspan=3 style="color:#e88">Erro: '+e.message+'</td></tr>'; }
 }
 async function importar(btn, nome){
-  const total = prompt('Quantas obras (Público+CC0) importar de "'+nome+'"? (máx 20000)', '500');
+  var so = document.getElementById('soPintura').checked;
+  const total = prompt('Quantas '+(so?'pinturas':'obras')+' (Público+CC0) importar de "'+nome+'"? (máx 20000)', '500');
   if(total===null) return;
   btn.disabled = true; btn.textContent = 'enviando...';
-  const d = await (await fetch('/api/europeana/importar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instituicao:nome,total:parseInt(total,10)})})).json();
+  const d = await (await fetch('/api/europeana/importar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instituicao:nome,total:parseInt(total,10),soPintura:so})})).json();
   if(d.error){ alert(d.error); btn.disabled=false; btn.textContent='Importar →'; return; }
   acompanhar();
 }
