@@ -1073,6 +1073,7 @@ a{color:#378ADD;text-decoration:none}a:hover{text-decoration:underline}
   <a class="btn" href="/api/cache/status">Status + tamanho</a>
   <a class="btn" href="/enriquecimento">Enriquecimento</a>
   <a class="btn" href="/triagem">⚖️ Triagem</a>
+  <a class="btn" href="/europeana">🇪🇺 Europeana</a>
   <a class="btn" href="#" onclick="recuperarHD();return false;" id="btnHD">🔍 Recuperar HD</a>
   <a class="btn" href="/api/carregar/psyche">Carregar Psyché</a>
   <a class="btn" href="/api/carregar/mestres">Carregar Mestres</a>
@@ -1114,6 +1115,7 @@ require("./imagens_mortas").montarImagensMortas(app, pool);
 require("./enriquecedor").montarEnriquecedor(app, pool);
 require("./hd_recuperar").montarHdRecuperar(app, pool);
 require("./triagem_ui").montarTriagem(app, pool);
+require("./europeana_ui").montarEuropeana(app, pool);
 
 // ─── Frontend estático ────────────────────────────────────────────────────────
 const distPath = path.join(__dirname, "../dist");
