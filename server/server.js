@@ -1116,6 +1116,7 @@ require("./enriquecedor").montarEnriquecedor(app, pool);
 require("./hd_recuperar").montarHdRecuperar(app, pool);
 require("./triagem_ui").montarTriagem(app, pool);
 require("./europeana_ui").montarEuropeana(app, pool);
+require("./medidor").montarMedidor(app, pool);
 
 // ─── Frontend estático ────────────────────────────────────────────────────────
 const distPath = path.join(__dirname, "../dist");
