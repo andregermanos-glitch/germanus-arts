@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import "./germanus.css";
-
+import Atendente from "./Atendente";
 // ─── Persistência ─────────────────────────────────────────────────────────────
 const loadCol  = () => { try { return JSON.parse(localStorage.getItem("germ_col")||"[]"); } catch { return []; } };
 const saveCol  = col => { try { localStorage.setItem("germ_col", JSON.stringify(col)); } catch {} };
@@ -942,9 +942,12 @@ export default function App() {
               </div>
             )}
 
-            {phase==="idle"&&results.length===0&&(
-              <div style={{ textAlign:"center",paddingTop:18,borderTop:"1px solid #f0ece4" }}>
-                <p style={{ fontSize:10,color:"#ccc",fontFamily:"Verdana,sans-serif",letterSpacing:1,textTransform:"uppercase" }}>{t.select}</p>
+                        {phase==="idle"&&results.length===0&&(
+              <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",
+                            gap:20,flexWrap:"wrap",paddingTop:18,borderTop:"1px solid #f0ece4" }}>
+                <p style={{ margin:0,fontSize:9,color:"#ccc",fontFamily:"Verdana,sans-serif",
+                            letterSpacing:1,textTransform:"uppercase" }}>{t.select}</p>
+                <Atendente lang={lang}/>
               </div>
             )}
           </div>
