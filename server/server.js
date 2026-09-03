@@ -1117,7 +1117,8 @@ require("./hd_recuperar").montarHdRecuperar(app, pool);
 require("./triagem_ui").montarTriagem(app, pool);
 require("./europeana_ui").montarEuropeana(app, pool);
 require("./medidor").montarMedidor(app, pool);
-
+require("./atendente_ui").montarAtendente(app, pool);
+require("./atendente_admin").montarAtendenteAdmin(app, pool);
 // ─── Frontend estático ────────────────────────────────────────────────────────
 const distPath = path.join(__dirname, "../dist");
 app.use(express.static(distPath));
