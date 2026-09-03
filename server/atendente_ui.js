@@ -163,7 +163,6 @@ async function chamarGemini(system, contents) {
       generationConfig: {
         maxOutputTokens: MAX_TOKENS,
         temperature: 0.7,
-        thinkingConfig: { thinkingBudget: 0 },  // sem tokens de raciocínio: custo previsível
       },
     }),
     signal: AbortSignal.timeout(30000),
