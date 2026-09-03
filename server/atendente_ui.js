@@ -207,8 +207,8 @@ function montarAtendente(app, pool) {
     if (!process.env.GEMINI_API_KEY || !estaDisponivel())
       return res.status(503).json({ erro: "atendente_indisponivel" });
     if (!passouNoLimite(ip)) {
-      registrar({ ip, lang, pergunta, erro: "rate_limit" });
-      return res.status(429).json({ erro: "muitas_perguntas" });
+            registrar({ ip, lang, pergunta, erro: ("erro: " + e.message).slice(0, 280) });
+      return res.status(500).json({ erro: "tente_de_novo" });
     }
 
     const historico = Array.isArray(req.body?.historico) ? req.body.historico.slice(-MAX_HISTORICO) : [];
