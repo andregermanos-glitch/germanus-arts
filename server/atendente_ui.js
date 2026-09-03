@@ -10,7 +10,7 @@
 const crypto = require("crypto");
 
 // ─── Configuração ────────────────────────────────────────────────────────────
-const MODELO         = "gemini-2.5-flash-lite";   // confirme o id no AI Studio
+const MODELO = "gemini-3.5-flash-lite";   // confirme o id no AI Studio
 const API            = "https://generativelanguage.googleapis.com/v1beta/models";
 const MAX_TOKENS     = 700;
 const MAX_RODADAS    = 3;      // teto de idas ao modelo por pergunta
