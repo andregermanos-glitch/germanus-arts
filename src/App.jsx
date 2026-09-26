@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import "./germanus.css";
 import Atendente from "./Atendente";
+import Exposicoes from "./Exposicoes";
 // ─── Persistência ─────────────────────────────────────────────────────────────
 const loadCol  = () => { try { return JSON.parse(localStorage.getItem("germ_col")||"[]"); } catch { return []; } };
 const saveCol  = col => { try { localStorage.setItem("germ_col", JSON.stringify(col)); } catch {} };
@@ -981,8 +982,7 @@ export default function App() {
         )}
 
         {/* CURADORIA */}
-        {tab==="curadoria"&&<CuradoriaTab col={col} onClickAla={ala=>{clickAla(ala);setTab("buscar");}} t={t} lang={lang}/>}
-
+        {tab==="curadoria"&&<Exposicoes lang={lang}/>}
         {/* MANUAL */}
         {tab==="manual"&&(
           <div style={{ maxWidth:680 }}>
