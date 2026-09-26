@@ -38,7 +38,7 @@ function clearSeen() {
 // ─── Traduções ────────────────────────────────────────────────────────────────
 const T = {
   fr: {
-    tabs: ["Rechercher", "Collection", "Curation", "Ajouter une œuvre"],
+    tabs: ["Rechercher", "Collection", "Expositions", "Ajouter une œuvre"],
     searchDirect: "Recherche directe — œuvre, artiste, style, période...",
     searchRefine: n => `Affiner dans ${n}... (optionnel)`,
     from: "DE", to: "À",
@@ -84,7 +84,7 @@ const T = {
     }
   },
   en: {
-    tabs: ["Search", "Collection", "Curation", "Add Artwork"],
+    tabs: ["Search", "Collection", "Exhibitions", "Add Artwork"],
     searchDirect: "Direct search — artwork, artist, style, period...",
     searchRefine: n => `Refine in ${n}... (optional)`,
     from: "FROM", to: "TO",
@@ -176,7 +176,7 @@ const T = {
     }
   },
   it: {
-    tabs: ["Cerca", "Collezione", "Curatela", "Aggiungi Opera"],
+    tabs: ["Cerca", "Collezione", "Mostre", "Aggiungi Opera"],
     searchDirect: "Ricerca diretta — opera, artista, stile, periodo...",
     searchRefine: n => `Raffina in ${n}... (facoltativo)`,
     from: "DA", to: "A",
@@ -222,7 +222,7 @@ const T = {
     }
   },
   pt: {
-    tabs: ["Buscar", "Coleção", "Curadoria", "Adicionar Obra"],
+    tabs: ["Buscar", "Coleção", "Exposições", "Adicionar Obra"],
     searchDirect: "Busca direta — obra, artista, estilo, período...",
     searchRefine: n => `Refinar em ${n}... (opcional)`,
     from: "DE", to: "ATÉ",
@@ -268,7 +268,7 @@ const T = {
     }
   },
   de: {
-    tabs: ["Suchen", "Sammlung", "Kuratierung", "Werk hinzufügen"],
+    tabs: ["Suchen", "Sammlung", "Ausstellungen", "Werk hinzufügen"],
     searchDirect: "Direktsuche — Werk, Künstler, Stil, Epoche...",
     searchRefine: n => `Eingrenzen in ${n}... (optional)`,
     from: "VON", to: "BIS",
