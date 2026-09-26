@@ -922,10 +922,6 @@ export default function App() {
               )}
             </div>
 
-            <div style={{ display:"flex",justifyContent:"flex-end",marginBottom:14 }}>
-              <YearRange from={fromYear} to={toYear} onFrom={setFrom} onTo={setTo} t={t}/>
-            </div>
-
             <div className="alas-grid" style={{ display:"grid",gap:6,marginBottom:22 }}>
               {ALAS.map(ala=>(
                 <AlaBtn key={ala.id} name={t.alas[ala.id]} ala={ala} active={activeAla?.id===ala.id} onClick={()=>clickAla(ala)}/>
