@@ -130,7 +130,7 @@ const T = {
     }
   },
   es: {
-    tabs: ["Buscar", "Colección", "Curaduría", "Agregar Obra"],
+    tabs: ["Buscar", "Colección", "Exposiciones", "Agregar Obra"],
     searchDirect: "Búsqueda directa — obra, artista, estilo, período...",
     searchRefine: n => `Refinar en ${n}... (opcional)`,
     from: "DESDE", to: "HASTA",
