@@ -3,10 +3,11 @@ import { createPortal } from "react-dom";
 import "./germanus.css";
 import Atendente from "./Atendente";
 import Exposicoes from "./Exposicoes";
+import MenuRodape from "./MenuRodape";
 // ─── Persistência ─────────────────────────────────────────────────────────────
 const loadCol  = () => { try { return JSON.parse(localStorage.getItem("germ_col")||"[]"); } catch { return []; } };
 const saveCol  = col => { try { localStorage.setItem("germ_col", JSON.stringify(col)); } catch {} };
-const loadLang = () => { try { return localStorage.getItem("germ_lang") || "fr"; } catch { return "fr"; } };
+export const loadLang = () => { try { return localStorage.getItem("germ_lang") || "fr"; } catch { return "fr"; } };
 const saveLang = l  => { try { localStorage.setItem("germ_lang", l); } catch {} };
 
 // ─── Rotatividade — rastreia obras vistas (30 min) ───────────────────────────
@@ -397,7 +398,7 @@ async function fetchGaleria(alaId, page) {
 }
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
-function Logo({ small }) {
+export function Logo({ small }) {
   const n=small?16:40, d=small?26:68, a=small?16:44;
   return (
     <div style={{ display:"flex", alignItems:"baseline", lineHeight:1, userSelect:"none" }}>
@@ -409,7 +410,7 @@ function Logo({ small }) {
 }
 
 // ─── Seletor de idioma — horizontal no desktop, quadrado 2×2 no celular ───────
-function LangSwitcher({ lang, setLang }) {
+export function LangSwitcher({ lang, setLang }) {
   const [abrir, setAbrir] = useState(false);
   const principais = [
     { code:"fr", flag:"🇫🇷" },
@@ -947,6 +948,7 @@ export default function App() {
                 <Atendente lang={lang}/>
               </div>
             )}
+            {phase==="idle"&&results.length===0&&<MenuRodape lang={lang}/>}
           </div>
         )}
 
