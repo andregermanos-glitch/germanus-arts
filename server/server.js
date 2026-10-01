@@ -1121,6 +1121,7 @@ require("./atendente_ui").montarAtendente(app, pool);
 require("./atendente_admin").montarAtendenteAdmin(app, pool);
 require("./museus_ui").montarMuseus(app, pool);
 require("./colecoes_ui").montarColecoes(app, pool);
+require("./noticias").montarNoticias(app, pool);
 // ─── Frontend estático ────────────────────────────────────────────────────────
 const distPath = path.join(__dirname, "../dist");
 app.use(express.static(distPath));
