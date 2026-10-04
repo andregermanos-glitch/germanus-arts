@@ -320,7 +320,7 @@ let remessa = { rodando: false, parar: false, fonte: null, ultimo_erro: null };
 async function pegarJson(url, timeout = 25000) {
   const r = await fetch(url, { headers: { "User-Agent": UA, "Accept": "application/json" },
                                signal: AbortSignal.timeout(timeout) });
-  if (!r.ok) throw new Error(`HTTP ${r.status} em ${new URL(url).host}`);
+  if (!r.ok) { const e = new Error(`HTTP ${r.status} em ${new URL(url).host}`); e.status = r.status; throw e; }
   return r.json();
 }
 
@@ -362,11 +362,18 @@ const FONTES = {
       let n = 0, vistas = 0;
       for (const id of fatia) {
         if (restante <= 0 || remessa.parar) break;
-        n++; vistas++;
         let o;
         try { o = await pegarJson(`https://collectionapi.metmuseum.org/public/collection/v1/objects/${id}`, 15000); }
-        catch { await pausa(500); continue; }
-        await pausa(200);
+        catch (e) {
+          // 403/429/5xx = o Met está barrando o servidor. NÃO avança o marcador:
+          // a obra é tentada de novo depois, em vez de ser pulada para sempre.
+          if (!e.status || e.status === 403 || e.status === 429 || e.status >= 500)
+            return { estado: { dep, pos: pos + n }, esgotada: false, vistas,
+                     erro: `Met recusou (${e.status ? "HTTP " + e.status : "sem resposta"}) — ritmo reduzido` };
+          n++; vistas++; continue;                      // 404: objeto não existe mais
+        }
+        n++; vistas++;
+        await pausa(1000);                              // Met: 1 obra por segundo
         const classif = `${o?.classification || ""} ${o?.objectName || ""}`;
         const img = o?.primaryImage || o?.primaryImageSmall;
         if (!o?.isPublicDomain || !/painting/i.test(classif) || !img) continue;
@@ -635,7 +642,7 @@ async function executarRemessa(pool) {
             if (ok) { importadas++; inseridasFonte++; }
             return ok;
           };
-          try { res = await FONTES[f.fonte].passo(pool, estado, rem.autorizadas - importadas, gravar); errosSeguidos = 0; }
+          try { res = await FONTES[f.fonte].passo(pool, estado, rem.autorizadas - importadas, gravar); }
           catch (e) {
             remessa.ultimo_erro = `${f.fonte}: ${e.message}`;
             if (++errosSeguidos >= 3) { pular.add(f.fonte); break; }   // tenta de novo na próxima remessa
@@ -647,6 +654,12 @@ async function executarRemessa(pool) {
             [f.fonte, JSON.stringify(estado), res.esgotada, res.vistas, inseridasFonte]);
           inseridasFonte = 0;
           await pool.query(`UPDATE agente_remessas SET importadas=$2 WHERE id=$1`, [rem.id, importadas]);
+          if (res.erro) {                               // fonte barrando: espera, e após 3 vezes passa à próxima
+            remessa.ultimo_erro = `${f.fonte}: ${res.erro}`;
+            if (++errosSeguidos >= 3) { pular.add(f.fonte); break; }
+            await pausa(60000); continue;
+          }
+          errosSeguidos = 0;
           if (res.esgotada) break;
         }
       }
@@ -789,6 +802,17 @@ function montarAgenteAlas(app, pool) {
     if (typeof req.body?.ligado === "boolean") verif.ligado = req.body.ligado;
     if (req.body?.agora) verificarImagens(pool).catch(() => {});
     res.json({ ok: true, verif });
+  });
+
+  // recomeça a varredura de uma fonte do início (o que já está no banco é ignorado)
+  app.post("/api/agente/fonte/recomecar", async (req, res) => {
+    try {
+      const fonte = String(req.body?.fonte || "");
+      if (!ORDEM_FONTES.includes(fonte)) return res.status(400).json({ error: "fonte inválida" });
+      await pool.query(`UPDATE agente_fontes SET estado='{}'::jsonb, esgotada=FALSE WHERE fonte=$1`, [fonte]);
+      if (FONTES[fonte]?.cacheIds) FONTES[fonte].cacheIds = {};
+      res.json({ ok: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
   });
 
   app.post("/api/agente/fonte", async (req, res) => {
@@ -1112,7 +1136,8 @@ async function remessas(){
     var off=!f.ativa||(f.fonte==='europeana'&&!d.europeana_ok);
     return '<label class="fonte'+(off?' off':'')+(f.esgotada?' fim':'')+'"><input type="checkbox" '+(f.ativa?'checked':'')+
       ' onchange="fonte(\\''+f.fonte+'\\',this.checked)"> '+esc(f.nome)+' · '+f.importadas+' trazidas'+(f.esgotada?' · ✓ acervo percorrido':'')+
-      (f.fonte==='europeana'&&!d.europeana_ok?' · falta EUROPEANA_KEY':'')+'</label>'}).join('')+'</div>';
+      (f.fonte==='europeana'&&!d.europeana_ok?' · falta EUROPEANA_KEY':'')+
+      ' <a href="#" title="recomeçar a varredura deste museu do início" onclick="recomecar(\\''+f.fonte+'\\');return false">↺</a></label>'}).join('')+'</div>';
   box.innerHTML=h; return !!at && !at.pausada;
 }
 async function autorizar(){
@@ -1120,6 +1145,7 @@ async function autorizar(){
   if(!confirm('Autorizar a próxima remessa de até '+d.padrao.toLocaleString('pt-BR')+' obras novas?\\n\\nCusto estimado de API (Gemini): US$ 0,75 a 1,50.\\nO agente baixa, coloca cada pintura na ala sugerida e PUBLICA. Depois para e espera você.')) return;
   var r=await j('/api/agente/remessa/autorizar',{total:d.padrao}); if(r.error) return alert(r.error); remessas(); status();
 }
+async function recomecar(f){if(!confirm('Recomeçar a varredura de '+f+' do início? O que já está no banco é ignorado; nada é apagado.'))return; await j('/api/agente/fonte/recomecar',{fonte:f}); remessas()}
 async function verifLigar(v){await j('/api/agente/verificador',{ligado:v}); remessas()}
 async function verifAgora(){await j('/api/agente/verificador',{agora:true}); setTimeout(remessas,1500)}
 async function pausar(){await j('/api/agente/remessa/pausar',{}); remessas()}
