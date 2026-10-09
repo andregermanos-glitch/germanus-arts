@@ -49,6 +49,7 @@ const T = {
     noImg: "image non disponible",
     explore: "Explorer à partir de cette œuvre",
     moreAla: "Plus dans cette galerie",
+    showMore: (n, tot) => `Voir plus · ${n} sur ${tot.toLocaleString("fr-FR")}`,
     samePeriod: "+ Même période",
     loadMore: "Voir 18 de plus",
     add: "+ COLLECTION", saved: "✓ SAUVÉ",
@@ -95,6 +96,7 @@ const T = {
     noImg: "image unavailable",
     explore: "Explore from this artwork",
     moreAla: "More in this gallery",
+    showMore: (n, tot) => `Show more · ${n} of ${tot.toLocaleString("en-US")}`,
     samePeriod: "+ Same period",
     loadMore: "Show 18 more",
     add: "+ COLLECTION", saved: "✓ SAVED",
@@ -141,6 +143,7 @@ const T = {
     noImg: "imagen no disponible",
     explore: "Explorar desde esta obra",
     moreAla: "Más en esta galería",
+    showMore: (n, tot) => `Mostrar más · ${n} de ${tot.toLocaleString("es-ES")}`,
     samePeriod: "+ Mismo período",
     loadMore: "Ver 18 más",
     add: "+ COLECCIÓN", saved: "✓ GUARDADO",
@@ -187,6 +190,7 @@ const T = {
     noImg: "immagine non disponibile",
     explore: "Esplora da questa opera",
     moreAla: "Altro in questa galleria",
+    showMore: (n, tot) => `Mostra altro · ${n} di ${tot.toLocaleString("it-IT")}`,
     samePeriod: "+ Stesso periodo",
     loadMore: "Mostra altre 18",
     add: "+ COLLEZIONE", saved: "✓ SALVATO",
@@ -233,6 +237,7 @@ const T = {
     noImg: "imagem não disponível",
     explore: "Explorar a partir desta obra",
     moreAla: "Mais nesta galeria",
+    showMore: (n, tot) => `Mostrar mais · ${n} de ${tot.toLocaleString("pt-BR")}`,
     samePeriod: "+ Mesmo período",
     loadMore: "Ver mais 18",
     add: "+ COLEÇÃO", saved: "✓ SALVO",
@@ -279,6 +284,7 @@ const T = {
     noImg: "Bild nicht verfügbar",
     explore: "Von diesem Werk aus erkunden",
     moreAla: "Mehr in dieser Galerie",
+    showMore: (n, tot) => `Mehr anzeigen · ${n} von ${tot.toLocaleString("de-DE")}`,
     samePeriod: "+ Gleiche Epoche",
     loadMore: "18 weitere anzeigen",
     add: "+ SAMMLUNG", saved: "✓ GESPEICHERT",
@@ -388,7 +394,7 @@ async function searchArt(query, ala, fromYear, toYear, lang, limit = PAGE) {
   return { results, hasMore: results.length >= limit };
 }
 
-// ─── Galeria com rotação estável (cookie anônimo, sequência fixa por usuário) ──
+// ─── Galeria: sequência curada e fixa da ala, em blocos de 18 ──────────────
 async function fetchGaleria(alaId, page) {
   const res = await fetch(`/api/galeria/${encodeURIComponent(alaId)}?page=${page}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -514,35 +520,69 @@ function AlaBtn({ name, ala, active, onClick }) {
   );
 }
 
-// ─── Visor de zoom em alta resolução ──────────────────────────────────────────
-function ZoomViewer({ art, onClose, lang = "fr" }) {
+// ─── Visor de zoom em alta resolução (com setas: anterior / próxima) ─────────
+// onPrev/onNext opcionais: quando presentes, mostra setas, aceita ← → do teclado
+// e o gesto de deslizar no celular. pos/total exibem "37 / 1.240".
+function ZoomViewer({ art, onClose, onPrev, onNext, pos, total, neighbors = [], lang = "fr" }) {
   const [scale, setScale]   = useState(1);
-  const [pos, setPos]       = useState({ x: 0, y: 0 });
+  const [pos2, setPos]      = useState({ x: 0, y: 0 });
   const [drag, setDrag]     = useState(null);
   const [loaded, setLoaded] = useState(false);
+  const [touch, setTouch]   = useState(null);
+  const [baixa, setBaixa]   = useState(false); // HD falhou → usa a imagem normal
 
-  const src = art.imageHd || art.imageUrl;
+  const src = baixa ? art.imageUrl : (art.imageHd || art.imageUrl);
+
+  // nova obra → volta ao enquadramento inicial
+  useEffect(() => { setScale(1); setPos({ x: 0, y: 0 }); setLoaded(false); setBaixa(false); }, [art.id]);
+
+  // pré-carrega as vizinhas para a troca pelas setas ser imediata
+  useEffect(() => {
+    neighbors.forEach(n => { if (n) { const im = new Image(); im.src = n.imageHd || n.imageUrl; } });
+  }, [art.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const onKey = e => {
       if (e.key === "Escape") onClose();
       if (e.key === "+" || e.key === "=") setScale(s => Math.min(s + 0.4, 8));
       if (e.key === "-") setScale(s => Math.max(s - 0.4, 1));
+      if (e.key === "ArrowRight" && onNext) onNext();
+      if (e.key === "ArrowLeft"  && onPrev) onPrev();
     };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
-  }, [onClose]);
+  }, [onClose, onPrev, onNext]);
 
   const onWheel = e => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.3 : 0.3;
     setScale(s => Math.min(Math.max(s + delta, 1), 8));
   };
-  const onMouseDown = e => { if (scale <= 1) return; setDrag({ x: e.clientX - pos.x, y: e.clientY - pos.y }); };
+  const onMouseDown = e => { if (scale <= 1) return; setDrag({ x: e.clientX - pos2.x, y: e.clientY - pos2.y }); };
   const onMouseMove = e => { if (!drag) return; setPos({ x: e.clientX - drag.x, y: e.clientY - drag.y }); };
   const onMouseUp = () => setDrag(null);
   const reset = () => { setScale(1); setPos({ x: 0, y: 0 }); };
+
+  // deslizar no celular (só sem zoom, para não brigar com o arrasto)
+  const onTouchStart = e => { if (scale > 1) return; const t0 = e.touches[0]; setTouch({ x: t0.clientX, y: t0.clientY }); };
+  const onTouchEnd = e => {
+    if (!touch) return;
+    const t1 = e.changedTouches[0];
+    const dx = t1.clientX - touch.x, dy = t1.clientY - touch.y;
+    setTouch(null);
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0 && onNext) onNext();
+      if (dx > 0 && onPrev) onPrev();
+    }
+  };
+
+  const arrow = side => ({
+    position:"fixed", top:"50%", [side]:12, transform:"translateY(-50%)", zIndex:100000,
+    width:48, height:64, borderRadius:6, border:"1px solid rgba(255,255,255,0.3)",
+    background:"rgba(255,255,255,0.10)", color:"#fff", fontSize:28, lineHeight:"1",
+    cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
+  });
 
   return createPortal(
     <div onClick={onClose}
@@ -552,20 +592,36 @@ function ZoomViewer({ art, onClose, lang = "fr" }) {
         cursor: scale > 1 ? (drag ? "grabbing" : "grab") : "default" }}>
       <div onClick={e => e.stopPropagation()} onWheel={onWheel}
         onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
+        onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
         onDoubleClick={() => scale > 1 ? reset() : setScale(2.5)}
-        style={{ overflow:"hidden", width:"94vw", height:"90vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        style={{ overflow:"hidden", width:"94vw", height:"84vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
         {!loaded && (
           <div style={{ position:"absolute", color:"#888", fontFamily:"Verdana,sans-serif", fontSize:13 }}>
             <span style={{ display:"inline-block", animation:"spin 1s linear infinite" }}>⟳</span> carregando alta resolução…
           </div>
         )}
-        <img src={src} alt={art.title} draggable={false} onLoad={() => setLoaded(true)}
+        <img key={art.id} src={src} alt={art.title} draggable={false} onLoad={() => setLoaded(true)}
+          onError={() => { if (!baixa && art.imageHd && art.imageHd !== art.imageUrl) setBaixa(true); else setLoaded(true); }}
           style={{ width:"100%", height:"100%", objectFit:"contain", display:"block",
-            transform:`translate(${pos.x}px, ${pos.y}px) scale(${scale})`,
+            transform:`translate(${pos2.x}px, ${pos2.y}px) scale(${scale})`,
             transformOrigin:"center center",
             transition: drag ? "none" : "transform .15s ease-out",
             opacity: loaded ? 1 : 0, userSelect:"none" }}/>
       </div>
+
+      {/* legenda: título · artista · posição na sequência */}
+      <div onClick={e => e.stopPropagation()}
+        style={{ position:"fixed", left:0, right:0, bottom:14, textAlign:"center", zIndex:100000, padding:"0 70px", pointerEvents:"none" }}>
+        <p style={{ margin:0, color:"#eee", fontFamily:"'Cormorant Garamond',serif", fontSize:17, fontStyle:"italic",
+          whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{art.title}</p>
+        <p style={{ margin:"2px 0 0", color:"#999", fontFamily:"Verdana,sans-serif", fontSize:10.5, letterSpacing:.5 }}>
+          {[art.artist, art.date].filter(Boolean).join(" · ")}
+          {pos && total ? `  ·  ${pos.toLocaleString()} / ${total.toLocaleString()}` : ""}
+        </p>
+      </div>
+
+      {onPrev && <button aria-label="anterior" onClick={e => { e.stopPropagation(); onPrev(); }} style={arrow("left")}>‹</button>}
+      {onNext && <button aria-label="próxima"  onClick={e => { e.stopPropagation(); onNext(); }} style={arrow("right")}>›</button>}
 
       <div style={{ position:"fixed", top:16, right:16, display:"flex", gap:8, zIndex:100000 }}>
         <ZoomBtn onClick={e => { e.stopPropagation(); setScale(s => Math.min(s + 0.5, 8)); }}>+</ZoomBtn>
@@ -594,7 +650,7 @@ function ZoomBtn({ children, onClick, close }) {
 }
 
 // ─── Card de obra ─────────────────────────────────────────────────────────────
-function Card({ art, onAdd, onRemove, inCollection, onNavigate, t, lang="fr" }) {
+function Card({ art, onAdd, onRemove, inCollection, onNavigate, onZoom, t, lang="fr" }) {
   const [open,setOpen]    = useState(false);
   const [imgErr,setImgErr]= useState(false);
   const [imgOk,setImgOk]  = useState(false);
@@ -611,7 +667,7 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, t, lang="fr" }) 
         {art.imageUrl&&!imgErr?(
           <>
             {!imgOk&&<div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:"#f2f0eb" }}><div style={{ width:20, height:20, border:"2px solid #ddd", borderTopColor:"#888", borderRadius:"50%", animation:"spin 1s linear infinite" }}/></div>}
-            <img src={art.imageUrl} alt={art.title} className="artwork-card__img" onClick={()=>setZoom(true)} style={{ opacity:imgOk?1:0, transition:"opacity .3s", cursor:"zoom-in" }} onLoad={()=>setImgOk(true)} onError={()=>{ setImgErr(true); fetch("/api/obra/imagem-morta",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:art.id})}).catch(()=>{}); }}/>
+            <img src={art.imageUrl} alt={art.title} className="artwork-card__img" onClick={()=>onZoom?onZoom():setZoom(true)} loading="lazy" decoding="async" style={{ opacity:imgOk?1:0, transition:"opacity .3s", cursor:"zoom-in" }} onLoad={()=>setImgOk(true)} onError={()=>{ setImgErr(true); fetch("/api/obra/imagem-morta",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:art.id})}).catch(()=>{}); }}/>
           </>
         ):(
           <div className="artwork-card__placeholder" style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:12, textAlign:"center" }}>
@@ -801,6 +857,9 @@ export default function App() {
   const [lastTerm,setLastTerm] = useState("");
   const [mode,setMode]     = useState("idle"); // "ala" (rotação estável) | "search" (busca por texto)
   const [galPage,setGalPage] = useState(0);
+  const [galTotal,setGalTotal] = useState(0);
+  const [zoomIdx,setZoomIdx] = useState(-1); // obra aberta no visor ampliado (-1 = fechado)
+  const [loadingMore,setLoadingMore] = useState(false);
 
   useEffect(()=>{ setCol(loadCol()); },[]);
 
@@ -810,31 +869,47 @@ export default function App() {
   const add    = useCallback(art=>setCol(p=>{if(p.find(a=>a.id===art.id))return p;const n=[art,...p];saveCol(n);return n;}),[]);
   const remove = useCallback(id=>setCol(p=>{const n=p.filter(a=>a.id!==id);saveCol(n);return n;}),[]);
 
-  // Inicia uma ala ou, se já ativa, troca pelos PRÓXIMOS 18 (substitui, não acumula).
-  // Ao chegar ao fim da sequência, volta ao início (rotação estável).
+  // Abre uma ala no início da sua sequência curada (igual para todos).
+  // Clicar de novo na mesma ala volta ao começo.
   async function clickAla(ala) {
     if (phase==="searching") return;
-    if (activeAla?.id===ala.id && mode==="ala") {
-      const np = hasMore ? galPage + 1 : 0;
-      setPhase("searching");
-      try {
-        const { results: arts, hasMore: more } = await fetchGaleria(ala.id, np);
-        setGalPage(np); setRes(arts); setHasMore(more); setPhase("done");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      } catch(e){ setErr(e.message); setPhase("error"); }
-      return;
-    }
     setAla(ala);setRes([]);setErr("");setPhase("searching");setTab("buscar");setHasMore(false);
-    setMode("ala");setGalPage(0);setQuery("");
+    setMode("ala");setGalPage(0);setGalTotal(0);setZoomIdx(-1);setQuery("");
     try {
-      const { results: arts, hasMore: more } = await fetchGaleria(ala.id, 0);
-      setRes(arts);setHasMore(more);setPhase("done");
+      const { results: arts, hasMore: more, total } = await fetchGaleria(ala.id, 0);
+      setRes(arts);setHasMore(more);setGalTotal(total);setPhase("done");
     } catch(e){setErr(e.message);setPhase("error");}
+  }
+
+  // "Mostrar mais": acrescenta os próximos 18 da sequência, sem tirar os que já estão na tela.
+  // Devolve a lista nova (o visor ampliado usa isso para seguir adiante).
+  async function loadMore() {
+    if (!activeAla || mode!=="ala" || !hasMore || loadingMore) return null;
+    setLoadingMore(true);
+    try {
+      const np = galPage + 1;
+      const { results: arts, hasMore: more, total } = await fetchGaleria(activeAla.id, np);
+      const vistos = new Set(results.map(a=>a.id));
+      const nova = [...results, ...arts.filter(a=>!vistos.has(a.id))];
+      setRes(nova);
+      setGalPage(np); setHasMore(more); setGalTotal(total);
+      return nova;
+    } catch(e){ setErr(e.message); return null; }
+    finally { setLoadingMore(false); }
+  }
+
+  // Setas do visor ampliado: seguem a mesma sequência da grade; na última obra
+  // carregada, busca o próximo bloco de 18 e continua.
+  const zoomPrev = useCallback(() => setZoomIdx(i => Math.max(0, i - 1)), []);
+  async function zoomNext() {
+    if (zoomIdx < results.length - 1) { setZoomIdx(zoomIdx + 1); return; }
+    const nova = await loadMore();
+    if (nova && nova.length > zoomIdx + 1) setZoomIdx(zoomIdx + 1);
   }
 
   async function doSearch() {
     if (!query.trim()||phase==="searching") return;
-    setRes([]);setErr("");setPhase("searching");setHasMore(false);
+    setRes([]);setErr("");setPhase("searching");setHasMore(false);setZoomIdx(-1);
     setMode("search");clearSeen();setLastTerm(query);
     try {
       const { results: arts } = await searchArt(query, activeAla, fromYear, toYear, lang);
@@ -847,15 +922,14 @@ export default function App() {
     if (!term && alaId) {
       const ala = ALAS.find(a=>a.id===alaId);
       if (ala) {
-        if (activeAla?.id===alaId && mode==="ala") { clickAla(ala); }
-        else { setAla(null); setMode("idle"); setTimeout(()=>clickAla(ala),0); }
+        setZoomIdx(-1); clickAla(ala);
         return;
       }
     }
     const ala=alaId?ALAS.find(a=>a.id===alaId):activeAla;
     if(alaId)setAla(ALAS.find(a=>a.id===alaId)||null);
     if(term)setQuery(term);
-    setTab("buscar");setRes([]);setPhase("idle");setHasMore(false);
+    setTab("buscar");setRes([]);setPhase("idle");setHasMore(false);setZoomIdx(-1);
     setMode("search");clearSeen();
     const term2 = term||query;
     setLastTerm(term2);
@@ -936,8 +1010,33 @@ export default function App() {
 
             {results.length>0&&(
               <div className="artworks-grid" style={{ display:"grid",gap:18 }}>
-                {results.map(a=><Card key={a.id} art={a} lang={lang} onAdd={add} inCollection={ids.has(a.id)} onNavigate={navigate} t={t}/>)}
+                {results.map((a,i)=><Card key={a.id} art={a} lang={lang} onAdd={add} inCollection={ids.has(a.id)} onNavigate={navigate} onZoom={()=>setZoomIdx(i)} t={t}/>)}
               </div>
+            )}
+
+            {mode==="ala"&&phase==="done"&&hasMore&&(
+              <div style={{ display:"flex",justifyContent:"center",margin:"30px 0 8px" }}>
+                <button onClick={loadMore} disabled={loadingMore}
+                  style={{ background:"#fff",border:`1px solid ${activeAla?.color||"#0a0a0a"}`,borderRadius:2,
+                    color:"#0a0a0a",padding:"12px 30px",cursor:loadingMore?"default":"pointer",
+                    fontSize:10.5,fontFamily:"Verdana,sans-serif",letterSpacing:1.5,textTransform:"uppercase",
+                    transition:"all .18s",minWidth:240 }}
+                  onMouseEnter={e=>{ if(!loadingMore){ e.currentTarget.style.background=activeAla?.color||"#0a0a0a"; e.currentTarget.style.color="#fff"; } }}
+                  onMouseLeave={e=>{ e.currentTarget.style.background="#fff"; e.currentTarget.style.color="#0a0a0a"; }}>
+                  {loadingMore
+                    ? <span style={{ display:"inline-block",animation:"spin 1s linear infinite" }}>⟳</span>
+                    : t.showMore(results.length, galTotal)}
+                </button>
+              </div>
+            )}
+
+            {zoomIdx>=0&&results[zoomIdx]&&(
+              <ZoomViewer art={results[zoomIdx]} lang={lang}
+                onClose={()=>setZoomIdx(-1)}
+                onPrev={zoomIdx>0?zoomPrev:null}
+                onNext={(zoomIdx<results.length-1||(mode==="ala"&&hasMore))?zoomNext:null}
+                pos={zoomIdx+1} total={mode==="ala"?galTotal:results.length}
+                neighbors={[results[zoomIdx+1],results[zoomIdx-1]]}/>
             )}
 
                         {phase==="idle"&&results.length===0&&(
