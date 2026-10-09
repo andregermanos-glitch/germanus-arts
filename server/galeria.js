@@ -1,37 +1,35 @@
-// server/galeria.js — Rotação estável por usuário (cookie anônimo)
+// server/galeria.js — Sequência curada e fixa por ala, em blocos de 18
 // ─────────────────────────────────────────────────────────────────────────────
-// A ala tem UMA ordem fixa (ordem de entrada no banco: antigas primeiro, novas
-// no fim). Cada visitante recebe um ponto de partida próprio nessa ordem,
-// estável por 1 semana (cookie anônimo germ_uid). A cada clique/página ele
-// avança 18 na sequência, sem repetir, dando a volta na ordem fixa.
+// Cada ala tem UMA sequência, igual para todos os visitantes, do começo ao fim.
+// Ela é montada em blocos de 18 obras:
 //
-// - Sequência fixa  = ORDER BY indexed_at ASC, id ASC  → novas entram no fim
-// - Ponto de partida = hash(uid + ala) % N             → cada um começa em lugar diferente
-// - Página p        = posições [(offset + p*18) .. +18] com wrap
+//   1. QUALIDADE — cada obra recebe uma nota (ver notaSql abaixo). Os primeiros
+//      blocos reúnem as melhores; as de menor nota ficam juntas nos últimos.
+//   2. VARIEDADE — no máximo 2 obras do mesmo artista por bloco. Se, no fim da
+//      ala, sobrarem só obras de poucos artistas, o limite sobe aos poucos
+//      (3, 4…) apenas nesses blocos finais, para nada ficar de fora.
+//   3. RITMO — dentro do bloco, a melhor obra abre, e a ordem evita o mesmo
+//      artista lado a lado e alterna os séculos.
 //
-// COMO LIGAR (1 linha no server.js, ANTES do app.get("*")):
+// A sequência é recalculada a cada 10 min (ou quando o nº de obras da ala muda),
+// então movimentos feitos em /curadoria aparecem sem deploy. Para forçar:
+//     GET /api/galeria/:ala?page=0&refresh=1
+//
+// USO (frontend):  GET /api/galeria/:ala?page=0   (page 1, 2… = próximos 18)
+// Diagnóstico:     GET /api/galeria/:ala/sequencia  (ids, nota e bloco de cada obra)
+//
+// COMO LIGAR (já está no server.js, ANTES do app.get("*")):
 //     require("./galeria").montarGaleria(app, pool);
-//
-// USO (frontend):  GET /api/galeria/:ala?page=0   (page 1, 2, ... a cada clique)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PAGE = 18;
-const SEMANA = 7 * 24 * 3600; // segundos
+const MAX_POR_ARTISTA = 2;
+const TTL_MS = 10 * 60 * 1000;
 
-function lerCookie(req, nome) {
-  const raw = req.headers.cookie || "";
-  for (const par of raw.split(";")) {
-    const [k, v] = par.trim().split("=");
-    if (k === nome) return v;
-  }
-  return null;
-}
+const cache = new Map(); // ala -> { seq: [{id, nota, bloco}], n, em }
+let colunas = null;      // colunas existentes em artworks (detectadas uma vez)
 
-function novoUid() {
-  return Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
-}
-
-// Hash determinístico (FNV-1a) → mesmo uid+ala sempre dá o mesmo offset
+// Hash determinístico (FNV-1a) — desempate estável, igual para todos
 function hashStr(s) {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -57,63 +55,165 @@ function mapRow(r) {
   };
 }
 
+const FILTRO = `ala_id = $1 AND image_url IS NOT NULL AND image_url <> ''
+                AND COALESCE(status,'publicada') = 'publicada'`;
+
+async function lerColunas(pool) {
+  if (colunas) return colunas;
+  const r = await pool.query(
+    `SELECT column_name FROM information_schema.columns WHERE table_name = 'artworks'`);
+  colunas = new Set(r.rows.map(x => x.column_name));
+  return colunas;
+}
+
+// ─── A nota de qualidade ─────────────────────────────────────────────────────
+// Usa só o que o banco já sabe. Cada sinal entra apenas se a coluna existir.
+function notaSql(c) {
+  const p = [];
+  // Obras escolhidas à mão (curadoria fixa) — o núcleo do acervo
+  p.push(`CASE WHEN source = 'curadoria' THEN 40 ELSE 0 END`);
+  // Obra que você já revisou/moveu em /curadoria
+  if (c.has("curado")) p.push(`CASE WHEN curado THEN 12 ELSE 0 END`);
+  // Obra com verbete na Wikipédia = obra reconhecida (3 pts por idioma, até 18)
+  const wikis = ["wiki_en", "wiki_fr", "wiki_es", "wiki_it", "wiki_pt", "wiki_de"].filter(w => c.has(w));
+  if (wikis.length) p.push(`LEAST(18, 3 * (${wikis.map(w => `(CASE WHEN COALESCE(${w},'') <> '' THEN 1 ELSE 0 END)`).join(" + ")}))`);
+  // Resolução medida (lado menor)
+  if (c.has("img_w") && c.has("img_h")) p.push(`CASE
+      WHEN img_w IS NULL OR img_h IS NULL OR img_w = 0 THEN 0
+      WHEN LEAST(img_w, img_h) >= 2400 THEN 14
+      WHEN LEAST(img_w, img_h) >= 1500 THEN 10
+      WHEN LEAST(img_w, img_h) >= 900  THEN 5
+      WHEN LEAST(img_w, img_h) <  500  THEN -12
+      ELSE 0 END`);
+  if (c.has("hd_url")) p.push(`CASE WHEN COALESCE(hd_url,'') <> '' THEN 3 ELSE 0 END`);
+  // Ficha completa
+  p.push(`CASE WHEN COALESCE(description,'') <> '' THEN 3 ELSE 0 END`);
+  p.push(`CASE WHEN COALESCE(date,'') <> '' THEN 2 ELSE 0 END`);
+  p.push(`CASE WHEN COALESCE(museum,'') <> '' THEN 2 ELSE 0 END`);
+  // Autoria desconhecida pesa um pouco
+  p.push(`CASE WHEN COALESCE(artist,'') = '' OR artist ~* '^(unknown|anonymous|anônimo|anonimo|anonyme|desconhecido)' THEN -6 ELSE 0 END`);
+  // Certeza do agente ao pôr a obra nesta ala
+  if (c.has("ala_confianca")) p.push(`CASE WHEN ala_confianca IS NULL THEN 0 ELSE ROUND(((ala_confianca - 0.6) * 15)::numeric, 1) END`);
+  // Imagem que já falhou para algum visitante
+  const falhas = ["falhas_imagem", "img_falhas"].filter(f => c.has(f));
+  if (falhas.length) p.push(`CASE WHEN (${falhas.map(f => `COALESCE(${f},0)`).join(" + ")}) > 0 THEN -15 ELSE 0 END`);
+  return p.join(" + ");
+}
+
+// Chave de artista: "Claude Monet (1840–1926)" e "claude monet" contam como o mesmo
+function chaveArtista(a, id) {
+  const k = (a || "").split("(")[0].normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  if (!k || /^(unknown|anonymous|anonimo|anonyme|desconhecido)/.test(k)) return "anon:" + id; // anônimos não se agrupam
+  return k;
+}
+
+function seculo(date) {
+  const m = String(date || "").match(/\d{3,4}/);
+  return m ? Math.floor(parseInt(m[0], 10) / 100) : -1;
+}
+
+// Dentro do bloco: a melhor abre; depois, evita artista repetido lado a lado
+// e prefere trocar de século a cada passo.
+function ritmo(bloco) {
+  const resto = [...bloco];
+  const out = [resto.shift()];
+  while (resto.length) {
+    const ant = out[out.length - 1];
+    let idx = resto.findIndex(o => o.art !== ant.art && o.sec !== ant.sec);
+    if (idx < 0) idx = resto.findIndex(o => o.art !== ant.art);
+    if (idx < 0) idx = 0;
+    out.push(resto.splice(idx, 1)[0]);
+  }
+  return out;
+}
+
+function montarSequencia(rows) {
+  // 1. ordem de qualidade (desempate estável e "embaralhado" pelo id)
+  const obras = rows.map(r => ({
+    id: r.id, nota: Number(r.nota) || 0,
+    art: chaveArtista(r.artist, r.id), sec: seculo(r.date), h: hashStr(String(r.id)),
+  })).sort((a, b) => b.nota - a.nota || a.h - b.h);
+
+  // 2. blocos de 18 com no máximo 2 por artista
+  const seq = [];
+  let restantes = obras;
+  let bloco = 0;
+  while (restantes.length) {
+    const tam = Math.min(PAGE, restantes.length);
+    const usados = new Set();
+    let escolhidas = [];
+    for (let limite = MAX_POR_ARTISTA; escolhidas.length < tam; limite++) {
+      const cont = new Map();
+      for (const o of escolhidas) cont.set(o.art, (cont.get(o.art) || 0) + 1);
+      for (let i = 0; i < restantes.length && escolhidas.length < tam; i++) {
+        const o = restantes[i];
+        if (usados.has(o.id)) continue;
+        const n = cont.get(o.art) || 0;
+        if (n >= limite) continue;
+        cont.set(o.art, n + 1); usados.add(o.id); escolhidas.push(o);
+      }
+    }
+    escolhidas.sort((a, b) => b.nota - a.nota || a.h - b.h);
+    for (const o of ritmo(escolhidas)) seq.push({ id: o.id, nota: o.nota, bloco });
+    restantes = restantes.filter(o => !usados.has(o.id));
+    bloco++;
+  }
+  return seq;
+}
+
+async function sequenciaDaAla(pool, ala, forcar) {
+  const ct = await pool.query(`SELECT COUNT(*) AS n FROM artworks WHERE ${FILTRO}`, [ala]);
+  const n = parseInt(ct.rows[0].n, 10);
+  const c = cache.get(ala);
+  if (!forcar && c && c.n === n && Date.now() - c.em < TTL_MS) return c.seq;
+
+  const cols = await lerColunas(pool);
+  const r = await pool.query(
+    `SELECT id, artist, date, (${notaSql(cols)}) AS nota FROM artworks WHERE ${FILTRO}`, [ala]);
+  const seq = montarSequencia(r.rows);
+  cache.set(ala, { seq, n: seq.length, em: Date.now() });
+  return seq;
+}
+
 function montarGaleria(app, pool) {
   app.get("/api/galeria/:ala", async (req, res) => {
     try {
       const ala  = req.params.ala;
       const page = Math.max(0, parseInt(req.query.page || "0", 10) || 0);
+      const seq  = await sequenciaDaAla(pool, ala, req.query.refresh === "1");
+      const N = seq.length;
+      const fatia = seq.slice(page * PAGE, page * PAGE + PAGE);
+      if (!fatia.length) return res.json({ results: [], total: N, page, hasMore: false });
 
-      // uid anônimo estável por 1 semana
-      let uid = lerCookie(req, "germ_uid");
-      if (!uid) {
-        uid = novoUid();
-        res.setHeader("Set-Cookie", `germ_uid=${uid}; Max-Age=${SEMANA}; Path=/; SameSite=Lax`);
-      }
+      const ids = fatia.map(o => o.id);
+      const r = await pool.query(`SELECT * FROM artworks WHERE id = ANY($1::text[])`, [ids]);
+      const porId = new Map(r.rows.map(row => [row.id, row]));
+      const results = ids.map(id => porId.get(id)).filter(Boolean).map(mapRow);
 
-      // total de obras publicadas com imagem na ala (a sequência fixa)
-      const ct = await pool.query(
-        `SELECT COUNT(*) AS n FROM artworks
-          WHERE ala_id = $1 AND image_url IS NOT NULL AND image_url <> ''
-            AND COALESCE(status,'publicada') = 'publicada'`,
-        [ala]
-      );
-      const N = parseInt(ct.rows[0].n, 10);
-      if (N === 0) return res.json({ results: [], total: 0, page, hasMore: false, uid });
-
-      // ponto de partida do usuário (estável) e posições desta página (com wrap)
-      const offset = hashStr(uid + "|" + ala) % N;
-      const count  = Math.min(PAGE, N);
-      const base   = offset + page * PAGE;
-      const positions = [];
-      for (let i = 0; i < count; i++) positions.push((base + i) % N);
-
-      const r = await pool.query(
-        `WITH ordenado AS (
-           SELECT *, (ROW_NUMBER() OVER (ORDER BY indexed_at ASC, id ASC) - 1) AS pos
-           FROM artworks
-           WHERE ala_id = $1 AND image_url IS NOT NULL AND image_url <> ''
-             AND COALESCE(status,'publicada') = 'publicada'
-         )
-         SELECT * FROM ordenado WHERE pos = ANY($2::bigint[])`,
-        [ala, positions]
-      );
-
-      // reordena para bater exatamente com a sequência pedida
-      const byPos = new Map(r.rows.map(row => [Number(row.pos), row]));
-      const results = positions.map(p => byPos.get(p)).filter(Boolean).map(mapRow);
-
-      res.json({
-        results,
-        total: N,
-        page,
-        hasMore: (page + 1) * PAGE < N, // ainda há mais antes de dar a volta completa
-      });
+      res.json({ results, total: N, page, hasMore: (page + 1) * PAGE < N });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
   });
 
-  console.log("🔁 Galeria (rotação estável) montada — /api/galeria/:ala");
+  // Diagnóstico: a sequência inteira com nota e bloco (para conferir a curadoria)
+  app.get("/api/galeria/:ala/sequencia", async (req, res) => {
+    try {
+      const ala = req.params.ala;
+      const seq = await sequenciaDaAla(pool, ala, req.query.refresh === "1");
+      const r = await pool.query(`SELECT id, title, artist, date FROM artworks WHERE id = ANY($1::text[])`, [seq.map(o => o.id)]);
+      const porId = new Map(r.rows.map(row => [row.id, row]));
+      res.json({ ala, total: seq.length, sequencia: seq.map((o, i) => ({
+        pos: i + 1, bloco: o.bloco + 1, nota: o.nota, id: o.id,
+        titulo: porId.get(o.id)?.title, artista: porId.get(o.id)?.artist, data: porId.get(o.id)?.date,
+      })) });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  console.log("🖼  Galeria (sequência curada em blocos de 18) montada — /api/galeria/:ala");
 }
 
-module.exports = { montarGaleria };
+module.exports = { montarGaleria, montarSequencia };
