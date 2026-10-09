@@ -5,11 +5,16 @@
 //
 //   1. QUALIDADE — cada obra recebe uma nota (ver notaSql abaixo). Os primeiros
 //      blocos reúnem as melhores; as de menor nota ficam juntas nos últimos.
-//   2. VARIEDADE — no máximo 2 obras do mesmo artista por bloco. Se, no fim da
-//      ala, sobrarem só obras de poucos artistas, o limite sobe aos poucos
-//      (3, 4…) apenas nesses blocos finais, para nada ficar de fora.
-//   3. RITMO — dentro do bloco, a melhor obra abre, e a ordem evita o mesmo
-//      artista lado a lado e alterna os séculos.
+//   2. VARIEDADE DE ARTISTAS — no máximo 2 obras do mesmo artista por bloco.
+//   3. VARIEDADE DE MUSEUS — cada museu tem um teto por bloco proporcional ao
+//      seu peso na ala (mínimo 3): um museu com 10% da ala cabe 3 vezes em 18;
+//      um com 50% cabe 9. Assim o bloco mistura acervos sem empurrar todas as
+//      obras do museu dominante para o fim da ala. Quando dá, a escolha ainda
+//      prefere a obra que traz um museu novo ao bloco.
+//      Se, no fim da ala, faltar variedade, os limites sobem aos poucos só
+//      nesses blocos finais (primeiro o de museu, depois o de artista).
+//   4. RITMO — dentro do bloco, a melhor obra abre, e a ordem evita o mesmo
+//      artista ou o mesmo museu lado a lado e alterna os séculos.
 //
 // A sequência é recalculada a cada 10 min (ou quando o nº de obras da ala muda),
 // então movimentos feitos em /curadoria aparecem sem deploy. Para forçar:
@@ -108,19 +113,31 @@ function chaveArtista(a, id) {
   return k;
 }
 
+// Chave de museu: "Rijksmuseum, Amsterdam, Países Baixos" → "rijksmuseum".
+// Sem museu na ficha, usa a fonte (ex.: commons, met, aic).
+function chaveMuseu(museum, source) {
+  const base = String(museum || "").split(/[,(;–—-]/)[0];
+  const k = base.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+    .replace(/^(the|le|la|il|el|o|museo|museu|musee|museum)\s+/, "")
+    .replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  if (k) return "m:" + k;
+  return "f:" + String(source || "?").toLowerCase();
+}
+
 function seculo(date) {
   const m = String(date || "").match(/\d{3,4}/);
   return m ? Math.floor(parseInt(m[0], 10) / 100) : -1;
 }
 
-// Dentro do bloco: a melhor abre; depois, evita artista repetido lado a lado
-// e prefere trocar de século a cada passo.
+// Dentro do bloco: a melhor abre; depois, evita artista e museu repetidos lado
+// a lado e prefere trocar de século a cada passo.
 function ritmo(bloco) {
   const resto = [...bloco];
   const out = [resto.shift()];
   while (resto.length) {
     const ant = out[out.length - 1];
-    let idx = resto.findIndex(o => o.art !== ant.art && o.sec !== ant.sec);
+    let idx = resto.findIndex(o => o.art !== ant.art && o.mus !== ant.mus && o.sec !== ant.sec);
+    if (idx < 0) idx = resto.findIndex(o => o.art !== ant.art && o.mus !== ant.mus);
     if (idx < 0) idx = resto.findIndex(o => o.art !== ant.art);
     if (idx < 0) idx = 0;
     out.push(resto.splice(idx, 1)[0]);
@@ -132,28 +149,53 @@ function montarSequencia(rows) {
   // 1. ordem de qualidade (desempate estável e "embaralhado" pelo id)
   const obras = rows.map(r => ({
     id: r.id, nota: Number(r.nota) || 0,
-    art: chaveArtista(r.artist, r.id), sec: seculo(r.date), h: hashStr(String(r.id)),
+    art: chaveArtista(r.artist, r.id), mus: chaveMuseu(r.museum, r.source),
+    sec: seculo(r.date), h: hashStr(String(r.id)),
   })).sort((a, b) => b.nota - a.nota || a.h - b.h);
 
-  // 2. blocos de 18 com no máximo 2 por artista
+  // teto por museu, proporcional ao peso do museu na ala (mínimo 3 por bloco)
+  const peso = new Map();
+  for (const o of obras) peso.set(o.mus, (peso.get(o.mus) || 0) + 1);
+  const tetoMuseu = m => Math.max(3, Math.ceil(PAGE * (peso.get(m) || 0) / obras.length));
+
+  // 2. blocos de 18
   const seq = [];
   let restantes = obras;
   let bloco = 0;
   while (restantes.length) {
     const tam = Math.min(PAGE, restantes.length);
     const usados = new Set();
-    let escolhidas = [];
-    for (let limite = MAX_POR_ARTISTA; escolhidas.length < tam; limite++) {
-      const cont = new Map();
-      for (const o of escolhidas) cont.set(o.art, (cont.get(o.art) || 0) + 1);
-      for (let i = 0; i < restantes.length && escolhidas.length < tam; i++) {
-        const o = restantes[i];
-        if (usados.has(o.id)) continue;
-        const n = cont.get(o.art) || 0;
-        if (n >= limite) continue;
-        cont.set(o.art, n + 1); usados.add(o.id); escolhidas.push(o);
+    const escolhidas = [];
+    const cArt = new Map(), cMus = new Map();
+    const pega = o => {
+      cArt.set(o.art, (cArt.get(o.art) || 0) + 1);
+      cMus.set(o.mus, (cMus.get(o.mus) || 0) + 1);
+      usados.add(o.id); escolhidas.push(o);
+    };
+    const cabe = (o, folgaArt, folgaMus) =>
+      !usados.has(o.id) &&
+      (cArt.get(o.art) || 0) < MAX_POR_ARTISTA + folgaArt &&
+      (cMus.get(o.mus) || 0) < tetoMuseu(o.mus) + folgaMus;
+
+    // a) entre as melhores ainda disponíveis, prefere a que traz um museu novo
+    //    (janela curta, para a variedade não atropelar a qualidade)
+    const JANELA = 6;
+    while (escolhidas.length < tam) {
+      const cand = [];
+      for (let i = 0; i < restantes.length && cand.length < JANELA; i++)
+        if (cabe(restantes[i], 0, 0)) cand.push(restantes[i]);
+      if (!cand.length) break;
+      pega(cand.find(o => !cMus.has(o.mus)) || cand[0]);
+    }
+    // b) faltou variedade (fim da ala): afrouxa primeiro museu, depois artista
+    for (let folga = 1; escolhidas.length < tam; folga++) {
+      for (const [fa, fm] of [[0, folga], [folga, folga]]) {
+        for (let i = 0; i < restantes.length && escolhidas.length < tam; i++)
+          if (cabe(restantes[i], fa, fm)) pega(restantes[i]);
+        if (escolhidas.length >= tam) break;
       }
     }
+
     escolhidas.sort((a, b) => b.nota - a.nota || a.h - b.h);
     for (const o of ritmo(escolhidas)) seq.push({ id: o.id, nota: o.nota, bloco });
     restantes = restantes.filter(o => !usados.has(o.id));
@@ -170,7 +212,7 @@ async function sequenciaDaAla(pool, ala, forcar) {
 
   const cols = await lerColunas(pool);
   const r = await pool.query(
-    `SELECT id, artist, date, (${notaSql(cols)}) AS nota FROM artworks WHERE ${FILTRO}`, [ala]);
+    `SELECT id, artist, date, museum, source, (${notaSql(cols)}) AS nota FROM artworks WHERE ${FILTRO}`, [ala]);
   const seq = montarSequencia(r.rows);
   cache.set(ala, { seq, n: seq.length, em: Date.now() });
   return seq;
@@ -202,11 +244,12 @@ function montarGaleria(app, pool) {
     try {
       const ala = req.params.ala;
       const seq = await sequenciaDaAla(pool, ala, req.query.refresh === "1");
-      const r = await pool.query(`SELECT id, title, artist, date FROM artworks WHERE id = ANY($1::text[])`, [seq.map(o => o.id)]);
+      const r = await pool.query(`SELECT id, title, artist, date, museum FROM artworks WHERE id = ANY($1::text[])`, [seq.map(o => o.id)]);
       const porId = new Map(r.rows.map(row => [row.id, row]));
       res.json({ ala, total: seq.length, sequencia: seq.map((o, i) => ({
         pos: i + 1, bloco: o.bloco + 1, nota: o.nota, id: o.id,
         titulo: porId.get(o.id)?.title, artista: porId.get(o.id)?.artist, data: porId.get(o.id)?.date,
+        museu: porId.get(o.id)?.museum,
       })) });
     } catch (e) {
       res.status(500).json({ error: e.message });
