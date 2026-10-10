@@ -16,12 +16,14 @@ const { enriquecerObra } = require("./enriquecedor");
 function montarTriagem(app, pool) {
 
   // salvar correções de metadados (título/artista/data)
+  // ficha_manual=TRUE: o agente de fichas (/fichas) não mexe mais nesta obra
+  pool.query(`ALTER TABLE artworks ADD COLUMN IF NOT EXISTS ficha_manual BOOLEAN DEFAULT FALSE`).catch(() => {});
   app.post("/api/triagem/salvar", async (req, res) => {
     try {
       const { id, title, artist, date } = req.body || {};
       if (!id) return res.status(400).json({ error: "id obrigatório" });
       await pool.query(
-        `UPDATE artworks SET title=$2, artist=$3, date=$4 WHERE id=$1`,
+        `UPDATE artworks SET title=$2, artist=$3, date=$4, ficha_manual=TRUE WHERE id=$1`,
         [id, (title || "").trim(), (artist || "").trim(), (date || "").trim()]
       );
       res.json({ ok: true });
