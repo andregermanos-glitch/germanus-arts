@@ -511,7 +511,7 @@ export function LangSwitcher({ lang, setLang }) {
 const ROT_ACERVOS = { fr:"Collections", en:"Collections", es:"Acervos", pt:"Acervos", it:"Collezioni", de:"Sammlungen" };
 function AcervosTicker({ lang = "fr" }) {
   const [lista, setLista] = useState([]);
-  const [i, setI]         = useState(0);       // primeiro nome visível
+  const [i, setI]         = useState(0);       // contador sem fim: o nome visível é lista[i % tamanho]
   const [subindo, setSubindo] = useState(false);
   const LINHA = 17, VISIVEIS = 3, PAUSA = 2600, SUBIDA = 700;
   useEffect(() => {
@@ -522,15 +522,18 @@ function AcervosTicker({ lang = "fr" }) {
     if (lista.length <= VISIVEIS) return;
     const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const t = setInterval(() => {
-      if (quieto) { setI(x => (x + 1) % lista.length); return; }
+      if (quieto) { setI(x => x + 1); return; }
       setSubindo(true);
-      setTimeout(() => { setSubindo(false); setI(x => (x + 1) % lista.length); }, SUBIDA);
+      setTimeout(() => { setSubindo(false); setI(x => x + 1); }, SUBIDA);
     }, PAUSA + SUBIDA);
     return () => clearInterval(t);
   }, [lista.length]);
   if (!lista.length) return null;
   const n = Math.min(lista.length, VISIVEIS + 1);
-  const nomes = Array.from({ length: n }, (_, k) => lista[(i + k) % lista.length]);
+  // Cor alterna azul / vermelho do logo. Vai pelo contador (não pela posição na tela),
+  // então cada nome mantém sua cor enquanto sobe, e a alternância não quebra na volta da lista.
+  const COR = ["#1545c7", "#d41515"];
+  const nomes = Array.from({ length: n }, (_, k) => ({ nome: lista[(i + k) % lista.length], cor: COR[(i + k) % 2] }));
   const fade = "linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%)";
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2 }}>
@@ -541,9 +544,9 @@ function AcervosTicker({ lang = "fr" }) {
                     WebkitMaskImage: fade, maskImage: fade }}>
         <div aria-hidden="true" style={{ transform: `translateY(${subindo ? -LINHA : 0}px)`,
                       transition: subindo ? `transform ${SUBIDA}ms ease-in-out` : "none" }}>
-          {nomes.map((nome, k) => (
+          {nomes.map(({ nome, cor }, k) => (
             <div key={`${i}-${k}`} style={{ height:LINHA, lineHeight:`${LINHA}px`, textAlign:"right", whiteSpace:"nowrap", maxWidth:"52vw", overflow:"hidden", textOverflow:"ellipsis",
-                    fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:13.5, color:"#8a8478" }}>
+                    fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:13.5, color:cor }}>
               {nome}
             </div>
           ))}
