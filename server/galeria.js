@@ -256,6 +256,48 @@ function montarGaleria(app, pool) {
     }
   });
 
+  // Instituições e portais do acervo (para a lista que rola no rodapé do site).
+  // Conta só obras visíveis no site; o nome vem do campo "museum", antes da vírgula.
+  // Cache de 1 h.
+  let instCache = { em: 0, lista: null };
+  app.get("/api/acervo/instituicoes", async (req, res) => {
+    try {
+      if (!instCache.lista || Date.now() - instCache.em > 3600 * 1000) {
+        const r = await pool.query(`
+          SELECT trim(regexp_replace(museum, '\\s*[,(;—–].*$', '')) AS nome, source, COUNT(*)::int AS n
+            FROM artworks
+           WHERE image_url IS NOT NULL AND image_url <> ''
+             AND COALESCE(status,'publicada') = 'publicada'
+             AND ala_id IS NOT NULL AND ala_id <> 'entrada'
+           GROUP BY 1, 2`);
+        const PORTAIS = { europeana: "Europeana", wikimedia_commons: "Wikimedia Commons" };
+        const porChave = new Map();
+        const portais = new Map();
+        for (const { nome, source, n } of r.rows) {
+          if (PORTAIS[source]) portais.set(PORTAIS[source], (portais.get(PORTAIS[source]) || 0) + n);
+          if (!nome || /wikimedia|europeana/i.test(nome)) continue;
+          const chave = nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
+            .replace(/^the\s+/, "").replace(/[^a-z0-9]+/g, " ").trim();
+          if (!chave) continue;
+          const g = porChave.get(chave) || { total: 0, nomes: {} };
+          g.total += n;
+          g.nomes[nome] = (g.nomes[nome] || 0) + n;
+          porChave.set(chave, g);
+        }
+        const museus = [...porChave.values()]
+          .filter(g => g.total >= 5)                       // ignora instituições com 1–4 obras
+          .map(g => ({ nome: Object.entries(g.nomes).sort((a, b) => b[1] - a[1])[0][0], obras: g.total, tipo: "museu" }))
+          .sort((a, b) => b.obras - a.obras);
+        const lista = [...museus,
+          ...[...portais].filter(([, n]) => n > 0).map(([nome, obras]) => ({ nome, obras, tipo: "portal" }))];
+        instCache = { em: Date.now(), lista };
+      }
+      res.json({ instituicoes: instCache.lista });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   console.log("🖼  Galeria (sequência curada em blocos de 18) montada — /api/galeria/:ala");
 }
 
