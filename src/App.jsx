@@ -345,12 +345,47 @@ const ALAS = [
 ];
 
 // ─── Lua ──────────────────────────────────────────────────────────────────────
+// O dia do calendário lunar começa em 1 no instante da lua nova verdadeira (calculada
+// pelo algoritmo de Meeus, com erro de poucos minutos). A fase é a mais próxima da
+// fração do ciclo, para que "Lua cheia" fique centrada e não comece dias antes.
+const LUA = {
+  fr: { rotulo:"Calendrier lunaire", dia:"jour",   fases:["Nouvelle lune","Premier croissant","Premier quartier","Gibbeuse croissante","Pleine lune","Gibbeuse décroissante","Dernier quartier","Dernier croissant"] },
+  en: { rotulo:"Lunar calendar",     dia:"day",    fases:["New moon","Waxing crescent","First quarter","Waxing gibbous","Full moon","Waning gibbous","Last quarter","Waning crescent"] },
+  es: { rotulo:"Calendario lunar",   dia:"día",    fases:["Luna nueva","Luna creciente","Cuarto creciente","Gibosa creciente","Luna llena","Gibosa menguante","Cuarto menguante","Luna menguante"] },
+  pt: { rotulo:"Calendário lunar",   dia:"dia",    fases:["Lua nova","Lua crescente","Quarto crescente","Crescente gibosa","Lua cheia","Minguante gibosa","Quarto minguante","Lua minguante"] },
+  it: { rotulo:"Calendario lunare",  dia:"giorno", fases:["Luna nuova","Luna crescente","Primo quarto","Gibbosa crescente","Luna piena","Gibbosa calante","Ultimo quarto","Luna calante"] },
+  de: { rotulo:"Mondkalender",       dia:"Tag",    fases:["Neumond","Zunehmende Sichel","Erstes Viertel","Zunehmender Mond","Vollmond","Abnehmender Mond","Letztes Viertel","Abnehmende Sichel"] },
+};
+// Lua nova verdadeira (Meeus, Astronomical Algorithms, cap. 49) — erro de poucos minutos
+function luaNovaJDE(k) {
+  const T = k / 1236.85, r = Math.PI / 180;
+  let jde = 2451550.09766 + 29.530588861 * k + 0.00015437 * T * T - 0.00000015 * T ** 3 + 0.00000000073 * T ** 4;
+  const E = 1 - 0.002516 * T - 0.0000074 * T * T;
+  const M  = (2.5534 + 29.10535670 * k - 0.0000014 * T * T) * r;
+  const Mp = (201.5643 + 385.81693528 * k + 0.0107582 * T * T + 0.00001238 * T ** 3) * r;
+  const F  = (160.7108 + 390.67050284 * k - 0.0016118 * T * T - 0.00000227 * T ** 3) * r;
+  const Om = (124.7746 - 1.56375588 * k + 0.0020672 * T * T) * r;
+  jde += -0.40720 * Math.sin(Mp) + 0.17241 * E * Math.sin(M) + 0.01608 * Math.sin(2 * Mp)
+       + 0.01039 * Math.sin(2 * F) + 0.00739 * E * Math.sin(Mp - M) - 0.00514 * E * Math.sin(Mp + M)
+       + 0.00208 * E * E * Math.sin(2 * M) - 0.00111 * Math.sin(Mp - 2 * F) - 0.00057 * Math.sin(Mp + 2 * F)
+       + 0.00056 * E * Math.sin(2 * Mp + M) - 0.00042 * Math.sin(3 * Mp) + 0.00042 * E * Math.sin(M + 2 * F)
+       + 0.00038 * E * Math.sin(M - 2 * F) - 0.00024 * E * Math.sin(2 * Mp - M) - 0.00017 * Math.sin(Om)
+       - 0.00007 * Math.sin(Mp + 2 * M);
+  return jde;
+}
+const jdParaMs = jd => (jd - 2440587.5) * 86400000;   // TT ≈ UTC (diferença ~1 min)
+function ultimaLuaNova(agora) {
+  let k = Math.floor((agora / 86400000 + 2440587.5 - 2451550.09766) / 29.530588861) + 1;
+  let t; while ((t = jdParaMs(luaNovaJDE(k))) > agora) k--;
+  return { inicio: t, fim: jdParaMs(luaNovaJDE(k + 1)) };
+}
 function getMoonPhase() {
-  const now=new Date(), ref=new Date("2000-01-06T18:14:00Z"), cycle=29.53058867;
-  const age=(((now-ref)/86400000)%cycle+cycle)%cycle;
-  const idx=Math.floor((age/cycle)*8)%8;
-  const p=["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"];
-  return { emoji:p[idx], age:Math.round(age) };
+  const agora = Date.now();
+  const { inicio, fim } = ultimaLuaNova(agora);
+  const frac = (agora - inicio) / (fim - inicio);           // 0 = lua nova, 0,5 = lua cheia
+  const idx  = Math.round(frac * 8) % 8;
+  const p = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"];
+  return { emoji:p[idx], idx, dia: Math.floor((agora - inicio) / 86400000) + 1 };
 }
 
 // ─── Temperatura ─────────────────────────────────────────────────────────────
@@ -472,8 +507,54 @@ export function LangSwitcher({ lang, setLang }) {
   );
 }
 
+// ─── Instituições do acervo — 3 nomes visíveis, sobem um a um, em loop ───────
+const ROT_ACERVOS = { fr:"Collections", en:"Collections", es:"Acervos", pt:"Acervos", it:"Collezioni", de:"Sammlungen" };
+function AcervosTicker({ lang = "fr" }) {
+  const [lista, setLista] = useState([]);
+  const [i, setI]         = useState(0);       // primeiro nome visível
+  const [subindo, setSubindo] = useState(false);
+  const LINHA = 20, VISIVEIS = 3, PAUSA = 2600, SUBIDA = 700;
+  useEffect(() => {
+    fetch("/api/acervo/instituicoes").then(r => r.ok ? r.json() : null)
+      .then(d => setLista((d?.instituicoes || []).map(x => x.nome))).catch(() => {});
+  }, []);
+  useEffect(() => {
+    if (lista.length <= VISIVEIS) return;
+    const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const t = setInterval(() => {
+      if (quieto) { setI(x => (x + 1) % lista.length); return; }
+      setSubindo(true);
+      setTimeout(() => { setSubindo(false); setI(x => (x + 1) % lista.length); }, SUBIDA);
+    }, PAUSA + SUBIDA);
+    return () => clearInterval(t);
+  }, [lista.length]);
+  if (!lista.length) return null;
+  const n = Math.min(lista.length, VISIVEIS + 1);
+  const nomes = Array.from({ length: n }, (_, k) => lista[(i + k) % lista.length]);
+  const fade = "linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%)";
+  return (
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2 }}>
+      <span style={{ fontSize:9, color:"#bbb", fontFamily:"Verdana,sans-serif", letterSpacing:2, textTransform:"uppercase" }}>
+        {ROT_ACERVOS[lang] || ROT_ACERVOS.fr}
+      </span>
+      <div aria-label={lista.join(", ")} style={{ height: LINHA * Math.min(lista.length, VISIVEIS), overflow:"hidden",
+                    WebkitMaskImage: fade, maskImage: fade }}>
+        <div aria-hidden="true" style={{ transform: `translateY(${subindo ? -LINHA : 0}px)`,
+                      transition: subindo ? `transform ${SUBIDA}ms ease-in-out` : "none" }}>
+          {nomes.map((nome, k) => (
+            <div key={`${i}-${k}`} style={{ height:LINHA, lineHeight:`${LINHA}px`, textAlign:"right", whiteSpace:"nowrap",
+                    fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:14, color:"#8a8478" }}>
+              {nome}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Barra ambiente ───────────────────────────────────────────────────────────
-function AmbientBar() {
+function AmbientBar({ lang = "fr" }) {
   const [moon, setMoon]       = useState(null);
   const [weather, setWeather] = useState(null);
   const [wL, setWL]           = useState(true);
@@ -483,8 +564,9 @@ function AmbientBar() {
   }, []);
   const s = { fontSize:10, color:"#999", fontFamily:"Verdana,sans-serif", letterSpacing:.3 };
   return (
-    <div style={{ background:"#f5f4f0", borderBottom:"1px solid #ece9e2", padding:"5px 36px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-      <span style={s}>{moon?.emoji} · día {moon?.age}</span>
+    <div className="germ-ambient" style={{ background:"#f5f4f0", borderBottom:"1px solid #ece9e2", padding:"5px 36px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:"2px 12px", flexWrap:"wrap" }}>
+      <span style={s}>{moon && (() => { const L = LUA[lang] || LUA.fr;
+        return `${moon.emoji} ${L.rotulo} · ${L.dia} ${moon.dia} · ${L.fases[moon.idx]}`; })()}</span>
       <span style={s}>{wL?"···":weather?`${weather.icon} ${weather.temp}°C${weather.city?` · ${weather.city}`:""}` : "—"}</span>
     </div>
   );
@@ -960,7 +1042,7 @@ export default function App() {
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
       <style>{`*{box-sizing:border-box}@keyframes spin{to{transform:rotate(360deg)}}.lang-switcher{display:flex;align-items:center;gap:6px}@media(max-width:768px){.lang-switcher{display:grid;grid-template-columns:repeat(2,auto);gap:6px;justify-content:end}}`}</style>
 
-      <AmbientBar/>
+      <AmbientBar lang={lang}/>
 
       <header className="germ-header" style={{ borderBottom:"1px solid #e8e4dc",padding:"18px 36px 0" }}>
         <div style={{ maxWidth:1300,margin:"0 auto" }}>
@@ -1096,7 +1178,7 @@ export default function App() {
 
       <footer className="germ-footer" style={{ borderTop:"1px solid #ece9e2",padding:"14px 36px",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
         <div onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{ cursor:"pointer" }} title="Voltar ao topo"><Logo small/></div>
-        <p style={{ margin:0,fontSize:9,color:"#ccc",fontFamily:"Verdana,sans-serif",letterSpacing:2 }}>{t.footer}</p>
+        <AcervosTicker lang={lang}/>
       </footer>
     </div>
   );
