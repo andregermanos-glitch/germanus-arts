@@ -507,13 +507,13 @@ export function LangSwitcher({ lang, setLang }) {
   );
 }
 
-// ─── Instituições do acervo — 3 nomes visíveis, sobem um a um, em loop ───────
+// ─── Instituições do acervo (topo, abaixo dos idiomas) — 3 nomes, sobem um a um, em loop
 const ROT_ACERVOS = { fr:"Collections", en:"Collections", es:"Acervos", pt:"Acervos", it:"Collezioni", de:"Sammlungen" };
 function AcervosTicker({ lang = "fr" }) {
   const [lista, setLista] = useState([]);
   const [i, setI]         = useState(0);       // primeiro nome visível
   const [subindo, setSubindo] = useState(false);
-  const LINHA = 20, VISIVEIS = 3, PAUSA = 2600, SUBIDA = 700;
+  const LINHA = 17, VISIVEIS = 3, PAUSA = 2600, SUBIDA = 700;
   useEffect(() => {
     fetch("/api/acervo/instituicoes").then(r => r.ok ? r.json() : null)
       .then(d => setLista((d?.instituicoes || []).map(x => x.nome))).catch(() => {});
@@ -542,8 +542,8 @@ function AcervosTicker({ lang = "fr" }) {
         <div aria-hidden="true" style={{ transform: `translateY(${subindo ? -LINHA : 0}px)`,
                       transition: subindo ? `transform ${SUBIDA}ms ease-in-out` : "none" }}>
           {nomes.map((nome, k) => (
-            <div key={`${i}-${k}`} style={{ height:LINHA, lineHeight:`${LINHA}px`, textAlign:"right", whiteSpace:"nowrap",
-                    fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:14, color:"#8a8478" }}>
+            <div key={`${i}-${k}`} style={{ height:LINHA, lineHeight:`${LINHA}px`, textAlign:"right", whiteSpace:"nowrap", maxWidth:"52vw", overflow:"hidden", textOverflow:"ellipsis",
+                    fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:13.5, color:"#8a8478" }}>
               {nome}
             </div>
           ))}
@@ -1050,7 +1050,7 @@ export default function App() {
             <div onClick={()=>window.location.reload()} style={{ cursor:"pointer" }} title="Recarregar a página"><Logo/></div>
             <div style={{ display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6 }}>
               <LangSwitcher lang={lang} setLang={setLang}/>
-              <p style={{ margin:0,fontSize:9,color:"#bbb",fontFamily:"Verdana,sans-serif",letterSpacing:2,textTransform:"uppercase" }}>{t.global}</p>
+              <AcervosTicker lang={lang}/>
             </div>
           </div>
           <nav style={{ display:"flex" }}>
@@ -1178,7 +1178,7 @@ export default function App() {
 
       <footer className="germ-footer" style={{ borderTop:"1px solid #ece9e2",padding:"14px 36px",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
         <div onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{ cursor:"pointer" }} title="Voltar ao topo"><Logo small/></div>
-        <AcervosTicker lang={lang}/>
+        <p style={{ margin:0,fontSize:9,color:"#ccc",fontFamily:"Verdana,sans-serif",letterSpacing:2 }}>{t.footer}</p>
       </footer>
     </div>
   );
