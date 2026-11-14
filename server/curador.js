@@ -9,8 +9,21 @@
 // CORREÇÃO: se a image_url atual já aponta para o R2, NÃO tocar. A obra fica
 // selada no bucket; só obras ainda em URL de museu são reprocessadas/recuperadas.
 // ──────────────────────────────────────────────────────────────────────────────
+// ─── ALTERAÇÃO 14/11/2026 (identificação) ─────────────────────────────────────
+// • Artista: usa o mesmo critério rigoroso do /fichas (sobrenome, sem confundir
+//   prenomes como Thomas/Hans/Jan, sem "the Elder/Younger") e REJEITA
+//   "Workshop of / Follower of / After / Attributed to" quando a curadoria
+//   pediu o próprio mestre.
+// • Título genérico ("Portrait of a Man"): só aceita se o título encontrado for
+//   praticamente o mesmo — antes qualquer retrato daquele artista passava.
+// • Busca por ID (Met/AIC): confere o artista devolvido pela API.
+// • Fase 2 (repescagem): casava pelo título OU pelo artista e gravava a imagem
+//   de OUTRA obra do mesmo artista. Agora exige título igual E artista
+//   compatível; obras da curadoria sem título não são repescadas.
+// ──────────────────────────────────────────────────────────────────────────────
 
 const path = require("path");
+const { mesmoArtista, atribuicaoDifere } = require("./fichas");
 const fs   = require("fs");
 
 const CURADORIA_DIR = path.join(__dirname, "curadoria");
@@ -453,17 +466,17 @@ function palavrasChave(str) {
 
 function artistaCorresponde(esperado, encontrado) {
   if (!esperado) return true;  // sem restrição de artista
-  const palavrasEsp = palavrasChave(esperado);
-  const normEncontrado = normalizar(encontrado);
-  return palavrasEsp.some(p => normEncontrado.includes(p));
+  if (!encontrado) return false;
+  return mesmoArtista(esperado, encontrado) && !atribuicaoDifere(esperado, encontrado);
 }
 
-function tituloCorresponde(esperado, encontrado, threshold = 0.4) {
+function tituloCorresponde(esperado, encontrado, threshold = 0.6) {
   if (!esperado) return true;  // sem restrição de título
   const palavrasEsp = palavrasChave(esperado);
-  if (palavrasEsp.length === 0) return true;
-  const normEncontrado = normalizar(encontrado);
-  const match = palavrasEsp.filter(p => normEncontrado.includes(p)).length;
+  const nEsp = normalizar(esperado), nEnc = normalizar(encontrado);
+  // título genérico (uma palavra útil só): exige praticamente o mesmo título
+  if (palavrasEsp.length <= 1) return nEnc.startsWith(nEsp) && nEnc.length <= nEsp.length + 15;
+  const match = palavrasEsp.filter(p => nEnc.split(" ").includes(p)).length;   // palavra inteira, não pedaço
   return (match / palavrasEsp.length) >= threshold;
 }
 
@@ -505,16 +518,18 @@ async function resolverObra(obra, keys) {
     if (r) return r;
   }
 
-  // 3. Met por ID direto
+  // 3. Met por ID direto (confere o artista: um ID errado no JSON traria outra obra)
   if (obra.met_id) {
     const r = await fetchMetById(obra.met_id);
-    if (r) return r;
+    if (r && artistaCorresponde(obra.autor, r.artist)) return r;
+    if (r) console.log(`  ⚠ Met ID ${obra.met_id} é de outro artista: esperado "${obra.autor}", encontrado "${r.artist} / ${r.title}"`);
   }
 
   // 4. AIC por ID direto
   if (obra.aic_id) {
     const r = await fetchAICById(obra.aic_id);
-    if (r) return r;
+    if (r && artistaCorresponde(obra.autor, r.artist)) return r;
+    if (r) console.log(`  ⚠ AIC ID ${obra.aic_id} é de outro artista: esperado "${obra.autor}", encontrado "${r.artist} / ${r.title}"`);
   }
 
   // ── Fallbacks por busca de texto ────────────────────────────────────────────
@@ -607,14 +622,17 @@ async function indexarCuradoria(pool, keys) {
       if (semImg.rows.length > 0) {
         console.log(`  🔄 ${ala} — ${semImg.rows.length} obras sem imagem, retentando...`);
         for (const row of semImg.rows) {
+          // título igual E artista compatível — nunca só pelo artista
+          // (antes gravava a imagem de outra obra do mesmo pintor nesta ficha)
           const obraOriginal = obras.find(o =>
-            normalizar(o.titulo) === normalizar(row.title) ||
-            normalizar(o.autor)  === normalizar(row.artist)
+            o.titulo && normalizar(o.titulo) === normalizar(row.title) &&
+            artistaCorresponde(o.autor, row.artist)
           );
           if (!obraOriginal) continue;
 
           const resultado = await resolverObra(obraOriginal, keys);
-          if (resultado?.imageUrl) {
+          if (resultado?.imageUrl && artistaCorresponde(row.artist, resultado.artist)
+              && tituloCorresponde(row.title, resultado.title)) {
             await pool.query(
               `UPDATE artworks
                   SET image_url  = $1,

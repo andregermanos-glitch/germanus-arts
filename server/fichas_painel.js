@@ -19,7 +19,7 @@ function thumb(url) {
 const n = x => Number(x || 0).toLocaleString("pt-BR");
 
 const ABAS = [
-  ["alta", "✓ Alta confiança"], ["media", "◐ Revisar com calma"], ["sem_fonte", "∅ Sem fonte"],
+  ["alta", "✓ Alta confiança"], ["media", "◐ Revisar com calma"], ["imagem", "🖼 Imagem não confere"], ["sem_fonte", "∅ Sem fonte"],
   ["erro", "⚠ Erros"], ["aceita", "✔ Aceitas"], ["rejeitada", "✗ Rejeitadas"], ["ok", "· Já corretas"],
 ];
 const CAMPOS = [["title", "Título"], ["artist", "Artista"], ["date", "Data"],
@@ -60,7 +60,20 @@ function card(o, aba, rotulos) {
 
   // valores para o editor: proposta (se houver) ou atual
   const ed = k => esc(temProposta && p[k] ? p[k] : o[k]);
-  const acoes = temProposta
+  const ic = o.imagem_check || {};
+  const ROT = { confere: ["ok", "imagem confere"], diverge: ["mal", "IMAGEM NÃO CONFERE"], duvidosa: ["med", "imagem duvidosa"],
+                confirmada: ["ok", "imagem confirmada por você"], na_entrada: ["med", "devolvida à Entrada"],
+                nao_verificavel: ["", "imagem não verificável"], sem_ref: ["", "fonte sem imagem"] };
+  const selo = ic.status && ROT[ic.status]
+    ? `<span class="img-${ROT[ic.status][0] || "x"}" title="${esc(ic.motivo || (ic.metodo === "url" ? "comparada pela URL" : ic.dist != null ? "distância " + ic.dist + "/64" : ""))}">${ROT[ic.status][1]}${ic.dist != null ? ` · ${ic.dist}/64` : ""}</span>` : "";
+  const comparar = ic.fonte_url && ["diverge", "duvidosa"].includes(ic.status);
+
+  const acoes = aba === "imagem"
+    ? `<button class="ok" onclick="imagemOk(['${esc(o.id)}'],this)">✓ a imagem está certa</button>
+       <button class="no" onclick="paraEntrada(['${esc(o.id)}'],this)">↩ mandar para a Entrada</button>
+       <button onclick="abrirEditor('${esc(o.id)}')">✎ corrigir ficha à mão</button>
+       <button onclick="testar('${esc(o.id)}',this)">🔎 testar fonte</button>`
+    : temProposta
     ? `<label class="sel"><input type="checkbox" class="chk" value="${esc(o.id)}"> selecionar</label>
        <button class="ok" onclick="aceitar(['${esc(o.id)}'],this)">✓ aceitar</button>
        <button onclick="abrirEditor('${esc(o.id)}')">✎ editar</button>
@@ -72,12 +85,16 @@ function card(o, aba, rotulos) {
          <button onclick="testar('${esc(o.id)}',this)">🔎 testar fonte</button>`;
 
   return `<div class="card" id="c_${esc(o.id)}">
-    <div class="img"><a href="${esc(o.hd_url || o.image_url)}" target="_blank" rel="noreferrer">
-      <img src="${esc(thumb(o.image_url))}" loading="lazy" alt="" onerror="this.parentElement.parentElement.classList.add('err')"></a></div>
+    <div class="img ${comparar ? "duas" : ""}"><a href="${esc(o.hd_url || o.image_url)}" target="_blank" rel="noreferrer">
+      ${comparar ? `<small>guardada no site</small>` : ""}
+      <img src="${esc(thumb(o.image_url))}" loading="lazy" alt="" onerror="this.parentElement.parentElement.classList.add('err')"></a>
+      ${comparar ? `<a href="${esc(ic.fonte_url)}" target="_blank" rel="noreferrer"><small>registro da fonte (${esc(ic.ref_de || "")})</small>
+      <img src="${esc(ic.fonte_url)}" loading="lazy" alt=""></a>` : ""}</div>
     <div class="corpo">
       <div class="topo"><code onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(o.id)}')" title="copiar ID">${esc(o.id)}</code>
         ${p.confianca ? `<span class="conf ${esc(p.confianca)}">${p.confianca === "alta" ? "alta confiança" : "revisar"}</span>` : ""}
         ${o.status === "rascunho" ? `<span class="tag">entrada</span>` : o.ala_id ? `<span class="tag">${esc(o.ala_id)}</span>` : ""}
+        ${selo}
       </div>
       <table>${temProposta || aceita ? `<tr class="cab"><th></th><td>atual${aceita ? " (antes)" : ""}</td><td>${aceita ? "agora" : "proposta"}</td></tr>` : ""}${linhas}</table>
       ${def ? `<div class="defs">${def}</div>` : ""}
@@ -98,8 +115,10 @@ function card(o, aba, rotulos) {
 
 function paginaFichas({ aba, offset, LIMIT, total, obras, diag, estado, rotulos, temSenha, temEuropeana }) {
   const pag = Math.floor(offset / LIMIT) + 1, pags = Math.max(1, Math.ceil(total / LIMIT));
+  const im = diag.imagens || {};
+  const imgConferidas = Object.values(im).reduce((a, b) => a + b, 0);
   const contagem = {
-    alta: diag.pendentes.alta, media: diag.pendentes.media,
+    alta: diag.pendentes.alta, media: diag.pendentes.media, imagem: (im.diverge || 0) + (im.duvidosa || 0),
     sem_fonte: diag.estados.sem_fonte, erro: diag.estados.erro, aceita: diag.estados.aceita,
     rejeitada: diag.estados.rejeitada, ok: diag.estados.ok,
   };
@@ -144,6 +163,11 @@ button.go{border-color:#534AB766;background:#534AB722;color:#a9a1ff}
 .card.feito{opacity:.35;pointer-events:none}
 .img{background:#1a1a1a;display:flex;align-items:flex-start;justify-content:center;min-height:150px}
 .img img{width:100%;height:auto;max-height:260px;object-fit:contain;display:block}
+.img.duas{flex-direction:column;gap:4px;padding:4px}.img.duas a{display:block;text-decoration:none}
+.img small{display:block;font-size:9.5px;color:#777;padding:2px 2px 3px;text-transform:uppercase;letter-spacing:.4px}
+.img-ok,.img-mal,.img-med,.img-x{font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid #333;color:#888}
+.img-ok{color:#4fd1a5;border-color:#1D9E7555;background:#1D9E7518}.img-mal{color:#ff8a89;border-color:#E24B4A77;background:#E24B4A22;font-weight:600}
+.img-med{color:#e0a23a;border-color:#BA751755;background:#BA751718}
 .card.err .img::after{content:"imagem indisponível";color:#555;font-size:11px;padding:20px}
 .card.err .img img{display:none}
 .corpo{padding:11px 13px;display:flex;flex-direction:column;gap:7px;min-width:0}
@@ -184,6 +208,14 @@ ${temEuropeana ? "" : `<div class="aviso">EUROPEANA_KEY não encontrada: as obra
     <div class="num">${n(diag.com_defeito)} <small>com defeito, de ${n(diag.publicadas)} publicadas · ${n(naoVistas)} ainda não conferidas</small></div>
     <p style="margin-top:8px">${defs || "nenhum defeito detectado"}</p>
     <p>Por fonte: ${fontes || "—"}</p>
+    <p><b style="color:#ccc">Identificação das imagens</b> (${n(imgConferidas)} conferidas):
+      <span class="tag">confere <b>${n(im.confere)}</b></span>
+      <span class="tag" style="border-color:#E24B4A77">não confere <b>${n(im.diverge)}</b></span>
+      <span class="tag">duvidosa <b>${n(im.duvidosa)}</b></span>
+      <span class="tag">não verificável <b>${n(im.nao_verificavel)}</b></span>
+      <span class="tag">fonte sem imagem <b>${n(im.sem_ref)}</b></span>
+      <span class="tag">confirmadas por você <b>${n(im.confirmada)}</b></span>
+      ${imgConferidas ? `<br>Taxa de erro medida: <b style="color:#fff">${((100 * ((im.diverge || 0))) / Math.max(1, (im.confere || 0) + (im.diverge || 0) + (im.duvidosa || 0) + (im.confirmada || 0))).toFixed(1)}%</b> das verificáveis não conferem` : ""}</p>
     <p><a href="/fichas?aba=${aba}&recontar=1" style="color:#555">recontar</a></p>
   </div>
   <div class="box">
@@ -193,6 +225,7 @@ ${temEuropeana ? "" : `<div class="aviso">EUROPEANA_KEY não encontrada: as obra
       <select id="esc"><option value="publicadas">publicadas</option><option value="entrada">entrada</option><option value="todas">todas</option></select>
       <select id="sodef"><option value="1">só com defeito</option><option value="0">todas (confere também as boas)</option></select>
       <button class="go" onclick="rodar()">▶ rodar</button>
+      <button class="go" onclick="conferirImagens()" title="Confere só as imagens — inclusive das fichas já aceitas e corretas">🖼 conferir imagens</button>
       <button onclick="parar()">■ parar</button>
     </div>
     <div id="st">${estado.rodando ? "⏳ rodando…" : ""}</div>
@@ -256,6 +289,20 @@ async function rejeitar(ids, btn){
   try{ if(btn) btn.disabled=true; await post("/api/fichas/rejeitar",{ids}); ids.forEach(feito); }
   catch(e){ alert("Erro: "+e.message); if(btn) btn.disabled=false; }
 }
+async function imagemOk(ids, btn){
+  try{ if(btn) btn.disabled=true; await post("/api/fichas/imagem_ok",{ids}); ids.forEach(feito); }
+  catch(e){ alert("Erro: "+e.message); if(btn) btn.disabled=false; }
+}
+async function paraEntrada(ids, btn){
+  if(!confirm("Tirar esta obra da ala e devolvê-la para a Entrada?")) return;
+  try{ if(btn) btn.disabled=true; await post("/api/fichas/para_entrada",{ids}); ids.forEach(feito); }
+  catch(e){ alert("Erro: "+e.message); if(btn) btn.disabled=false; }
+}
+async function conferirImagens(){
+  const total=+document.getElementById("qtd").value, escopo=document.getElementById("esc").value;
+  try{ const d=await post("/api/fichas/conferir_imagens",{total,escopo}); document.getElementById("st").textContent="✅ "+d.mensagem; acompanhar(); }
+  catch(e){ document.getElementById("st").textContent="❌ "+e.message; }
+}
 function marcadas(){ return [...document.querySelectorAll(".chk:checked")].map(c=>c.value); }
 function marcarTodas(){ document.querySelectorAll(".chk").forEach(c=>c.checked=true); }
 function aceitarSel(){ const i=marcadas(); if(!i.length) return alert("Marque pelo menos uma."); aceitar(i); }
@@ -302,7 +349,8 @@ async function acompanhar(){
     const s=await (await fetch("/api/fichas/status")).json();
     const el=document.getElementById("st");
     if(s.rodando || s.feitas){
-      el.textContent=(s.rodando?"⏳ ":"✅ concluído · ")+s.feitas+" de "+s.alvo+" · "+s.propostas+" propostas · "+s.ok+" já corretas · "+s.sem_fonte+" sem fonte · "+s.erros+" erros"
+      const im=s.imagens||{}, ti=Object.keys(im).length?" · imagens: "+Object.entries(im).map(([k,v])=>k+" "+v).join(", "):"";
+      el.textContent=(s.rodando?"⏳ ":"✅ concluído · ")+s.feitas+" de "+s.alvo+(s.modo==="imagens"?"":" · "+s.propostas+" propostas · "+s.ok+" já corretas · "+s.sem_fonte+" sem fonte")+" · "+s.erros+" erros"+ti
         +(s.ultima?"\\nagora: "+s.ultima:"")+(s.ultimo_erro?"\\núltimo erro: "+s.ultimo_erro:"");
     }
     if(s.rodando) tick=setTimeout(acompanhar,3000);

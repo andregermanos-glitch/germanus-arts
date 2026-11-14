@@ -18,6 +18,19 @@
 // Fichas corrigidas à mão (aqui ou na /triagem) ficam com ficha_manual=TRUE e o
 // agente nunca mais mexe nelas.
 //
+// ─── ALTERAÇÃO 14/11/2026 (identificação) ────────────────────────────────────
+// • O ID da fonte agora é achado em qualquer posição do nome da obra:
+//   curated_met_aic_102227 → AIC 102227 · seed_met_4361 → Met 4361 ·
+//   seed_cle_… → Cleveland · seed_rks_SK_A_1234 → Rijksmuseum SK-A-1234 ·
+//   commons_<pageid> → arquivo do Commons pelo pageid.
+// • CONFERÊNCIA DE IMAGEM: a imagem guardada (inclusive no R2) é comparada com a
+//   imagem do registro da fonte — pela URL quando dá, senão por "impressão
+//   digital" visual (dHash 64 bits, via jpeg-js). Resultado em imagem_check:
+//   confere / diverge / duvidosa / nao_verificavel / sem_ref.
+// • mesmoArtista: ignora "the Elder/Younger/Jr." e prenomes comuns (Thomas,
+//   Hans, Jan…); "Workshop/Follower/After/Attributed" diferente vira motivo.
+// • Aba "Imagem" no painel + ação "mandar para a Entrada".
+//
 // COMO LIGAR (1 linha no server.js, ANTES do app.get("*")):
 //     require("./fichas").montarFichas(app, pool);
 //
@@ -43,7 +56,7 @@ let estado = novoEstado();
 function novoEstado() {
   return { rodando: false, parar: false, escopo: null, alvo: 0, feitas: 0,
            propostas: 0, ok: 0, sem_fonte: 0, erros: 0, ultima: "", ultimo_erro: null,
-           inicio: 0, fim: 0, porFonte: {} };
+           inicio: 0, fim: 0, porFonte: {}, modo: "fichas", imagens: {} };
 }
 
 // ─── utilidades de texto ─────────────────────────────────────────────────────
@@ -68,11 +81,33 @@ function semelhanca(a, b) { // Jaccard de palavras
   let i = 0; for (const t of A) if (B.has(t)) i++;
   return i / (A.size + B.size - i);
 }
+// Qualificadores de atribuição: "Workshop of X" NÃO é "X".
+const RX_QUALIF = /\b(attributed to|workshop of|studio of|follower of|followers of|circle of|school of|manner of|style of|copy after|after|imitator of|atelier de|cercle de|suiveur de|entourage de|d'apres|d apres|atribuido a|oficina de|seguidor de|escola de|bottega di|cerchia di|seguace di|scuola di|toegeschreven aan|navolger van|werkplaats van)\b/i;
+const GERACAO = /\b(elder|younger|il vecchio|il giovane|l'ancien|le jeune|de oude|de jonge)\b/i;
+const PARTICULAS = new Set(["the","elder","younger","jr","sr","junior","senior","de","van","von","der","den","la","le","da","di","del","della","y","il","ii","iii","jonge","oude"]);
+const PRENOMES = new Set(["john","thomas","william","george","charles","james","henry","jean","pierre","jacques","louis","henri","hans","jacob","pieter","peter","johann","johannes","giovanni","francesco","antonio","juan","francisco","jose","maria","anna","marie","paul","edward","robert","richard","joseph","frans","cornelis","willem","abraham","david","carl","karl","friedrich","ludwig","andrea","domenico","pietro","giuseppe","nicolas","claude","francois","alexander","ivan","vasily"]);
+function nucleoArtista(a) {
+  const s = norm(limparArtista(a).replace(RX_QUALIF, " "));
+  return s.split(" ").filter(t => t.length > 1 && !PARTICULAS.has(t));
+}
+function geracao(a) { const m = String(a || "").match(GERACAO); return m ? norm(m[1]) : ""; }
 function mesmoArtista(a, b) {
-  const ta = tokens(a), tb = tokens(b);
+  const ta = nucleoArtista(a), tb = nucleoArtista(b);
   if (!ta.length || !tb.length) return false;
-  if (ta[ta.length - 1] === tb[tb.length - 1]) return true; // sobrenome
-  return ta.some(t => t.length > 3 && tb.includes(t));
+  const ga = geracao(a), gb = geracao(b);
+  if (ga && gb && ga !== gb) return false;                 // Brueghel o Velho ≠ o Jovem
+  const sa = ta[ta.length - 1], sb = tb[tb.length - 1];
+  if (sa === sb && sa.length > 2 && !PRENOMES.has(sa)) return true;   // mesmo sobrenome
+  // ordem invertida ("Monet, Claude"): o sobrenome de um aparece no outro
+  if ((sa.length > 3 && !PRENOMES.has(sa) && tb.includes(sa)) || (sb.length > 3 && !PRENOMES.has(sb) && ta.includes(sb))) return true;
+  const comuns = ta.filter(t => t.length > 3 && tb.includes(t) && !PRENOMES.has(t));
+  if (comuns.length >= 2) return true;
+  // nome de um termo só (Rembrandt, Titian, Raphael) contra o nome completo
+  if ((ta.length === 1 || tb.length === 1) && comuns.length === 1) return true;
+  return false;
+}
+function atribuicaoDifere(a, b) {
+  return RX_QUALIF.test(String(a || "")) !== RX_QUALIF.test(String(b || ""));
 }
 const RX_ANON = /^(unknown|anonymous|anonyme|anonimo|anônimo|desconhecido|artista russo|unidentified|onbekend)/i;
 function ehAnonimo(a) { return !String(a || "").trim() || RX_ANON.test(String(a).trim()); }
@@ -166,11 +201,12 @@ async function lerMet(n) {
     date: o.objectDate, medium: o.medium, dimensions: o.dimensions,
     museum: "The Metropolitan Museum of Art, Nova York, EUA", url: o.objectURL,
     qid, inventario: o.accessionNumber, colecao: COLECAO.met,
+    imagem: o.primaryImageSmall || o.primaryImage || null,
   };
 }
 
 async function lerAIC(n) {
-  const campos = "id,title,artist_title,artist_display,date_display,medium_display,dimensions,main_reference_number";
+  const campos = "id,title,artist_title,artist_display,date_display,medium_display,dimensions,main_reference_number,image_id";
   const d = await pegar(`https://api.artic.edu/api/v1/artworks/${n}?fields=${campos}`);
   const o = d?.data;
   if (!o || !o.id) return null;
@@ -179,6 +215,7 @@ async function lerAIC(n) {
     date: o.date_display, medium: o.medium_display, dimensions: o.dimensions,
     museum: "Art Institute of Chicago, Illinois, EUA", url: `https://www.artic.edu/artworks/${o.id}`,
     inventario: o.main_reference_number, colecao: COLECAO.aic,
+    imagem: o.image_id ? `https://www.artic.edu/iiif/2/${o.image_id}/full/400,/0/default.jpg` : null,
   };
 }
 
@@ -191,6 +228,7 @@ async function lerCleveland(n) {
     date: o.creation_date, medium: o.technique, dimensions: o.measurements,
     museum: "Cleveland Museum of Art, Ohio, EUA", url: o.url || `https://www.clevelandart.org/art/${o.id}`,
     inventario: o.accession_number, colecao: COLECAO.cleveland,
+    imagem: o.images?.web?.url || null,
   };
 }
 
@@ -240,6 +278,7 @@ async function lerEuropeana(o) {
     medium: pegaLang(campo("dctermsMedium")), dimensions: pegaLang(campo("dctermsExtent")),
     museum: museu, url: `https://www.europeana.eu/item${rid}`,
     inventario, colecao: /rijksmuseum/i.test(museu) ? COLECAO.rijks : null,
+    imagem: ob.europeanaAggregation?.edmPreview || pegaLang(agg.edmIsShownBy) || null,
   };
 }
 
@@ -278,8 +317,28 @@ async function lerCommons(arquivo) {
     fonte: "commons", title: meta.ObjectName?.value || "", artist: meta.Artist?.value || "",
     date: meta.DateTimeOriginal?.value || "", medium: "", dimensions: "",
     museum: "", url: `https://commons.wikimedia.org/wiki/${encodeURIComponent(("File:" + arquivo).replace(/ /g, "_"))}`,
-    qid,
+    qid, imagem: miniCommons(arquivo),
   };
+}
+function miniCommons(arquivo) {
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(String(arquivo).replace(/ /g, "_"))}?width=400`;
+}
+// commons_<pageid>: o arquivo é achado pelo pageid (vale mesmo depois do R2)
+async function lerCommonsPorPageid(pid) {
+  const d = await pegar(`${COMMONS}?action=query&format=json&pageids=${pid}`);
+  const pg = d?.query?.pages?.[pid];
+  if (!pg || pg.missing !== undefined || !pg.title) return null;
+  return lerCommons(pg.title.replace(/^File:/, ""));
+}
+
+// ID da fonte em qualquer posição do nome da obra
+function fonteDoId(o) {
+  const id = String(o.id || "");
+  let m;
+  if ((m = id.match(/(?:^|_)(met|aic|cle|cleveland)_(\d+)$/))) return { tipo: m[1] === "cle" ? "cleveland" : m[1], n: m[2] };
+  if ((m = id.match(/^commons_(\d+)$/))) return { tipo: "commons_pageid", n: m[1] };
+  if ((m = id.match(/^seed_rks_(.+)$/))) return { tipo: "rijks", n: m[1].replace(/_/g, "-") };
+  return null;
 }
 
 // Rijksmuseum: inventário no id (rijks_SK-A-1234) ou na URL IIIF
@@ -343,39 +402,126 @@ async function obraWikidata(qid) {
     else if (t.precision === 8) date = `${Math.floor(ano / 10) * 10}s`;
     else if (t.precision === 7) date = `séc. ${Math.ceil(ano / 100)}`;
   }
-  return { qid, titulos, title: tituloBase, artist, date };
+  const p18 = val("P18")[0];
+  return { qid, titulos, title: tituloBase, artist, date, imagem: p18 ? miniCommons(p18) : null };
 }
 
 // ─── 4. montar a proposta de uma obra ────────────────────────────────────────
-async function rebuscar(o) {
+const fonteRijks = inv => ({ fonte: "rijksmuseum", inventario: inv, colecao: COLECAO.rijks,
+  museum: "Rijksmuseum, Amsterdam, Países Baixos",
+  url: `https://www.rijksmuseum.nl/en/collection/${encodeURIComponent(inv)}` });
+
+// a) leitura na fonte de origem, pelo ID (em qualquer posição do nome)
+async function acharFonte(o) {
   const src = String(o.source || "");
-  const motivos = [];
-  let fonte = null;
-
-  // a) leitura na fonte de origem, pelo ID
   let m;
-  if ((m = String(o.id).match(/^met_(\d+)$/))) fonte = await lerMet(m[1]);
-  else if ((m = String(o.id).match(/^aic_(\d+)$/))) fonte = await lerAIC(m[1]);
-  else if ((m = String(o.id).match(/^cleveland_(\d+)$/))) fonte = await lerCleveland(m[1]);
-  else if (src === "europeana" || /^europeana_/.test(o.id)) fonte = await lerEuropeana(o);
-  else if ((m = String(o.id).match(/^wikidata_(Q\d+)$/))) fonte = { fonte: "wikidata", qid: m[1] };
+  const f = fonteDoId(o);
+  if (f?.tipo === "met") return lerMet(f.n);
+  if (f?.tipo === "aic") return lerAIC(f.n);
+  if (f?.tipo === "cleveland") return lerCleveland(f.n);
+  if (src === "europeana" || /^europeana_/.test(o.id)) return lerEuropeana(o);
+  if ((m = String(o.id).match(/^wikidata_(Q\d+)$/))) return { fonte: "wikidata", qid: m[1] };
+  if (f?.tipo === "commons_pageid") { const r = await lerCommonsPorPageid(f.n); if (r) return r; }
+  if (f?.tipo === "rijks") return fonteRijks(f.n);
+  const arq = arquivoCommons(o.image_url) || arquivoCommons(o.hd_url);
+  const inv = inventarioRijks(o);
+  if (inv) return fonteRijks(inv);
+  if (arq) return lerCommons(arq);
+  return null;
+}
+async function wikidataDaFonte(fonte) {
+  const qid = fonte.qid || await qidPorInventario(fonte.inventario, fonte.colecao);
+  return qid ? obraWikidata(qid) : null;
+}
 
-  if (!fonte) {
-    const arq = arquivoCommons(o.image_url) || arquivoCommons(o.hd_url);
-    const inv = inventarioRijks(o);
-    if (inv) fonte = { fonte: "rijksmuseum", inventario: inv, colecao: COLECAO.rijks,
-                       museum: "Rijksmuseum, Amsterdam, Países Baixos",
-                       url: `https://www.rijksmuseum.nl/en/collection/${encodeURIComponent(inv)}` };
-    else if (arq) fonte = await lerCommons(arq);
+// ─── conferência de imagem ───────────────────────────────────────────────────
+let jpeg = null;
+try { jpeg = require("jpeg-js"); } catch { /* sem a biblioteca: só compara por URL */ }
+
+// identidade da imagem pela URL (quando a imagem guardada ainda é a do museu)
+function chaveUrl(u) {
+  u = String(u || ""); let m;
+  if ((m = u.match(/artic\.edu\/iiif\/2\/([0-9a-f-]{30,})/i))) return "aic:" + m[1].toLowerCase();
+  if ((m = u.match(/images\.metmuseum\.org\/.+\/([^/?#]+?)\.(?:jpe?g|png|tiff?)/i))) return "met:" + m[1].toLowerCase();
+  const arq = arquivoCommons(u);
+  if (arq) return "commons:" + norm(arq);
+  return null;
+}
+function miniatura(u) {
+  u = String(u || "");
+  if (u.includes("artic.edu/iiif")) return u.replace(/\/full\/[^/]+\//, "/full/400,/");
+  if (u.includes("upload.wikimedia.org") && u.includes("/thumb/")) return u.replace(/\/\d+px-/, "/400px-");
+  if (/Special:FilePath/i.test(u)) return u.replace(/([?&])width=\d+/, "$1width=400");
+  return u;
+}
+async function baixarImagem(url) {
+  const r = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(25000), redirect: "follow" });
+  if (!r.ok) throw new Error(`imagem HTTP ${r.status}`);
+  const len = +(r.headers.get("content-length") || 0);
+  if (len > 30e6) throw new Error("imagem grande demais para conferir");
+  return Buffer.from(await r.arrayBuffer());
+}
+// dHash 9x8 → 64 bits; só JPEG (o formato de quase todo o acervo)
+function impressao(buf) {
+  if (!jpeg || !buf || buf[0] !== 0xFF || buf[1] !== 0xD8) return null;
+  const im = jpeg.decode(buf, { useTArray: true, formatAsRGBA: true, tolerantDecoding: true,
+                                maxResolutionInMP: 40, maxMemoryUsageInMB: 256 });
+  const { width: w, height: h, data } = im, W = 9, H = 8, g = new Float64Array(W * H);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const x0 = Math.floor(x * w / W), x1 = Math.max(x0 + 1, Math.floor((x + 1) * w / W));
+    const y0 = Math.floor(y * h / H), y1 = Math.max(y0 + 1, Math.floor((y + 1) * h / H));
+    const sx = Math.max(1, Math.floor((x1 - x0) / 12)), sy = Math.max(1, Math.floor((y1 - y0) / 12));
+    let soma = 0, c = 0;
+    for (let yy = y0; yy < y1; yy += sy) for (let xx = x0; xx < x1; xx += sx) {
+      const i = (yy * w + xx) * 4; soma += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]; c++;
+    }
+    g[y * W + x] = soma / c;
   }
-  if (!fonte) return { estado: "sem_fonte", motivos: ["a obra não traz um ID de fonte que dê para consultar"] };
+  const bits = [];
+  for (let y = 0; y < H; y++) for (let x = 0; x < 8; x++) bits.push(g[y * W + x] > g[y * W + x + 1] ? 1 : 0);
+  return { bits, proporcao: w / h };
+}
+// limites calibrados para reprodução da mesma pintura (recortes/cor diferentes)
+const CONFERE_ATE = 10, DIVERGE_DESDE = 22;
+async function conferirImagem(o, fonte, wd) {
+  const ref = fonte?.imagem || wd?.imagem || null;
+  const base = { em: Math.floor(Date.now() / 1000), fonte_url: ref, ref_de: fonte?.imagem ? (fonte.fonte || "") : (ref ? "wikidata" : "") };
+  if (!ref) return { ...base, status: "sem_ref", motivo: "a fonte não fornece imagem para comparar" };
+  const atual = o.image_url || o.hd_url;
+  if (!atual) return { ...base, status: "nao_verificavel", motivo: "a obra não tem imagem guardada" };
+  // 1) pela URL, quando as duas são do mesmo tipo
+  const k1 = chaveUrl(atual), k2 = chaveUrl(ref);
+  if (k1 && k2 && k1.split(":")[0] === k2.split(":")[0])
+    return { ...base, status: k1 === k2 ? "confere" : "diverge", metodo: "url" };
+  // 2) pela impressão digital visual
+  if (!jpeg) return { ...base, status: "nao_verificavel", motivo: "instale jpeg-js (package.json) para comparar imagens no R2" };
+  try {
+    const [a, b] = await Promise.all([baixarImagem(miniatura(atual)), baixarImagem(ref)]);
+    const ia = impressao(a), ib = impressao(b);
+    if (!ia || !ib) return { ...base, status: "nao_verificavel", motivo: "imagem em formato não-JPEG" };
+    const dist = ia.bits.reduce((s, v, i) => s + (v !== ib.bits[i] ? 1 : 0), 0);
+    const difProp = Math.abs(Math.log(ia.proporcao / ib.proporcao));   // 0 = mesma proporção
+    let status = dist <= CONFERE_ATE ? "confere" : dist >= DIVERGE_DESDE ? "diverge" : "duvidosa";
+    if (status === "duvidosa" && difProp > 0.35) status = "diverge";   // formato muito diferente
+    if (status === "confere" && difProp > 0.6) status = "duvidosa";
+    return { ...base, status, metodo: "visual", dist, difProp: +difProp.toFixed(2) };
+  } catch (e) {
+    return { ...base, status: "nao_verificavel", motivo: e.message };
+  }
+}
+const ROTULO_IMG = { confere: "imagem confere com a fonte", diverge: "⚠ IMAGEM NÃO CONFERE com o registro da fonte",
+  duvidosa: "◐ imagem parecida, mas não idêntica à da fonte — olhar", nao_verificavel: "imagem não verificável", sem_ref: "fonte sem imagem" };
+
+async function rebuscar(o, { semImagem = false } = {}) {
+  const motivos = [];
+  const fonte = await acharFonte(o);
+  if (!fonte) return { estado: "sem_fonte", motivos: ["a obra não traz um ID de fonte que dê para consultar"
+    + (/r2\.dev|r2\.cloudflarestorage/.test(String(o.image_url)) && /^commons_\D/.test(o.id) ? " (o link original do Commons se perdeu na migração para o R2)" : "")] };
 
   // b) Wikidata (pelo QID direto, pelo arquivo do Commons ou pelo nº de inventário)
   let wd = null;
-  try {
-    const qid = fonte.qid || await qidPorInventario(fonte.inventario, fonte.colecao);
-    if (qid) wd = await obraWikidata(qid);
-  } catch (e) { motivos.push("Wikidata indisponível agora (" + e.message + ")"); }
+  try { wd = await wikidataDaFonte(fonte); }
+  catch (e) { motivos.push("Wikidata indisponível agora (" + e.message + ")"); }
 
   const daFonte = {
     title: limparTitulo(fonte.title), artist: fonte.artist ? limparArtista(fonte.artist) : "",
@@ -400,6 +546,9 @@ async function rebuscar(o) {
       && !mesmoArtista(daFonte.artist, daWd.artist)) {
     confianca = "media"; motivos.push(`Wikidata diz outro artista: ${daWd.artist}`);
   }
+  if (!ehAnonimo(o.artist) && prop.artist && atribuicaoDifere(o.artist, prop.artist)) {
+    confianca = "media"; motivos.push(`atribuição diferente (oficina/seguidor/atribuído): "${linha(o.artist)}" × "${prop.artist}"`);
+  }
   if (wd) motivos.push(`conferida no Wikidata (${wd.qid})`);
   if (!prop.artist && !ehAnonimo(o.artist)) prop.artist = limparArtista(o.artist); // nunca apaga autor
   if (!prop.title) prop.title = limparTitulo(o.title);
@@ -419,16 +568,34 @@ async function rebuscar(o) {
   if (!String(o.museum || "").trim() && fonte.museum) extra.museum = linha(fonte.museum);
   if (!String(o.external_url || "").trim() && fonte.url) extra.external_url = fonte.url;
 
+  // d) a imagem guardada é mesmo a deste registro?
+  const imagem = semImagem ? null : await conferirImagem(o, fonte, wd);
+  const imgRuim = imagem && (imagem.status === "diverge" || imagem.status === "duvidosa");
+  if (imagem && imagem.status !== "nao_verificavel" && imagem.status !== "sem_ref") motivos.push(ROTULO_IMG[imagem.status]
+    + (imagem.dist != null ? ` (distância ${imagem.dist}/64)` : ""));
+  if (imgRuim) confianca = "media";
+
   const muda = norm(prop.title) !== norm(o.title) || norm(prop.artist) !== norm(o.artist)
             || norm(prop.date) !== norm(o.date) || Object.keys(extra).length > 0;
 
   return {
-    estado: muda ? "proposta" : "ok",
+    estado: muda || imgRuim ? "proposta" : "ok",
+    imagem,
     proposta: {
       ...prop, ...extra, confianca, motivos, fonte: fonte.fonte, url: fonte.url || null,
       wikidata: wd?.qid || null, titulos: wd?.titulos || null, defeitos: defAtuais,
+      imagem: imagem?.status || null,
     },
   };
+}
+
+// só a conferência de imagem (para as fichas já aceitas/corretas)
+async function conferirSoImagem(o) {
+  const fonte = await acharFonte(o);
+  if (!fonte) return { em: Math.floor(Date.now() / 1000), status: "sem_ref", motivo: "sem fonte consultável" };
+  let wd = null;
+  if (!fonte.imagem) { try { wd = await wikidataDaFonte(fonte); } catch { /* segue */ } }
+  return conferirImagem(o, fonte, wd);
 }
 
 // ─── 5. trabalho em segundo plano ────────────────────────────────────────────
@@ -461,9 +628,12 @@ async function rodar(pool, { total, escopo, soDefeituosas }) {
         const fonte = res.proposta?.fonte || "—";
         estado.porFonte[fonte] = (estado.porFonte[fonte] || 0) + 1;
         await pool.query(
-          `UPDATE artworks SET ficha_estado=$2, ficha_proposta=$3, ficha_conferida_em=EXTRACT(EPOCH FROM NOW())::BIGINT
+          `UPDATE artworks SET ficha_estado=$2, ficha_proposta=$3, ficha_conferida_em=EXTRACT(EPOCH FROM NOW())::BIGINT,
+                  imagem_check=COALESCE($4::jsonb, imagem_check)
             WHERE id=$1 AND NOT COALESCE(ficha_manual,false)`,
-          [o.id, res.estado, JSON.stringify(res.proposta || { motivos: res.motivos || [], defeitos: defeitos(o) })]);
+          [o.id, res.estado, JSON.stringify(res.proposta || { motivos: res.motivos || [], defeitos: defeitos(o) }),
+           res.imagem ? JSON.stringify(res.imagem) : null]);
+        if (res.imagem) estado.imagens[res.imagem.status] = (estado.imagens[res.imagem.status] || 0) + 1;
         if (res.estado === "proposta") estado.propostas++;
         else if (res.estado === "ok") estado.ok++;
         else estado.sem_fonte++;
@@ -478,7 +648,33 @@ async function rodar(pool, { total, escopo, soDefeituosas }) {
     }
   } catch (e) { estado.ultimo_erro = e.message; }
   estado.rodando = false; estado.fim = Date.now();
-  console.log(`🗂  Fichas: ${estado.feitas} vistas · ${estado.propostas} propostas · ${estado.ok} ok · ${estado.sem_fonte} sem fonte · ${estado.erros} erros`);
+  console.log(`🗂  Fichas: ${estado.feitas} vistas · ${estado.propostas} propostas · ${estado.ok} ok · ${estado.sem_fonte} sem fonte · ${estado.erros} erros · imagens ${JSON.stringify(estado.imagens)}`);
+}
+
+// remessa só de imagens: inclui fichas já aceitas, corretas e corrigidas à mão
+async function rodarImagens(pool, { total, escopo, refazer }) {
+  estado = { ...novoEstado(), rodando: true, escopo, alvo: total, inicio: Date.now(), modo: "imagens" };
+  try {
+    const r = await pool.query(
+      `SELECT ${SELECT_FICHA} FROM artworks
+        WHERE ${filtroEscopo(escopo)} AND COALESCE(image_url,'')<>''
+          ${refazer ? "" : "AND imagem_check IS NULL"}
+        ORDER BY (source IN ('curadoria','semeador')) DESC, id LIMIT $1`, [total]);
+    estado.alvo = r.rows.length;
+    for (const o of r.rows) {
+      if (estado.parar) break;
+      estado.ultima = `${o.id} — ${linha(o.title).slice(0, 60)}`;
+      try {
+        const img = await conferirSoImagem(o);
+        estado.imagens[img.status] = (estado.imagens[img.status] || 0) + 1;
+        await pool.query(`UPDATE artworks SET imagem_check=$2 WHERE id=$1`, [o.id, JSON.stringify(img)]);
+      } catch (e) { estado.erros++; estado.ultimo_erro = `${o.id}: ${e.message}`; }
+      estado.feitas++;
+      await pausa(300);
+    }
+  } catch (e) { estado.ultimo_erro = e.message; }
+  estado.rodando = false; estado.fim = Date.now(); cacheDiag = null;
+  console.log(`🖼  Imagens: ${estado.feitas} conferidas · ${JSON.stringify(estado.imagens)} · ${estado.erros} erros`);
 }
 
 // ─── diagnóstico agregado (cache curto) ──────────────────────────────────────
@@ -507,6 +703,13 @@ async function diagnostico(pool, forcar) {
       d.por_fonte[f] = (d.por_fonte[f] || 0) + 1;
     }
   }
+  d.imagens = {};
+  try {
+    const ri = await pool.query(
+      `SELECT imagem_check->>'status' AS s, COUNT(*)::int AS n FROM artworks
+        WHERE imagem_check IS NOT NULL AND COALESCE(status,'publicada')='publicada' GROUP BY 1`);
+    for (const x of ri.rows) d.imagens[x.s] = x.n;
+  } catch { /* coluna ainda não criada */ }
   cacheDiag = { em: Date.now(), d };
   return d;
 }
@@ -517,7 +720,7 @@ function montarFichas(app, pool) {
     try {
       for (const c of ["ficha_estado TEXT", "ficha_proposta JSONB", "ficha_anterior JSONB",
                        "ficha_conferida_em BIGINT", "ficha_manual BOOLEAN DEFAULT FALSE",
-                       "ficha_titulos JSONB", "wikidata_id TEXT",
+                       "ficha_titulos JSONB", "wikidata_id TEXT", "imagem_check JSONB",
                        "medium TEXT", "dimensions TEXT", "external_url TEXT"])
         await pool.query(`ALTER TABLE artworks ADD COLUMN IF NOT EXISTS ${c}`);
       await pool.query(`CREATE INDEX IF NOT EXISTS idx_art_ficha_estado ON artworks(ficha_estado)`);
@@ -535,15 +738,17 @@ function montarFichas(app, pool) {
   // painel
   app.get("/fichas", async (req, res) => {
     try {
-      const aba = ["alta", "media", "sem_fonte", "erro", "aceita", "rejeitada", "ok"].includes(req.query.aba) ? req.query.aba : "alta";
+      const aba = ["alta", "media", "imagem", "sem_fonte", "erro", "aceita", "rejeitada", "ok"].includes(req.query.aba) ? req.query.aba : "alta";
       const offset = Math.max(0, parseInt(req.query.offset || "0", 10) || 0);
       const LIMIT = 18;
       let filtro = `ficha_estado=$1`; let params = [aba];
       if (aba === "alta" || aba === "media") { filtro = `ficha_estado='proposta' AND COALESCE(ficha_proposta->>'confianca','media')=$1`; }
+      if (aba === "imagem") { filtro = `imagem_check->>'status' = ANY($1::text[]) AND COALESCE(status,'publicada')='publicada'`; params = [["diverge", "duvidosa"]]; }
       const ct = await pool.query(`SELECT COUNT(*) AS n FROM artworks WHERE ${filtro}`, params);
-      const ordem = aba === "aceita" || aba === "rejeitada" ? "ficha_conferida_em DESC NULLS LAST, id" : "id";
+      const ordem = aba === "aceita" || aba === "rejeitada" ? "ficha_conferida_em DESC NULLS LAST, id"
+                  : aba === "imagem" ? "(imagem_check->>'status')='diverge' DESC, (imagem_check->>'dist')::int DESC NULLS FIRST, id" : "id";
       const r = await pool.query(
-        `SELECT ${SELECT_FICHA}, ficha_estado, ficha_proposta, ficha_anterior FROM artworks
+        `SELECT ${SELECT_FICHA}, ficha_estado, ficha_proposta, ficha_anterior, imagem_check FROM artworks
           WHERE ${filtro} ORDER BY ${ordem} LIMIT ${LIMIT} OFFSET ${offset}`, params);
       const diag = await diagnostico(pool, req.query.recontar === "1");
       res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -571,6 +776,35 @@ function montarFichas(app, pool) {
     rodar(pool, { total, escopo, soDefeituosas });
     res.json({ ok: true, mensagem: `Remessa iniciada: até ${total} fichas (${escopo}${soDefeituosas ? ", só com defeito" : ""}).` });
   });
+  app.post("/api/fichas/conferir_imagens", (req, res) => {
+    if (!senhaOk(req, res)) return;
+    if (estado.rodando) return res.status(409).json({ error: "já está rodando" });
+    const total = Math.min(10000, Math.max(1, parseInt(req.body?.total || "300", 10) || 300));
+    const escopo = ["publicadas", "entrada", "todas"].includes(req.body?.escopo) ? req.body.escopo : "publicadas";
+    rodarImagens(pool, { total, escopo, refazer: !!req.body?.refazer });
+    res.json({ ok: true, mensagem: `Conferência de imagens iniciada: até ${total} obras (${escopo}).` + (jpeg ? "" : " ATENÇÃO: jpeg-js não instalado — só compara por URL.") });
+  });
+  // a imagem está certa (conferida a olho) — sai da aba Imagem
+  app.post("/api/fichas/imagem_ok", async (req, res) => {
+    if (!senhaOk(req, res)) return;
+    try {
+      const r = await pool.query(
+        `UPDATE artworks SET imagem_check = COALESCE(imagem_check,'{}'::jsonb) || '{"status":"confirmada"}'::jsonb
+          WHERE id = ANY($1::text[])`, [listaIds(req.body)]);
+      cacheDiag = null; res.json({ ok: true, marcadas: r.rowCount });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  });
+  // imagem errada — tira da ala e devolve para a Entrada
+  app.post("/api/fichas/para_entrada", async (req, res) => {
+    if (!senhaOk(req, res)) return;
+    try {
+      const r = await pool.query(
+        `UPDATE artworks SET status='rascunho',
+            imagem_check = COALESCE(imagem_check,'{}'::jsonb) || '{"status":"na_entrada"}'::jsonb
+          WHERE id = ANY($1::text[])`, [listaIds(req.body)]);
+      cacheDiag = null; res.json({ ok: true, movidas: r.rowCount });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  });
   app.post("/api/fichas/parar", (req, res) => {
     if (!senhaOk(req, res)) return;
     estado.parar = true; res.json({ ok: true });
@@ -583,7 +817,8 @@ function montarFichas(app, pool) {
       const r = await pool.query(`SELECT ${SELECT_FICHA} FROM artworks WHERE id=$1`, [id]);
       if (!r.rows.length) return res.status(404).json({ error: "id não encontrado" });
       const o = r.rows[0];
-      res.json({ atual: { title: o.title, artist: o.artist, date: o.date }, defeitos: defeitos(o), resultado: await rebuscar(o) });
+      res.json({ atual: { title: o.title, artist: o.artist, date: o.date, image_url: o.image_url }, defeitos: defeitos(o),
+                 id_da_fonte: fonteDoId(o), resultado: await rebuscar(o) });
     } catch (e) { res.status(500).json({ error: e.message }); }
   });
 
@@ -690,4 +925,5 @@ function montarFichas(app, pool) {
 }
 
 module.exports = { montarFichas, defeitos, rebuscar, limparArtista, limparTitulo, limparData,
-                   arquivoCommons, idEuropeana, inventarioRijks, mesmoArtista };
+                   arquivoCommons, idEuropeana, inventarioRijks, mesmoArtista, atribuicaoDifere,
+                   fonteDoId, chaveUrl, impressao, conferirImagem };
