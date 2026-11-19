@@ -246,6 +246,9 @@ body {
 }
 
 @media (max-width: 480px) {
+  .germ-footer { padding: 16px 20px !important; }
+  .germ-footer-tag { letter-spacing: 1.2px !important; line-height: 1.6; }
+
   .artworks-grid {
     grid-template-columns: 1fr 1fr;
   }

@@ -507,50 +507,41 @@ export function LangSwitcher({ lang, setLang }) {
   );
 }
 
-// ─── Instituições do acervo (topo, abaixo dos idiomas) — 3 nomes, sobem um a um, em loop
+// ─── Instituições do acervo (rodapé, sob o logo pequeno) — um nome por vez, em loop
+// Troca por esmaecimento com leve subida; altura fixa para o rodapé nunca "pular".
 const ROT_ACERVOS = { fr:"Collections", en:"Collections", es:"Acervos", pt:"Acervos", it:"Collezioni", de:"Sammlungen" };
-function AcervosTicker({ lang = "fr" }) {
-  const [lista, setLista] = useState([]);
-  const [i, setI]         = useState(0);       // contador sem fim: o nome visível é lista[i % tamanho]
-  const [subindo, setSubindo] = useState(false);
-  const LINHA = 17, VISIVEIS = 3, PAUSA = 2600, SUBIDA = 700;
+function AcervoRodape({ lang = "fr" }) {
+  const [lista, setLista]   = useState([]);
+  const [i, setI]           = useState(0);
+  const [visivel, setVisivel] = useState(true);
+  const PAUSA = 3400, FADE = 650;
   useEffect(() => {
     fetch("/api/acervo/instituicoes").then(r => r.ok ? r.json() : null)
       .then(d => setLista((d?.instituicoes || []).map(x => x.nome))).catch(() => {});
   }, []);
   useEffect(() => {
-    if (lista.length <= VISIVEIS) return;
+    if (lista.length <= 1) return;
     const quieto = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    let t2;
     const t = setInterval(() => {
       if (quieto) { setI(x => x + 1); return; }
-      setSubindo(true);
-      setTimeout(() => { setSubindo(false); setI(x => x + 1); }, SUBIDA);
-    }, PAUSA + SUBIDA);
-    return () => clearInterval(t);
+      setVisivel(false);
+      t2 = setTimeout(() => { setI(x => x + 1); setVisivel(true); }, FADE);
+    }, PAUSA + FADE);
+    return () => { clearInterval(t); clearTimeout(t2); };
   }, [lista.length]);
   if (!lista.length) return null;
-  const n = Math.min(lista.length, VISIVEIS + 1);
-  // Cor alterna azul / vermelho do logo. Vai pelo contador (não pela posição na tela),
-  // então cada nome mantém sua cor enquanto sobe, e a alternância não quebra na volta da lista.
-  const COR = ["#1545c7", "#d41515"];
-  const nomes = Array.from({ length: n }, (_, k) => ({ nome: lista[(i + k) % lista.length], cor: COR[(i + k) % 2] }));
-  const fade = "linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%)";
+  const nome = lista[i % lista.length];
   return (
-    <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:2 }}>
-      <span style={{ fontSize:9, color:"#bbb", fontFamily:"Verdana,sans-serif", letterSpacing:2, textTransform:"uppercase" }}>
-        {ROT_ACERVOS[lang] || ROT_ACERVOS.fr}
-      </span>
-      <div aria-label={lista.join(", ")} style={{ height: LINHA * Math.min(lista.length, VISIVEIS), overflow:"hidden",
-                    WebkitMaskImage: fade, maskImage: fade }}>
-        <div aria-hidden="true" style={{ transform: `translateY(${subindo ? -LINHA : 0}px)`,
-                      transition: subindo ? `transform ${SUBIDA}ms ease-in-out` : "none" }}>
-          {nomes.map(({ nome, cor }, k) => (
-            <div key={`${i}-${k}`} style={{ height:LINHA, lineHeight:`${LINHA}px`, textAlign:"right", whiteSpace:"nowrap", maxWidth:"52vw", overflow:"hidden", textOverflow:"ellipsis",
-                    fontFamily:"'Cormorant Garamond',Georgia,serif", fontSize:13.5, color:cor }}>
-              {nome}
-            </div>
-          ))}
-        </div>
+    <div className="germ-acervo-rodape" aria-label={`${ROT_ACERVOS[lang] || ROT_ACERVOS.fr}: ${lista.join(", ")}`}
+         style={{ height:16, marginTop:6, overflow:"hidden" }}>
+      <div aria-hidden="true" style={{
+        fontFamily:"'Cormorant Garamond',Georgia,serif", fontStyle:"italic", fontSize:12.5, lineHeight:"16px",
+        letterSpacing:"0.02em", color:"#8a8478", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+        maxWidth:"min(260px, 70vw)",
+        opacity: visivel ? 1 : 0, transform: `translateY(${visivel ? 0 : 3}px)`,
+        transition:`opacity ${FADE}ms ease, transform ${FADE}ms ease` }}>
+        {nome}
       </div>
     </div>
   );
@@ -1053,7 +1044,6 @@ export default function App() {
             <div onClick={()=>window.location.reload()} style={{ cursor:"pointer" }} title="Recarregar a página"><Logo/></div>
             <div style={{ display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6 }}>
               <LangSwitcher lang={lang} setLang={setLang}/>
-              <AcervosTicker lang={lang}/>
             </div>
           </div>
           <nav style={{ display:"flex" }}>
@@ -1179,9 +1169,12 @@ export default function App() {
         )}
       </main>
 
-      <footer className="germ-footer" style={{ borderTop:"1px solid #ece9e2",padding:"14px 36px",display:"flex",justifyContent:"space-between",alignItems:"center" }}>
-        <div onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{ cursor:"pointer" }} title="Voltar ao topo"><Logo small/></div>
-        <p style={{ margin:0,fontSize:9,color:"#ccc",fontFamily:"Verdana,sans-serif",letterSpacing:2 }}>{t.footer}</p>
+      <footer className="germ-footer" style={{ borderTop:"1px solid #ece9e2",padding:"16px 36px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"10px 24px" }}>
+        <div style={{ display:"flex",flexDirection:"column",alignItems:"flex-start" }}>
+          <div onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{ cursor:"pointer" }} title="Voltar ao topo"><Logo small/></div>
+          <AcervoRodape lang={lang}/>
+        </div>
+        <p className="germ-footer-tag" style={{ margin:0,fontSize:9,color:"#ccc",fontFamily:"Verdana,sans-serif",letterSpacing:2 }}>{t.footer}</p>
       </footer>
     </div>
   );
