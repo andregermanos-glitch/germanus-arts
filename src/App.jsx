@@ -507,17 +507,21 @@ export function LangSwitcher({ lang, setLang }) {
   );
 }
 
-// ─── Instituições do acervo (rodapé, sob o logo pequeno) — um nome por vez, em loop
-// Troca por esmaecimento com leve subida; altura fixa para o rodapé nunca "pular".
-const ROT_ACERVOS = { fr:"Collections", en:"Collections", es:"Acervos", pt:"Acervos", it:"Collezioni", de:"Sammlungen" };
+// ─── Rodapé: "X obras · Acervo: <museu>" ao lado do logo pequeno
+// Total e rótulo fixos; só o nome do museu troca, um por vez, por esmaecimento.
+const ROT_ACERVO = { fr:"Fonds :", en:"Collection:", es:"Acervo:", pt:"Acervo:", it:"Collezione:", de:"Sammlung:" };
+const ROT_OBRAS  = { fr:"œuvres", en:"works", es:"obras", pt:"obras", it:"opere", de:"Werke" };
+const LOCALE     = { fr:"fr-FR", en:"en-US", es:"es-ES", pt:"pt-BR", it:"it-IT", de:"de-DE" };
 function AcervoRodape({ lang = "fr" }) {
-  const [lista, setLista]   = useState([]);
-  const [i, setI]           = useState(0);
+  const [lista, setLista]     = useState([]);
+  const [total, setTotal]     = useState(null);
+  const [i, setI]             = useState(0);
   const [visivel, setVisivel] = useState(true);
   const PAUSA = 3400, FADE = 650;
   useEffect(() => {
     fetch("/api/acervo/instituicoes").then(r => r.ok ? r.json() : null)
-      .then(d => setLista((d?.instituicoes || []).map(x => x.nome))).catch(() => {});
+      .then(d => { setLista((d?.instituicoes || []).map(x => x.nome)); if (d?.total) setTotal(d.total); })
+      .catch(() => {});
   }, []);
   useEffect(() => {
     if (lista.length <= 1) return;
@@ -530,19 +534,29 @@ function AcervoRodape({ lang = "fr" }) {
     }, PAUSA + FADE);
     return () => { clearInterval(t); clearTimeout(t2); };
   }, [lista.length]);
-  if (!lista.length) return null;
-  const nome = lista[i % lista.length];
+  if (!lista.length && !total) return null;
+  const caps = { fontFamily:"Verdana,sans-serif", fontSize:9, letterSpacing:2, textTransform:"uppercase", color:"#aaa", whiteSpace:"nowrap" };
+  const nome = lista.length ? lista[i % lista.length] : "";
   return (
-    <div className="germ-acervo-rodape" aria-label={`${ROT_ACERVOS[lang] || ROT_ACERVOS.fr}: ${lista.join(", ")}`}
-         style={{ height:16, marginTop:6, overflow:"hidden" }}>
-      <div aria-hidden="true" style={{
-        fontFamily:"'Cormorant Garamond',Georgia,serif", fontStyle:"italic", fontSize:12.5, lineHeight:"16px",
-        letterSpacing:"0.02em", color:"#8a8478", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
-        maxWidth:"min(260px, 70vw)",
-        opacity: visivel ? 1 : 0, transform: `translateY(${visivel ? 0 : 3}px)`,
-        transition:`opacity ${FADE}ms ease, transform ${FADE}ms ease` }}>
-        {nome}
-      </div>
+    <div className="germ-acervo-rodape" style={{ display:"flex", alignItems:"baseline", flexWrap:"wrap", gap:"6px 0" }}>
+      {total ? (
+        <span style={caps}>{total.toLocaleString(LOCALE[lang] || "pt-BR")} {ROT_OBRAS[lang] || ROT_OBRAS.fr}</span>
+      ) : null}
+      {total && lista.length ? <span className="germ-acervo-sep" style={{ ...caps, color:"#d6d1c7", margin:"0 10px" }}>·</span> : null}
+      {lista.length ? (
+        <span style={{ display:"inline-flex", alignItems:"baseline", whiteSpace:"nowrap" }}
+              aria-label={`${ROT_ACERVO[lang] || ROT_ACERVO.fr} ${lista.join(", ")}`}>
+          <span style={caps} aria-hidden="true">{ROT_ACERVO[lang] || ROT_ACERVO.fr}</span>
+          <span aria-hidden="true" style={{
+            marginLeft:8, fontFamily:"'Cormorant Garamond',Georgia,serif", fontStyle:"italic", fontSize:13.5,
+            letterSpacing:"0.01em", color:"#8a8478", display:"inline-block",
+            maxWidth:"min(280px, 62vw)", overflow:"hidden", textOverflow:"ellipsis", verticalAlign:"baseline",
+            opacity: visivel ? 1 : 0, transform:`translateY(${visivel ? 0 : 3}px)`,
+            transition:`opacity ${FADE}ms ease, transform ${FADE}ms ease` }}>
+            {nome}
+          </span>
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -1169,8 +1183,8 @@ export default function App() {
         )}
       </main>
 
-      <footer className="germ-footer" style={{ borderTop:"1px solid #ece9e2",padding:"16px 36px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"10px 24px" }}>
-        <div style={{ display:"flex",flexDirection:"column",alignItems:"flex-start" }}>
+      <footer className="germ-footer" style={{ borderTop:"1px solid #ece9e2",padding:"16px 36px",display:"flex",justifyContent:"space-between",alignItems:"baseline",flexWrap:"wrap",gap:"10px 24px" }}>
+        <div style={{ display:"flex",alignItems:"baseline",flexWrap:"wrap",gap:"8px 22px" }}>
           <div onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{ cursor:"pointer" }} title="Voltar ao topo"><Logo small/></div>
           <AcervoRodape lang={lang}/>
         </div>
