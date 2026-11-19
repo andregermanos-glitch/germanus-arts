@@ -290,9 +290,15 @@ function montarGaleria(app, pool) {
           .sort((a, b) => b.obras - a.obras);
         const lista = [...museus,
           ...[...portais].filter(([, n]) => n > 0).map(([nome, obras]) => ({ nome, obras, tipo: "portal" }))];
-        instCache = { em: Date.now(), lista };
+        // Total de obras visíveis no site (com imagem, publicadas, em alguma ala) — mesmo critério da busca
+        const t = await pool.query(`
+          SELECT COUNT(*)::int AS n FROM artworks
+           WHERE image_url IS NOT NULL AND image_url <> ''
+             AND COALESCE(status,'publicada') = 'publicada'
+             AND ala_id IS NOT NULL AND ala_id <> 'entrada'`);
+        instCache = { em: Date.now(), lista, total: t.rows[0]?.n || 0 };
       }
-      res.json({ instituicoes: instCache.lista });
+      res.json({ instituicoes: instCache.lista, total: instCache.total });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
