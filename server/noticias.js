@@ -53,6 +53,55 @@ TikTok: @germanus.art`,
   },
 };
 
+// Traduções das páginas padrão (EN e FR). Só são gravadas se o texto em português
+// no banco ainda for o padrão — se André já editou a página, nada é sobrescrito.
+const PAGINAS_TRAD = {
+  "nos-somos": {
+    titulo_en: "About us", titulo_fr: "Qui sommes-nous",
+    texto_en:
+`GERMANUS.Art is a curatorial platform for public-domain art. We bring together works from museums around the world and arrange them in 18 thematic galleries, conceived from the act of looking: the portrait, history, objects, ordinary people, light, colour, emotion.
+
+Each gallery measures the visual arts by what the eye can reach. A work enters the gallery in which one of its elements commands the viewer's experience, not by a rigid classification of school or period.
+
+The collection is free to view, study and share. The GERMANUS.Art Editorial follows what happens in the visual arts, fashion and culture, with its own reading and signed opinion.`,
+    texto_fr:
+`GERMANUS.Art est une plateforme de curation d'art du domaine public. Nous réunissons des œuvres de musées du monde entier et les organisons en 18 galeries thématiques, pensées à partir du regard : le portrait, l'histoire, les objets, les gens du peuple, la lumière, les couleurs, l'émotion.
+
+Chaque galerie mesure les arts plastiques à ce que le regard atteint. Une œuvre entre dans la galerie où l'un de ses éléments commande l'expérience de celui qui la regarde, et non selon un classement rigide par école ou par période.
+
+La collection est libre d'accès, d'étude et de partage. L'Éditorial GERMANUS.Art suit l'actualité des arts plastiques, de la mode et des comportements, avec une lecture propre et une opinion signée.`,
+  },
+  "direitos": {
+    titulo_en: "Rights", titulo_fr: "Droits",
+    texto_en:
+`Every work in the collection is in the public domain. We follow the rule of Brazilian copyright law: a work enters the public domain 70 years after 1 January of the year following the author's death. Older works by unknown authors, or whose date of death is unknown, undergo additional verification before entering the collection.
+
+Images come from two sources: museums with open-access policies, which release them under a CC0 licence, and Wikimedia Commons, where the licence is checked file by file. Every work goes through a rights review before publication, and each record states its source.
+
+GERMANUS.Art Editorial texts are our own, written with the help of artificial intelligence and reviewed by our curators. News items cite and link to their original sources.
+
+If you believe an image or text should not be here, please write to us through the Contact page. We review every request and, where appropriate, remove the content.`,
+    texto_fr:
+`Toutes les œuvres de la collection appartiennent au domaine public. Nous suivons la règle du droit d'auteur brésilien : une œuvre entre dans le domaine public 70 ans après le 1er janvier de l'année suivant la mort de son auteur. Les œuvres anciennes d'auteur inconnu, ou dont la date de décès est inconnue, font l'objet d'une vérification supplémentaire avant d'entrer dans la collection.
+
+Les images proviennent de deux sources : des musées ayant une politique d'accès ouvert, qui les diffusent sous licence CC0, et Wikimedia Commons, où la licence est vérifiée fichier par fichier. Chaque œuvre passe par un contrôle des droits avant publication, et chaque fiche indique sa source.
+
+Les textes de l'Éditorial GERMANUS.Art sont de notre plume, rédigés avec l'aide de l'intelligence artificielle et relus par la curation. Les articles citent et renvoient à leurs sources originales.
+
+Si vous estimez qu'une image ou un texte ne devrait pas figurer ici, écrivez-nous via la page Contact. Nous examinons chaque demande et retirons le contenu le cas échéant.`,
+  },
+  "loja": {
+    titulo_en: "Shop", titulo_fr: "Boutique",
+    texto_en: `Coming soon: tote bags and T-shirts featuring public-domain works from the collection, each piece labelled with the work's title, date and source.`,
+    texto_fr: `Bientôt : tote bags et t-shirts ornés d'œuvres du domaine public de la collection, chaque pièce accompagnée d'une étiquette indiquant le titre, la date et la source de l'œuvre.`,
+  },
+  "contatos": {
+    titulo_en: "Contact", titulo_fr: "Contact",
+    texto_en: `TikTok: @germanus.art`,
+    texto_fr: `TikTok : @germanus.art`,
+  },
+};
+
 function esc(s) {
   return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;")
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -91,6 +140,19 @@ function montarNoticias(app, pool) {
         await pool.query(
           `INSERT INTO paginas (slug, titulo, texto) VALUES ($1,$2,$3) ON CONFLICT (slug) DO NOTHING`,
           [slug, p.titulo, p.texto]);
+      }
+      // Idiomas: EN e FR ao lado do português
+      for (const col of ["titulo_en", "titulo_fr", "texto_en", "texto_fr"])
+        await pool.query(`ALTER TABLE paginas ADD COLUMN IF NOT EXISTS ${col} TEXT NOT NULL DEFAULT ''`);
+      for (const [slug, tr] of Object.entries(PAGINAS_TRAD)) {
+        await pool.query(`
+          UPDATE paginas SET titulo_en=$2, titulo_fr=$3, texto_en=$4, texto_fr=$5
+           WHERE slug=$1 AND texto_en='' AND texto_fr='' AND texto=$6`,
+          [slug, tr.titulo_en, tr.titulo_fr, tr.texto_en, tr.texto_fr, PAGINAS_PADRAO[slug].texto]);
+        // contatos: o texto padrão tem uma instrução interna; o público vê só o TikTok
+        if (slug === "contatos") await pool.query(`
+          UPDATE paginas SET titulo_en=$2, titulo_fr=$3
+           WHERE slug=$1 AND titulo_en='' AND titulo_fr=''`, [slug, tr.titulo_en, tr.titulo_fr]);
       }
       console.log("📰 Notícias — tabelas prontas");
     } catch (e) { console.log("📰 Notícias — migração:", e.message); }
@@ -136,9 +198,14 @@ function montarNoticias(app, pool) {
 
   app.get("/api/pagina/:slug", async (req, res) => {
     try {
-      const { rows } = await pool.query(`SELECT slug, titulo, texto FROM paginas WHERE slug=$1`, [req.params.slug]);
-      if (!rows[0]) return res.status(404).json({ error: "página não encontrada" });
-      res.json(rows[0]);
+      const { rows } = await pool.query(`SELECT * FROM paginas WHERE slug=$1`, [req.params.slug]);
+      const p = rows[0];
+      if (!p) return res.status(404).json({ error: "página não encontrada" });
+      const lang = ["en", "fr"].includes(req.query.lang) ? req.query.lang : "pt";
+      // Sem tradução gravada, cai para o português
+      const titulo = lang === "pt" ? p.titulo : (p[`titulo_${lang}`] || "");
+      const texto  = lang === "pt" ? p.texto  : (p[`texto_${lang}`]  || p.texto);
+      res.json({ slug: p.slug, titulo: titulo || p.titulo, titulo_traduzido: lang === "pt" || !!titulo, texto, lang });
     } catch (e) { res.status(500).json({ error: e.message }); }
   });
 
@@ -204,7 +271,7 @@ function montarNoticias(app, pool) {
   app.get("/api/paginas/painel", async (req, res) => {
     if (!autorizado(req, res)) return;
     try {
-      const { rows } = await pool.query(`SELECT slug, titulo, texto FROM paginas ORDER BY slug`);
+      const { rows } = await pool.query(`SELECT slug, titulo, texto, titulo_en, texto_en, titulo_fr, texto_fr FROM paginas ORDER BY slug`);
       res.json({ paginas: rows });
     } catch (e) { res.status(500).json({ error: e.message }); }
   });
@@ -212,12 +279,16 @@ function montarNoticias(app, pool) {
   app.post("/api/paginas/salvar", async (req, res) => {
     if (!autorizado(req, res)) return;
     try {
-      const { slug, titulo, texto } = req.body || {};
+      const { slug, titulo, texto, titulo_en, texto_en, titulo_fr, texto_fr } = req.body || {};
       if (!PAGINAS_PADRAO[slug]) return res.status(400).json({ error: "página desconhecida" });
       await pool.query(`
-        INSERT INTO paginas (slug, titulo, texto, atualizada_em) VALUES ($1,$2,$3,NOW())
-        ON CONFLICT (slug) DO UPDATE SET titulo=EXCLUDED.titulo, texto=EXCLUDED.texto, atualizada_em=NOW()`,
-        [slug, String(titulo || PAGINAS_PADRAO[slug].titulo), String(texto || "")]);
+        INSERT INTO paginas (slug, titulo, texto, titulo_en, texto_en, titulo_fr, texto_fr, atualizada_em)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())
+        ON CONFLICT (slug) DO UPDATE SET titulo=EXCLUDED.titulo, texto=EXCLUDED.texto,
+          titulo_en=EXCLUDED.titulo_en, texto_en=EXCLUDED.texto_en,
+          titulo_fr=EXCLUDED.titulo_fr, texto_fr=EXCLUDED.texto_fr, atualizada_em=NOW()`,
+        [slug, String(titulo || PAGINAS_PADRAO[slug].titulo), String(texto || ""),
+         String(titulo_en || ""), String(texto_en || ""), String(titulo_fr || ""), String(texto_fr || "")]);
       res.json({ ok: true });
     } catch (e) { res.status(500).json({ error: e.message }); }
   });
@@ -425,9 +496,15 @@ async function carregarPaginas(){
   var ordem = ['nos-somos','direitos','loja','contatos'];
   var ps = (d.paginas||[]).sort(function(a,b){ return ordem.indexOf(a.slug)-ordem.indexOf(b.slug); });
   g('paginas').innerHTML = ps.map(function(p){
+    var campo = function(rot, suf, tit, txt){
+      return '<div style="margin:10px 0 14px;padding-top:8px;border-top:1px dashed #ddd"><b style="font-size:11px">'+rot+'</b>'+
+        '<label>título</label><input id="pt'+suf+'_'+p.slug+'" value="'+e(tit||'')+'">'+
+        '<label>texto (parágrafos separados por linha em branco)</label><textarea id="px'+suf+'_'+p.slug+'" style="min-height:180px">'+e(txt||'')+'</textarea></div>';
+    };
     return '<div class="box"><h3>/'+e(p.slug)+'</h3>'+
-      '<label>título</label><input id="pt_'+p.slug+'" value="'+e(p.titulo)+'">'+
-      '<label>texto (parágrafos separados por linha em branco)</label><textarea id="px_'+p.slug+'" style="min-height:200px">'+e(p.texto)+'</textarea>'+
+      campo('ENGLISH (idioma principal)', 'en', p.titulo_en, p.texto_en)+
+      campo('FRANÇAIS', 'fr', p.titulo_fr, p.texto_fr)+
+      campo('PORTUGUÊS', '', p.titulo, p.texto)+
       '<button class="b go" onclick="salvarPagina(\\''+p.slug+'\\')">salvar</button> '+
       '<a href="/'+p.slug+'" target="_blank" style="font-size:10px;margin-left:8px">ver ↗</a>'+
       '<span id="pm_'+p.slug+'" style="font-size:11px;color:#666;margin-left:8px"></span></div>';
@@ -435,7 +512,10 @@ async function carregarPaginas(){
 }
 async function salvarPagina(slug){
   g('pm_'+slug).textContent = 'salvando…';
-  var d = await api('/api/paginas/salvar', {slug:slug, titulo:g('pt_'+slug).value, texto:g('px_'+slug).value});
+  var d = await api('/api/paginas/salvar', {slug:slug,
+    titulo:g('pt_'+slug).value, texto:g('px_'+slug).value,
+    titulo_en:g('pten_'+slug).value, texto_en:g('pxen_'+slug).value,
+    titulo_fr:g('ptfr_'+slug).value, texto_fr:g('pxfr_'+slug).value});
   g('pm_'+slug).textContent = d.ok ? 'salvo ✓' : ('erro: '+(d.error||''));
 }
 
