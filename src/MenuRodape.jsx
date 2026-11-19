@@ -1,19 +1,16 @@
-// src/MenuRodape.jsx — menu de texto do rodapé: Nós Somos · Direitos · Notícias · Loja · Contatos
+// src/MenuRodape.jsx — menu de texto do rodapé: Nós Somos · Direitos · Editorial · Loja · Contatos
 // Usado na página inicial (abaixo da seleção de ala e do Emmanuel Rio) e nas páginas internas.
 
-export const ROTAS = ["nos-somos", "direitos", "noticias", "loja", "contatos"];
+export const ROTAS = ["nos-somos", "direitos", "editorial", "loja", "contatos"];
 
 export const ROTULOS = {
-  fr: { "nos-somos":"Qui sommes-nous", direitos:"Droits",   noticias:"Actualités", loja:"Boutique", contatos:"Contact" },
-  en: { "nos-somos":"About us",        direitos:"Rights",   noticias:"News",       loja:"Shop",     contatos:"Contact" },
-  es: { "nos-somos":"Quiénes somos",   direitos:"Derechos", noticias:"Noticias",   loja:"Tienda",   contatos:"Contacto" },
-  pt: { "nos-somos":"Nós Somos",       direitos:"Direitos", noticias:"Notícias",   loja:"Loja",     contatos:"Contatos" },
-  it: { "nos-somos":"Chi siamo",       direitos:"Diritti",  noticias:"Notizie",    loja:"Negozio",  contatos:"Contatti" },
-  de: { "nos-somos":"Über uns",        direitos:"Rechte",   noticias:"Nachrichten",loja:"Shop",     contatos:"Kontakt" },
+  en: { "nos-somos":"About us",        direitos:"Rights", editorial:"Editorial",  loja:"Shop",     contatos:"Contact" },
+  fr: { "nos-somos":"Qui sommes-nous", direitos:"Droits", editorial:"Éditorial",  loja:"Boutique", contatos:"Contact" },
+  pt: { "nos-somos":"Nós Somos",       direitos:"Direitos", editorial:"Editorial", loja:"Loja",   contatos:"Contatos" },
 };
 
-export default function MenuRodape({ lang = "fr", atual = "", centro = false }) {
-  const r = ROTULOS[lang] || ROTULOS.fr;
+export default function MenuRodape({ lang = "en", atual = "", centro = false }) {
+  const r = ROTULOS[lang] || ROTULOS.en;
   return (
     <nav className="menu-rodape" style={{
       display:"flex", flexWrap:"wrap", alignItems:"center",

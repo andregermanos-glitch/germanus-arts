@@ -1,4 +1,4 @@
-// src/Paginas.jsx — páginas do menu do rodapé: /nos-somos, /direitos, /noticias, /loja, /contatos
+// src/Paginas.jsx — páginas do menu do rodapé: /nos-somos, /direitos, /editorial, /loja, /contatos
 // Mesma linha visual da página inicial: fundo creme, Cormorant Garamond nos textos,
 // Verdana em caixa-alta espaçada nos rótulos, logo GERMANUS.Art no cabeçalho.
 
@@ -11,13 +11,13 @@ const VERMELHO = "#b03a2e";
 const LOCALE = { fr:"fr-FR", en:"en-GB", es:"es-ES", pt:"pt-BR", it:"it-IT", de:"de-DE" };
 
 const TX = {
-  fr: { voltar:"← Retour à la collection", ler:"Lire", edicao:"Édition nº", editorial:"Éditorial", fontes:"Sources",
+  fr: { voltar:"← Retour à la collection", ler:"Lire", edicao:"Édition nº", editorial:"Éditorial", breve:"Bientôt", fontes:"Sources",
         vazio:"Aucun article publié pour l’instant.", ia:"Textes rédigés par l’Éditorial GERMANUS.Art avec l’aide de l’IA et relus par la curation.", pt:"Articles en portugais." },
-  en: { voltar:"← Back to the collection", ler:"Read", edicao:"Edition no.", editorial:"Editorial", fontes:"Sources",
+  en: { voltar:"← Back to the collection", ler:"Read", edicao:"Edition no.", editorial:"Editorial", breve:"Coming soon", fontes:"Sources",
         vazio:"No articles published yet.", ia:"Written by the GERMANUS.Art Editorial with AI assistance and reviewed by our curators.", pt:"Articles in Portuguese." },
   es: { voltar:"← Volver a la colección", ler:"Leer", edicao:"Edición n.º", editorial:"Editorial", fontes:"Fuentes",
         vazio:"Aún no hay artículos publicados.", ia:"Textos del Editorial GERMANUS.Art con apoyo de IA y revisión de la curaduría.", pt:"Artículos en portugués." },
-  pt: { voltar:"← Voltar ao acervo", ler:"Ler", edicao:"Edição nº", editorial:"Editorial", fontes:"Fontes",
+  pt: { voltar:"← Voltar ao acervo", ler:"Ler", edicao:"Edição nº", editorial:"Editorial", breve:"Em breve", fontes:"Fontes",
         vazio:"Nenhuma matéria publicada ainda.", ia:"Textos produzidos pela redação da GERMANUS.Art com apoio de IA e revisão editorial.", pt:"" },
   it: { voltar:"← Torna alla collezione", ler:"Leggi", edicao:"Edizione n.", editorial:"Editoriale", fontes:"Fonti",
         vazio:"Nessun articolo pubblicato.", ia:"Testi dell’Editoriale GERMANUS.Art con supporto dell’IA e revisione curatoriale.", pt:"Articoli in portoghese." },
@@ -56,11 +56,11 @@ function Fontes({ fontes, titulo }) {
 
 // ─── Moldura comum: cabeçalho igual ao da home + rodapé com o menu ───────────
 function Moldura({ lang, setLang, slug, children }) {
-  const t = TX[lang] || TX.fr;
+  const t = TX[lang] || TX.en;
   return (
     <div className="germ-app" style={{ minHeight:"100vh", color:"#0a0a0a", fontFamily:serif, display:"flex", flexDirection:"column" }}>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
-      <style>{`*{box-sizing:border-box}.lang-switcher{display:flex;align-items:center;gap:6px}@media(max-width:768px){.lang-switcher{display:grid;grid-template-columns:repeat(2,auto);gap:6px;justify-content:end}.pg-pad{padding-left:16px!important;padding-right:16px!important}.pg-voltar{display:none}.pg-logo{transform:scale(.62);transform-origin:left bottom;margin-right:-40%}}`}</style>
+      <style>{`*{box-sizing:border-box}.lang-switcher{display:flex;align-items:center;gap:6px}@media(max-width:768px){.pg-pad{padding-left:16px!important;padding-right:16px!important}.pg-voltar{display:none}.pg-logo{transform:scale(.62);transform-origin:left bottom;margin-right:-40%}}`}</style>
 
       <header className="germ-header pg-pad" style={{ borderBottom:"1px solid #e8e4dc", padding:"18px 36px 16px" }}>
         <div style={{ maxWidth:1300, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"flex-end", gap:12 }}>
@@ -81,7 +81,6 @@ function Moldura({ lang, setLang, slug, children }) {
           <MenuRodape lang={lang} atual={slug} centro/>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:14, gap:12, flexWrap:"wrap" }}>
             <a href="/" style={{ textDecoration:"none" }}><Logo small/></a>
-            {slug === "noticias" && <p style={{ margin:0, fontSize:12, fontStyle:"italic", color:"#8a8478", fontFamily:serif }}>{t.ia}</p>}
           </div>
         </div>
       </footer>
@@ -94,15 +93,16 @@ function PaginaTexto({ slug, lang }) {
   const [p, setP] = useState(null);
   const [erro, setErro] = useState(false);
   useEffect(() => {
-    fetch(`/api/pagina/${slug}`).then(r => r.ok ? r.json() : Promise.reject())
+    setP(null); setErro(false);
+    fetch(`/api/pagina/${slug}?lang=${lang}`).then(r => r.ok ? r.json() : Promise.reject())
       .then(setP).catch(() => setErro(true));
-  }, [slug]);
+  }, [slug, lang]);
   const titulo = p?.titulo || (ROTULOS.pt[slug]);
   return (
     <article style={{ maxWidth:680, margin:"0 auto", paddingTop:12 }}>
       <p style={{ ...rotulo, color:VERMELHO, margin:"0 0 10px" }}>GERMANUS.Art</p>
       <h1 style={{ margin:"0 0 22px", fontSize:"clamp(34px,5vw,48px)", fontWeight:700, lineHeight:1.05, fontFamily:serif }}>
-        {lang === "pt" ? titulo : (ROTULOS[lang] || ROTULOS.fr)[slug]}
+        {p?.titulo_traduzido ? p.titulo : (lang === "pt" ? titulo : (ROTULOS[lang] || ROTULOS.en)[slug])}
       </h1>
       <div style={{ borderTop:"1px solid #0a0a0a", borderBottom:"1px solid #0a0a0a", height:4, marginBottom:26 }}/>
       {erro && <p style={{ color:"#999", fontStyle:"italic" }}>—</p>}
@@ -114,9 +114,22 @@ function PaginaTexto({ slug, lang }) {
   );
 }
 
-// ─── Notícias: central + seis chamadas; clicar numa chamada a leva ao centro ──
+// ─── Editorial: por enquanto, só "Em breve" ──────────────────────────────────
+function EditorialEmBreve({ lang }) {
+  const t = TX[lang] || TX.en;
+  return (
+    <article style={{ maxWidth:680, margin:"0 auto", paddingTop:12, minHeight:"38vh" }}>
+      <p style={{ ...rotulo, color:VERMELHO, margin:"0 0 10px" }}>GERMANUS.Art</p>
+      <h1 style={{ margin:"0 0 22px", fontSize:"clamp(34px,5vw,48px)", fontWeight:700, lineHeight:1.05, fontFamily:serif }}>{t.editorial}</h1>
+      <div style={{ borderTop:"1px solid #0a0a0a", borderBottom:"1px solid #0a0a0a", height:4, marginBottom:30 }}/>
+      <p style={{ fontSize:22, fontStyle:"italic", color:"#8a8478", margin:0, fontFamily:serif }}>{t.breve}</p>
+    </article>
+  );
+}
+
+// ─── Notícias (guardado para quando o Editorial voltar): central + seis chamadas; clicar numa chamada a leva ao centro ──
 function PaginaNoticias({ lang }) {
-  const t = TX[lang] || TX.fr;
+  const t = TX[lang] || TX.en;
   const [lista, setLista] = useState(null);
   const [edicao, setEdicao] = useState(0);
 
@@ -215,13 +228,13 @@ function PaginaNoticias({ lang }) {
 export default function Paginas({ slug }) {
   const [lang, setLang] = useState(loadLang);
   useEffect(() => {
-    const nome = slug === "noticias" ? TX[lang]?.editorial : (ROTULOS[lang] || ROTULOS.fr)[slug];
+    const nome = (ROTULOS[lang] || ROTULOS.en)[slug];
     document.title = `${nome} — GERMANUS.Art`;
     document.documentElement.lang = lang;
   }, [slug, lang]);
   return (
     <Moldura lang={lang} setLang={setLang} slug={slug}>
-      {slug === "noticias" ? <PaginaNoticias lang={lang}/> : <PaginaTexto slug={slug} lang={lang}/>}
+      {slug === "editorial" ? <EditorialEmBreve lang={lang}/> : <PaginaTexto slug={slug} lang={lang}/>}
     </Moldura>
   );
 }

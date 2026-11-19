@@ -4,9 +4,10 @@ import App from './App.jsx'
 import Paginas from './Paginas.jsx'
 import { ROTAS } from './MenuRodape.jsx'
 
-// Páginas do menu do rodapé (/nos-somos, /direitos, /noticias, /loja, /contatos);
+// Páginas do menu do rodapé (/nos-somos, /direitos, /editorial, /loja, /contatos);
 // qualquer outro caminho abre o site como sempre.
-const slug = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase()
+let slug = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase()
+if (slug === 'noticias') slug = 'editorial'   // endereço antigo continua funcionando
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

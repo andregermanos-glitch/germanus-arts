@@ -41,8 +41,8 @@ const TX = {
         abertura:"Ich bin Emmanuel Rio. Ich kann erklären, wie diese Sammlung geordnet ist, über jedes hier verwahrte Werk sprechen oder meine eigene Geschichte erzählen. Was möchten Sie?" },
 };
 
-export default function Atendente({ lang = "fr" }) {
-  const t = TX[lang] || TX.fr;
+export default function Atendente({ lang = "en" }) {
+  const t = TX[lang] || TX.en;
 
   const [disponivel, setDisp] = useState(null);
   const [aberto, setAberto]   = useState(false);

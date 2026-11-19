@@ -7,8 +7,14 @@ import MenuRodape from "./MenuRodape";
 // ─── Persistência ─────────────────────────────────────────────────────────────
 const loadCol  = () => { try { return JSON.parse(localStorage.getItem("germ_col")||"[]"); } catch { return []; } };
 const saveCol  = col => { try { localStorage.setItem("germ_col", JSON.stringify(col)); } catch {} };
-export const loadLang = () => { try { return localStorage.getItem("germ_lang") || "fr"; } catch { return "fr"; } };
-const saveLang = l  => { try { localStorage.setItem("germ_lang", l); } catch {} };
+// Idiomas do site: inglês (principal), francês e português.
+// Chave nova ("germ_idioma"): todos passam a abrir em inglês; quem escolher outro idioma, fica com ele.
+export const IDIOMAS = ["en", "fr", "pt"];
+export const loadLang = () => {
+  try { const l = localStorage.getItem("germ_idioma"); return IDIOMAS.includes(l) ? l : "en"; }
+  catch { return "en"; }
+};
+export const saveLang = l => { try { localStorage.setItem("germ_idioma", l); } catch {} };
 
 // ─── Rotatividade — rastreia obras vistas (30 min) ───────────────────────────
 const SEEN_KEY = "germ_seen";
@@ -39,7 +45,7 @@ function clearSeen() {
 // ─── Traduções ────────────────────────────────────────────────────────────────
 const T = {
   fr: {
-    tabs: ["Rechercher", "Collection", "Expositions", "Ajouter une œuvre"],
+    tabs: ["Rechercher", "Collection personnelle", "Expositions", "Ajouter une œuvre"],
     searchDirect: "Recherche directe — œuvre, artiste, style, période...",
     searchRefine: n => `Affiner dans ${n}... (optionnel)`,
     from: "DE", to: "À",
@@ -86,7 +92,7 @@ const T = {
     }
   },
   en: {
-    tabs: ["Search", "Collection", "Exhibitions", "Add Artwork"],
+    tabs: ["Search", "Personal Collection", "Exhibitions", "Add Artwork"],
     searchDirect: "Direct search — artwork, artist, style, period...",
     searchRefine: n => `Refine in ${n}... (optional)`,
     from: "FROM", to: "TO",
@@ -227,7 +233,7 @@ const T = {
     }
   },
   pt: {
-    tabs: ["Buscar", "Coleção", "Exposições", "Adicionar Obra"],
+    tabs: ["Buscar", "Coleção Pessoal", "Exposições", "Adicionar Obra"],
     searchDirect: "Busca direta — obra, artista, estilo, período...",
     searchRefine: n => `Refinar em ${n}... (opcional)`,
     from: "DE", to: "ATÉ",
@@ -450,23 +456,13 @@ export function Logo({ small }) {
   );
 }
 
-// ─── Seletor de idioma — horizontal no desktop, quadrado 2×2 no celular ───────
+// ─── Seletor de idioma — EN · FR · PT, em linha ───────────────────────────────
 export function LangSwitcher({ lang, setLang }) {
-  const [abrir, setAbrir] = useState(false);
   const principais = [
-    { code:"fr", flag:"🇫🇷" },
     { code:"en", flag:"🇬🇧" },
-    { code:"es", flag:"🇪🇸" },
+    { code:"fr", flag:"🇫🇷" },
     { code:"pt", flag:"🇵🇹" },
   ];
-  const outras = [
-    { code:"it", flag:"🇮🇹", nome:"Italiano" },
-    { code:"de", flag:"🇩🇪", nome:"Deutsch" },
-  ];
-  const rotulo = {
-    fr:"autres langues", en:"other languages", es:"otros idiomas",
-    pt:"outros idiomas", it:"altre lingue", de:"andere Sprachen",
-  };
   const btn = (l) => (
     <button key={l.code} onClick={() => { setLang(l.code); saveLang(l.code); }}
       style={{
@@ -482,37 +478,16 @@ export function LangSwitcher({ lang, setLang }) {
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:3 }}>
       <div className="lang-switcher">{principais.map(btn)}</div>
-      <div style={{ position:"relative" }}>
-        <span onClick={() => setAbrir(a => !a)}
-          style={{ fontSize:11, color:"#0a0a0a", cursor:"pointer", letterSpacing:0.3,
-                   opacity:0.65, userSelect:"none" }}>
-          {rotulo[lang] || rotulo.fr} ▾
-        </span>
-        {abrir && (
-          <div style={{ position:"absolute", right:0, top:"18px", background:"#fff",
-                        border:"1px solid #e0e0e0", borderRadius:6, boxShadow:"0 2px 8px rgba(0,0,0,.12)",
-                        padding:4, zIndex:50, display:"flex", flexDirection:"column", gap:2 }}>
-            {outras.map(l => (
-              <button key={l.code} onClick={() => { setLang(l.code); saveLang(l.code); setAbrir(false); }}
-                style={{ background: lang===l.code?"#f0f0f0":"none", border:"none", cursor:"pointer",
-                         fontSize:12, padding:"4px 10px", whiteSpace:"nowrap", textAlign:"left",
-                         display:"flex", alignItems:"center", gap:6, borderRadius:4 }}>
-                <span style={{ fontSize:16 }}>{l.flag}</span> {l.nome}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
 
 // ─── Rodapé: "X obras · Acervo: <museu>" ao lado do logo pequeno
 // Total e rótulo fixos; só o nome do museu troca, um por vez, por esmaecimento.
-const ROT_ACERVO = { fr:"Fonds :", en:"Collection:", es:"Acervo:", pt:"Acervo:", it:"Collezione:", de:"Sammlung:" };
+const ROT_ACERVO = { fr:"Fonds :", en:"Holdings:", es:"Acervo:", pt:"Acervo:", it:"Collezione:", de:"Sammlung:" };
 const ROT_OBRAS  = { fr:"œuvres", en:"works", es:"obras", pt:"obras", it:"opere", de:"Werke" };
 const LOCALE     = { fr:"fr-FR", en:"en-US", es:"es-ES", pt:"pt-BR", it:"it-IT", de:"de-DE" };
-function AcervoRodape({ lang = "fr" }) {
+function AcervoRodape({ lang = "en" }) {
   const [lista, setLista]     = useState([]);
   const [total, setTotal]     = useState(null);
   const [i, setI]             = useState(0);
@@ -540,13 +515,13 @@ function AcervoRodape({ lang = "fr" }) {
   return (
     <div className="germ-acervo-rodape" style={{ display:"flex", alignItems:"baseline", flexWrap:"wrap", gap:"6px 0" }}>
       {total ? (
-        <span style={caps}>{total.toLocaleString(LOCALE[lang] || "pt-BR")} {ROT_OBRAS[lang] || ROT_OBRAS.fr}</span>
+        <span style={caps}>{total.toLocaleString(LOCALE[lang] || "pt-BR")} {ROT_OBRAS[lang] || ROT_OBRAS.en}</span>
       ) : null}
       {total && lista.length ? <span className="germ-acervo-sep" style={{ ...caps, color:"#d6d1c7", margin:"0 10px" }}>·</span> : null}
       {lista.length ? (
         <span style={{ display:"inline-flex", alignItems:"baseline", whiteSpace:"nowrap" }}
-              aria-label={`${ROT_ACERVO[lang] || ROT_ACERVO.fr} ${lista.join(", ")}`}>
-          <span style={caps} aria-hidden="true">{ROT_ACERVO[lang] || ROT_ACERVO.fr}</span>
+              aria-label={`${ROT_ACERVO[lang] || ROT_ACERVO.en} ${lista.join(", ")}`}>
+          <span style={caps} aria-hidden="true">{ROT_ACERVO[lang] || ROT_ACERVO.en}</span>
           <span aria-hidden="true" style={{
             marginLeft:8, fontFamily:"'Cormorant Garamond',Georgia,serif", fontStyle:"italic", fontSize:13.5,
             letterSpacing:"0.01em", color:"#8a8478", display:"inline-block",
@@ -562,7 +537,7 @@ function AcervoRodape({ lang = "fr" }) {
 }
 
 // ─── Barra ambiente ───────────────────────────────────────────────────────────
-function AmbientBar({ lang = "fr" }) {
+function AmbientBar({ lang = "en" }) {
   const [moon, setMoon]       = useState(null);
   const [weather, setWeather] = useState(null);
   const [wL, setWL]           = useState(true);
@@ -573,7 +548,7 @@ function AmbientBar({ lang = "fr" }) {
   const s = { fontSize:10, color:"#999", fontFamily:"Verdana,sans-serif", letterSpacing:.3 };
   return (
     <div className="germ-ambient" style={{ background:"#f5f4f0", borderBottom:"1px solid #ece9e2", padding:"5px 36px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:"2px 12px", flexWrap:"wrap" }}>
-      <span style={s}>{moon && (() => { const L = LUA[lang] || LUA.fr;
+      <span style={s}>{moon && (() => { const L = LUA[lang] || LUA.en;
         return `${moon.emoji} ${L.rotulo} · ${L.dia} ${moon.dia} · ${L.fases[moon.idx]}`; })()}</span>
       <span style={s}>{wL?"···":weather?`${weather.icon} ${weather.temp}°C${weather.city?` · ${weather.city}`:""}` : "—"}</span>
     </div>
@@ -613,7 +588,7 @@ function AlaBtn({ name, ala, active, onClick }) {
 // ─── Visor de zoom em alta resolução (com setas: anterior / próxima) ─────────
 // onPrev/onNext opcionais: quando presentes, mostra setas, aceita ← → do teclado
 // e o gesto de deslizar no celular. pos/total exibem "37 / 1.240".
-function ZoomViewer({ art, onClose, onPrev, onNext, pos, total, neighbors = [], lang = "fr" }) {
+function ZoomViewer({ art, onClose, onPrev, onNext, pos, total, neighbors = [], lang = "en" }) {
   const [scale, setScale]   = useState(1);
   const [pos2, setPos]      = useState({ x: 0, y: 0 });
   const [drag, setDrag]     = useState(null);
@@ -740,7 +715,7 @@ function ZoomBtn({ children, onClick, close }) {
 }
 
 // ─── Card de obra ─────────────────────────────────────────────────────────────
-function Card({ art, onAdd, onRemove, inCollection, onNavigate, onZoom, t, lang="fr" }) {
+function Card({ art, onAdd, onRemove, inCollection, onNavigate, onZoom, t, lang="en" }) {
   const [open,setOpen]    = useState(false);
   const [imgErr,setImgErr]= useState(false);
   const [imgOk,setImgOk]  = useState(false);
@@ -788,7 +763,7 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, onZoom, t, lang=
           <div style={{ borderTop:"1px solid #f0ece4", paddingTop:9, display:"flex", flexDirection:"column", gap:5 }}>
             {art.dimensions&&<p style={{ margin:0, fontSize:10.5, color:"#bbb", fontFamily:"monospace" }}>{art.dimensions}</p>}
             {art.description&&<p style={{ margin:0, fontSize:13, color:"#444", lineHeight:1.65, fontFamily:"'Cormorant Garamond',serif" }}>{art.description}</p>}
-            {art.wiki&&(art.wiki[lang||"fr"]||art.wiki.en||art.wiki.fr)&&(()=>{
+            {art.wiki&&(art.wiki[lang||"en"]||art.wiki.en||art.wiki.fr)&&(()=>{
               const ordem = [lang, "pt", "fr", "en", "es", "it", "de"].filter(Boolean);
               const wLang = ordem.find(L => art.wiki[L]) || "fr";
               const wText = art.wiki[wLang];
@@ -930,7 +905,7 @@ function CuradoriaTab({ col, onClickAla, t, lang }) {
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [lang,setLang]     = useState(loadLang);
-  const t = T[lang] || T.fr;
+  const t = T[lang] || T.en;
 
   const [tab,setTab]       = useState("buscar");
   const [col,setCol]       = useState([]);
@@ -1040,27 +1015,27 @@ export default function App() {
 
   const TABS=[
     {id:"buscar",   label:t.tabs[0]},
-    {id:"acervo",   label:`${t.tabs[1]}${col.length?` (${col.length})`:""}`},
     {id:"curadoria",label:t.tabs[2]},
+    {id:"acervo",   label:`${t.tabs[1]}${col.length?` (${col.length})`:""}`},
     {id:"manual",   label:t.tabs[3]},
   ];
 
   return (
     <div className="germ-app" style={{ minHeight:"100vh",color:"#0a0a0a",fontFamily:"'Cormorant Garamond',Georgia,serif" }}>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
-      <style>{`*{box-sizing:border-box}@keyframes spin{to{transform:rotate(360deg)}}.lang-switcher{display:flex;align-items:center;gap:6px}@media(max-width:768px){.lang-switcher{display:grid;grid-template-columns:repeat(2,auto);gap:6px;justify-content:end}}`}</style>
+      <style>{`*{box-sizing:border-box}@keyframes spin{to{transform:rotate(360deg)}}.lang-switcher{display:flex;align-items:center;gap:6px}@media(max-width:600px){.germ-header{padding:14px 16px 0!important}.germ-app main{padding:22px 16px!important}.germ-logo-topo{transform:scale(.6);transform-origin:left top;height:44px;margin-right:-38%}.germ-ambient{padding:5px 16px!important}.germ-topo{margin-bottom:10px!important}.lang-switcher{gap:2px}.germ-abas{overflow-x:auto;scrollbar-width:none}.germ-abas::-webkit-scrollbar{display:none}.germ-abas button{white-space:nowrap;padding:9px 11px 9px 0!important;margin-right:0!important;flex-shrink:0;font-size:9.5px!important;letter-spacing:.5px!important}}`}</style>
 
       <AmbientBar lang={lang}/>
 
       <header className="germ-header" style={{ borderBottom:"1px solid #e8e4dc",padding:"18px 36px 0" }}>
         <div style={{ maxWidth:1300,margin:"0 auto" }}>
-          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:16 }}>
-            <div onClick={()=>window.location.reload()} style={{ cursor:"pointer" }} title="Recarregar a página"><Logo/></div>
+          <div className="germ-topo" style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:16,gap:12 }}>
+            <div className="germ-logo-topo" onClick={()=>window.location.reload()} style={{ cursor:"pointer" }} title={{en:"Reload",fr:"Recharger",pt:"Recarregar"}[lang]}><Logo/></div>
             <div style={{ display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6 }}>
               <LangSwitcher lang={lang} setLang={setLang}/>
             </div>
           </div>
-          <nav style={{ display:"flex" }}>
+          <nav className="germ-abas" style={{ display:"flex" }}>
             {TABS.map(tb=>(
               <button key={tb.id} onClick={()=>setTab(tb.id)} style={{ background:"none",border:"none",borderBottom:tab===tb.id?"2px solid #0a0a0a":"2px solid transparent",color:tab===tb.id?"#0a0a0a":"#aaa",padding:"9px 20px 9px 0",marginRight:4,cursor:"pointer",fontSize:10.5,fontFamily:"Verdana,sans-serif",letterSpacing:1,textTransform:"uppercase",transition:"color .18s" }}>{tb.label}</button>
             ))}
@@ -1185,7 +1160,7 @@ export default function App() {
 
       <footer className="germ-footer" style={{ borderTop:"1px solid #ece9e2",padding:"16px 36px",display:"flex",justifyContent:"space-between",alignItems:"baseline",flexWrap:"wrap",gap:"10px 24px" }}>
         <div style={{ display:"flex",alignItems:"baseline",flexWrap:"wrap",gap:"8px 22px" }}>
-          <div onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{ cursor:"pointer" }} title="Voltar ao topo"><Logo small/></div>
+          <div onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{ cursor:"pointer" }} title={{en:"Back to top",fr:"Haut de page",pt:"Voltar ao topo"}[lang]}><Logo small/></div>
           <AcervoRodape lang={lang}/>
         </div>
         <p className="germ-footer-tag" style={{ margin:0,fontSize:9,color:"#ccc",fontFamily:"Verdana,sans-serif",letterSpacing:2 }}>{t.footer}</p>

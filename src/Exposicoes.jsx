@@ -165,8 +165,8 @@ function Percurso({ obras, indice, setIndice, onFechar, x }) {
     </div>, document.body);
 }
 
-export default function Exposicoes({ lang = "fr" }) {
-  const x = TX[lang] || TX.fr;
+export default function Exposicoes({ lang = "en" }) {
+  const x = TX[lang] || TX.en;
 
   const [lista, setLista]   = useState([]);
   const [aberta, setAberta] = useState(null);   // { colecao, results }
