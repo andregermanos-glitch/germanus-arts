@@ -267,7 +267,7 @@ But the art of the ego does not die within the frame; it spills over into histor
 
 The persona, however, exists independently of history. The living being tells history through its social context, and society is a clash of outcomes, neither just nor certain, dirty in essence, romantic to the eye. Ordinary People is the gallery that seeks this context: where and when it happens — work, form, pain, life within a frame.
 
-History is not an instant: it spills over the frame and seeps into the gaze. The social does not determine it; it is determined by it. Thus History records, honors and catalogues time — and not the other way around.
+History is not an instant: it spills over the frame and seeps into the gaze. The social does not determine it; it is determined by it. Thus History records, honors and catalogs time — and not the other way around.
 
 What fits within a frame? Time, society, people, their stories? The context of things tells us the reason for history and for time. Things shape us; that is why we make them and admire them. Objects is the history of art as primitive semiotics.
 
@@ -550,6 +550,25 @@ function montarNoticias(app, pool) {
       for (const L of OUTROS_IDIOMAS)
         for (const col of [`titulo_${L}`, `texto_${L}`])
           await pool.query(`ALTER TABLE paginas ADD COLUMN IF NOT EXISTS ${col} TEXT NOT NULL DEFAULT ''`);
+      // Nós Somos: publica uma única vez o texto de André nos 6 idiomas (pedido de 19/11/2026).
+      // Depois disso vale o que ele editar no painel. O texto que estava antes fica guardado
+      // em paginas_migracoes.anterior.
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS paginas_migracoes (
+          id          TEXT PRIMARY KEY,
+          aplicada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          anterior    TEXT
+        )`);
+      const feita = await pool.query(`SELECT 1 FROM paginas_migracoes WHERE id=$1`, ["nos-somos-texto-andre"]);
+      if (!feita.rows.length) {
+        const atual = await pool.query(`SELECT texto FROM paginas WHERE slug=$1`, ["nos-somos"]);
+        const vals = ["nos-somos", MANIFESTO.pt], sets = ["texto=$2"];
+        for (const L of OUTROS_IDIOMAS) { vals.push(MANIFESTO[L]); sets.push(`texto_${L}=$${vals.length}`); }
+        await pool.query(`UPDATE paginas SET ${sets.join(", ")}, atualizada_em=NOW() WHERE slug=$1`, vals);
+        await pool.query(`INSERT INTO paginas_migracoes (id, anterior) VALUES ($1,$2)`,
+          ["nos-somos-texto-andre", atual.rows[0]?.texto || ""]);
+        console.log("📰 Nós Somos — texto de André publicado nos 6 idiomas");
+      }
       const n = await sincronizarTraducoes(pool);
       if (n) console.log(`📰 Páginas — ${n} tradução(ões) atualizada(s)`);
       console.log("📰 Notícias — tabelas prontas");

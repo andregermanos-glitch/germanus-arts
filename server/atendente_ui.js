@@ -18,7 +18,7 @@ const MAX_HISTORICO  = 6;      // últimas 3 trocas
 const LIMITE_IP_HORA = 25;
 const MAX_PERGUNTA   = 600;
 
-const IDIOMAS = { pt: "português", en: "English", fr: "français", es: "español", it: "italiano", de: "Deutsch" };
+const IDIOMAS = { pt: "português", en: "American English (US spelling and usage)", fr: "français", es: "español", it: "italiano", de: "Deutsch" };
 
 // Mapa das alas. O ala_id do banco não bate com o nome exibido em dois casos:
 // "cidades" é a ala Emoção e "fase" é a Psiquê. Sem isto o atendente erra feio.
