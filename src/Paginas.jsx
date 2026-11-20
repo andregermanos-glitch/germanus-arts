@@ -8,25 +8,41 @@ import { Logo, LangSwitcher, loadLang } from "./App";
 import MenuRodape, { ROTULOS } from "./MenuRodape";
 
 const VERMELHO = "#b03a2e";
-const LOCALE = { fr:"fr-FR", en:"en-GB", es:"es-ES", pt:"pt-BR", it:"it-IT", de:"de-DE" };
+const LOCALE = { en:"en-US", fr:"fr-FR", es:"es-ES", pt:"pt-BR", it:"it-IT", de:"de-DE" };
 
 const TX = {
-  fr: { voltar:"← Retour à la collection", ler:"Lire", edicao:"Édition nº", editorial:"Éditorial", breve:"Bientôt", fontes:"Sources",
-        vazio:"Aucun article publié pour l’instant.", ia:"Textes rédigés par l’Éditorial GERMANUS.Art avec l’aide de l’IA et relus par la curation.", pt:"Articles en portugais." },
-  en: { voltar:"← Back to the collection", ler:"Read", edicao:"Edition no.", editorial:"Editorial", breve:"Coming soon", fontes:"Sources",
-        vazio:"No articles published yet.", ia:"Written by the GERMANUS.Art Editorial with AI assistance and reviewed by our curators.", pt:"Articles in Portuguese." },
-  es: { voltar:"← Volver a la colección", ler:"Leer", edicao:"Edición n.º", editorial:"Editorial", fontes:"Fuentes",
-        vazio:"Aún no hay artículos publicados.", ia:"Textos del Editorial GERMANUS.Art con apoyo de IA y revisión de la curaduría.", pt:"Artículos en portugués." },
-  pt: { voltar:"← Voltar ao acervo", ler:"Ler", edicao:"Edição nº", editorial:"Editorial", breve:"Em breve", fontes:"Fontes",
-        vazio:"Nenhuma matéria publicada ainda.", ia:"Textos produzidos pela redação da GERMANUS.Art com apoio de IA e revisão editorial.", pt:"" },
-  it: { voltar:"← Torna alla collezione", ler:"Leggi", edicao:"Edizione n.", editorial:"Editoriale", fontes:"Fonti",
-        vazio:"Nessun articolo pubblicato.", ia:"Testi dell’Editoriale GERMANUS.Art con supporto dell’IA e revisione curatoriale.", pt:"Articoli in portoghese." },
-  de: { voltar:"← Zurück zur Sammlung", ler:"Lesen", edicao:"Ausgabe Nr.", editorial:"Redaktion", fontes:"Quellen",
-        vazio:"Noch keine Artikel veröffentlicht.", ia:"Texte der GERMANUS.Art-Redaktion, mit KI-Unterstützung verfasst und kuratorisch geprüft.", pt:"Artikel auf Portugiesisch." },
+  en: { voltar:"← Back to the collection", editorial:"Editorial", breve:"Coming soon",
+        ler:"Read", edicao:"Edition no.", fontes:"Sources", vazio:"No articles published yet.",
+        ia:"Written by the GERMANUS.Art Editorial with AI assistance and reviewed by our curators.", pt:"Articles in Portuguese." },
+  fr: { voltar:"← Retour à la collection", editorial:"Éditorial", breve:"Bientôt",
+        ler:"Lire", edicao:"Édition nº", fontes:"Sources", vazio:"Aucun article publié pour l’instant.",
+        ia:"Textes rédigés par l’Éditorial GERMANUS.Art avec l’aide de l’IA et relus par la curation.", pt:"Articles en portugais." },
+  es: { voltar:"← Volver a la colección", editorial:"Editorial", breve:"Próximamente",
+        ler:"Leer", edicao:"Edición n.º", fontes:"Fuentes", vazio:"Aún no hay artículos publicados.",
+        ia:"Textos del Editorial GERMANUS.Art, escritos con apoyo de IA y revisados por la curaduría.", pt:"Artículos en portugués." },
+  pt: { voltar:"← Voltar ao acervo", editorial:"Editorial", breve:"Em breve",
+        ler:"Ler", edicao:"Edição nº", fontes:"Fontes", vazio:"Nenhuma matéria publicada ainda.",
+        ia:"Textos produzidos pela redação da GERMANUS.Art com apoio de IA e revisão editorial.", pt:"" },
+  it: { voltar:"← Torna alla collezione", editorial:"Editoriale", breve:"Prossimamente",
+        ler:"Leggi", edicao:"Edizione n.", fontes:"Fonti", vazio:"Nessun articolo pubblicato.",
+        ia:"Testi dell’Editoriale GERMANUS.Art, scritti con il supporto dell’IA e rivisti dalla curatela.", pt:"Articoli in portoghese." },
+  de: { voltar:"← Zurück zur Sammlung", editorial:"Editorial", breve:"Demnächst",
+        ler:"Lesen", edicao:"Ausgabe Nr.", fontes:"Quellen", vazio:"Noch keine Artikel veröffentlicht.",
+        ia:"Texte der GERMANUS.Art-Redaktion, mit KI-Unterstützung verfasst und kuratorisch geprüft.", pt:"Artikel auf Portugiesisch." },
 };
 
 const serif = "'Cormorant Garamond',Georgia,serif";
 const rotulo = { fontFamily:"Verdana,sans-serif", fontSize:9.5, letterSpacing:2, textTransform:"uppercase" };
+
+// Selo vermelho acima do título: a marca sempre como no logo — GERMANUS em caixa-alta, ".Art" como está.
+function Marca() {
+  return (
+    <p style={{ margin:"0 0 10px", color:VERMELHO, lineHeight:1 }}>
+      <span style={{ ...rotulo }}>Germanus</span>
+      <span style={{ fontFamily:serif, fontWeight:700, fontSize:12.5, letterSpacing:0 }}>.Art</span>
+    </p>
+  );
+}
 
 function paragrafos(texto) {
   const t = String(texto || "").trim();
@@ -100,7 +116,7 @@ function PaginaTexto({ slug, lang }) {
   const titulo = p?.titulo || (ROTULOS.pt[slug]);
   return (
     <article style={{ maxWidth:680, margin:"0 auto", paddingTop:12 }}>
-      <p style={{ ...rotulo, color:VERMELHO, margin:"0 0 10px" }}>GERMANUS.Art</p>
+      <Marca/>
       <h1 style={{ margin:"0 0 22px", fontSize:"clamp(34px,5vw,48px)", fontWeight:700, lineHeight:1.05, fontFamily:serif }}>
         {p?.titulo_traduzido ? p.titulo : (lang === "pt" ? titulo : (ROTULOS[lang] || ROTULOS.en)[slug])}
       </h1>
@@ -119,7 +135,7 @@ function EditorialEmBreve({ lang }) {
   const t = TX[lang] || TX.en;
   return (
     <article style={{ maxWidth:680, margin:"0 auto", paddingTop:12, minHeight:"38vh" }}>
-      <p style={{ ...rotulo, color:VERMELHO, margin:"0 0 10px" }}>GERMANUS.Art</p>
+      <Marca/>
       <h1 style={{ margin:"0 0 22px", fontSize:"clamp(34px,5vw,48px)", fontWeight:700, lineHeight:1.05, fontFamily:serif }}>{t.editorial}</h1>
       <div style={{ borderTop:"1px solid #0a0a0a", borderBottom:"1px solid #0a0a0a", height:4, marginBottom:30 }}/>
       <p style={{ fontSize:22, fontStyle:"italic", color:"#8a8478", margin:0, fontFamily:serif }}>{t.breve}</p>

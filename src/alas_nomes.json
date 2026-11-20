@@ -1,0 +1,44 @@
+{
+  "en": {
+    "retratos": "Portraits", "pessoas_reais": "Famous Figures", "historico": "History", "cidades": "Emotion",
+    "objetos": "Objects", "lugares": "Famous Places", "natureza": "Nature", "familiar": "Home Life",
+    "nudes": "Female Nudes", "esoterico": "Esotericism", "sacro": "Sacred Art", "arquitetura": "Architecture",
+    "povo": "Ordinary People", "perspectiva": "Perspective", "luz_sol": "Sunlight", "cores": "Colors",
+    "fase": "Psyche", "femininas": "Women Artists"
+  },
+  "fr": {
+    "retratos": "Portraits", "pessoas_reais": "Personnages célèbres", "historico": "Histoire", "cidades": "Émotion",
+    "objetos": "Objets", "lugares": "Lieux célèbres", "natureza": "Nature", "familiar": "Vie domestique",
+    "nudes": "Nus féminins", "esoterico": "Ésotérisme", "sacro": "Art sacré", "arquitetura": "Architecture",
+    "povo": "Gens du peuple", "perspectiva": "Perspective", "luz_sol": "Lumière du soleil", "cores": "Couleurs",
+    "fase": "Psyché", "femininas": "Artistes femmes"
+  },
+  "es": {
+    "retratos": "Retratos", "pessoas_reais": "Personajes célebres", "historico": "Historia", "cidades": "Emoción",
+    "objetos": "Objetos", "lugares": "Lugares célebres", "natureza": "Naturaleza", "familiar": "Vida doméstica",
+    "nudes": "Desnudos femeninos", "esoterico": "Esoterismo", "sacro": "Arte sacro", "arquitetura": "Arquitectura",
+    "povo": "Gente del pueblo", "perspectiva": "Perspectiva", "luz_sol": "Luz del sol", "cores": "Colores",
+    "fase": "Psique", "femininas": "Mujeres artistas"
+  },
+  "pt": {
+    "retratos": "Retratos", "pessoas_reais": "Pessoas Conhecidas", "historico": "História", "cidades": "Emoção",
+    "objetos": "Objetos", "lugares": "Lugares Conhecidos", "natureza": "Natureza", "familiar": "Ambiente Familiar",
+    "nudes": "Nus Femininos", "esoterico": "Esoterismo", "sacro": "Sacro", "arquitetura": "Arquitetura",
+    "povo": "Gente do Povo", "perspectiva": "Perspectiva", "luz_sol": "Luz do Sol", "cores": "Cores",
+    "fase": "Psiquê", "femininas": "Artistas Femininas"
+  },
+  "it": {
+    "retratos": "Ritratti", "pessoas_reais": "Personaggi celebri", "historico": "Storia", "cidades": "Emozione",
+    "objetos": "Oggetti", "lugares": "Luoghi celebri", "natureza": "Natura", "familiar": "Vita domestica",
+    "nudes": "Nudi femminili", "esoterico": "Esoterismo", "sacro": "Arte sacra", "arquitetura": "Architettura",
+    "povo": "Gente del popolo", "perspectiva": "Prospettiva", "luz_sol": "Luce del sole", "cores": "Colori",
+    "fase": "Psiche", "femininas": "Artiste donne"
+  },
+  "de": {
+    "retratos": "Porträts", "pessoas_reais": "Berühmte Menschen", "historico": "Geschichte", "cidades": "Emotion",
+    "objetos": "Objekte", "lugares": "Berühmte Orte", "natureza": "Natur", "familiar": "Häusliches Leben",
+    "nudes": "Weibliche Akte", "esoterico": "Esoterik", "sacro": "Sakrale Kunst", "arquitetura": "Architektur",
+    "povo": "Einfache Leute", "perspectiva": "Perspektive", "luz_sol": "Sonnenlicht", "cores": "Farben",
+    "fase": "Psyche", "femininas": "Künstlerinnen"
+  }
+}

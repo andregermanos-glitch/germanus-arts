@@ -14,19 +14,19 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 
 const TX = {
-  fr: { titulo:"Expositions", sub:"Parcours ordonnés à travers les 18 galeries — l'ordre est l'argument.",
+  en: { titulo:"Exhibitions", sub:"Ordered paths across the 18 galleries — the sequence is the argument.",
+        obras:n=>`${n} ${n===1?"work":"works"}`, entrar:"Enter →", voltar:"← All exhibitions",
+        vazio:"No exhibitions yet.", dica:"Walk the room →",
+        ant:"Previous work", prox:"Next work", fechar:"Close",
+        mais:"Zoom in", menos:"Zoom out", reset:"Actual size" },
+  fr: { titulo:"Expositions", sub:"Des parcours ordonnés à travers les 18 galeries — l'ordre est le propos.",
         obras:n=>`${n} œuvre${n>1?"s":""}`, entrar:"Entrer →", voltar:"← Toutes les expositions",
         vazio:"Aucune exposition pour le moment.", dica:"Parcourez la salle →",
         ant:"Œuvre précédente", prox:"Œuvre suivante", fechar:"Fermer",
         mais:"Agrandir", menos:"Réduire", reset:"Taille d'origine" },
-  en: { titulo:"Exhibitions", sub:"Ordered paths across the 18 galleries — the sequence is the argument.",
-        obras:n=>`${n} work${n>1?"s":""}`, entrar:"Enter →", voltar:"← All exhibitions",
-        vazio:"No exhibitions yet.", dica:"Walk the room →",
-        ant:"Previous work", prox:"Next work", fechar:"Close",
-        mais:"Zoom in", menos:"Zoom out", reset:"Actual size" },
   es: { titulo:"Exposiciones", sub:"Recorridos ordenados por las 18 galerías — el orden es el argumento.",
         obras:n=>`${n} obra${n>1?"s":""}`, entrar:"Entrar →", voltar:"← Todas las exposiciones",
-        vazio:"Aún no hay exposiciones.", dica:"Recorra la sala →",
+        vazio:"Aún no hay exposiciones.", dica:"Recorre la sala →",
         ant:"Obra anterior", prox:"Obra siguiente", fechar:"Cerrar",
         mais:"Ampliar", menos:"Reducir", reset:"Tamaño original" },
   pt: { titulo:"Exposições", sub:"Percursos ordenados através das 18 galerias — a ordem é o argumento.",
@@ -34,14 +34,14 @@ const TX = {
         vazio:"Ainda não há exposições.", dica:"Percorra a sala →",
         ant:"Obra anterior", prox:"Próxima obra", fechar:"Fechar",
         mais:"Ampliar", menos:"Reduzir", reset:"Tamanho original" },
-  it: { titulo:"Mostre", sub:"Percorsi ordinati attraverso le 18 gallerie — l'ordine è l'argomento.",
-        obras:n=>`${n} opera${n>1?"e":""}`, entrar:"Entrare →", voltar:"← Tutte le mostre",
-        vazio:"Ancora nessuna mostra.", dica:"Percorri la sala →",
+  it: { titulo:"Mostre", sub:"Percorsi ordinati attraverso le 18 gallerie — l'ordine è il messaggio.",
+        obras:n=>`${n} ${n===1?"opera":"opere"}`, entrar:"Entra →", voltar:"← Tutte le mostre",
+        vazio:"Nessuna mostra, per ora.", dica:"Percorri la sala →",
         ant:"Opera precedente", prox:"Opera successiva", fechar:"Chiudi",
-        mais:"Ingrandire", menos:"Ridurre", reset:"Dimensione originale" },
-  de: { titulo:"Ausstellungen", sub:"Geordnete Wege durch die 18 Galerien — die Reihenfolge ist das Argument.",
-        obras:n=>`${n} Werk${n>1?"e":""}`, entrar:"Eintreten →", voltar:"← Alle Ausstellungen",
-        vazio:"Noch keine Ausstellungen.", dica:"Den Saal entlanggehen →",
+        mais:"Ingrandisci", menos:"Riduci", reset:"Dimensione originale" },
+  de: { titulo:"Ausstellungen", sub:"Rundgänge durch die 18 Galerien in fester Reihenfolge — die Abfolge ist die Aussage.",
+        obras:n=>`${n} ${n===1?"Werk":"Werke"}`, entrar:"Eintreten →", voltar:"← Alle Ausstellungen",
+        vazio:"Noch keine Ausstellungen.", dica:"Durch den Saal gehen →",
         ant:"Vorheriges Werk", prox:"Nächstes Werk", fechar:"Schließen",
         mais:"Vergrößern", menos:"Verkleinern", reset:"Originalgröße" },
 };
@@ -225,8 +225,9 @@ export default function Exposicoes({ lang = "en" }) {
     setCarregando(false);
   }
 
-  const tit = c => c?.[`titulo_${lang}`] || c?.titulo_pt || "";
-  const txt = c => c?.[`texto_${lang}`] || c?.texto_pt || "";
+  // Sem tradução no idioma do visitante: inglês (idioma principal) e, por fim, português.
+  const tit = c => c?.[`titulo_${lang}`] || c?.titulo_en || c?.titulo_pt || "";
+  const txt = c => c?.[`texto_${lang}`] || c?.texto_en || c?.texto_pt || "";
 
   // ─── A sala ────────────────────────────────────────────────────────────────
   if (aberta) {

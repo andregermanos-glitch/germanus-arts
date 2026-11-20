@@ -1,15 +1,17 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import "./germanus.css";
 import Atendente from "./Atendente";
 import Exposicoes from "./Exposicoes";
 import MenuRodape from "./MenuRodape";
+import ALAS_NOMES from "./alas_nomes.json";
 // ─── Persistência ─────────────────────────────────────────────────────────────
 const loadCol  = () => { try { return JSON.parse(localStorage.getItem("germ_col")||"[]"); } catch { return []; } };
 const saveCol  = col => { try { localStorage.setItem("germ_col", JSON.stringify(col)); } catch {} };
-// Idiomas do site: inglês (principal), francês e português.
-// Chave nova ("germ_idioma"): todos passam a abrir em inglês; quem escolher outro idioma, fica com ele.
-export const IDIOMAS = ["en", "fr", "pt"];
+// Idiomas do site: inglês (principal), francês, espanhol, português, italiano e alemão.
+// O site sempre abre em inglês; quem escolher outro idioma fica com ele nas próximas visitas
+// (chave "germ_idioma" — a antiga "germ_lang" é ignorada de propósito).
+export const IDIOMAS = ["en", "fr", "es", "pt", "it", "de"];
 export const loadLang = () => {
   try { const l = localStorage.getItem("germ_idioma"); return IDIOMAS.includes(l) ? l : "en"; }
   catch { return "en"; }
@@ -43,36 +45,85 @@ function clearSeen() {
 }
 
 // ─── Traduções ────────────────────────────────────────────────────────────────
+// Inglês é o idioma principal; os outros seguem a mesma ordem de chaves.
+// Os nomes das 18 galerias vêm de alas_nomes.json (o atendente usa o mesmo arquivo).
+const NBSP = " "; // espaço que não quebra (pontuação francesa)
 const T = {
+  en: {
+    tabs: ["Search", "Personal Collection", "Exhibitions", "Add Artwork"],
+    buscarBtn: "SEARCH",
+    searchDirect: "Search artworks, artists, styles, periods…",
+    searchRefine: n => `Search within ${n}… (optional)`,
+    from: "FROM", to: "TO",
+    searching: n => n ? `Searching ${n}…` : "Searching the collection…",
+    found: (n, i) => `${n} ${n===1?"work":"works"} · ${i} with ${i===1?"image":"images"}`,
+    select: "Choose a gallery or search directly",
+    noImg: "image unavailable",
+    explore: "Explore from this work",
+    moreAla: "More from this gallery",
+    showMore: (n, tot) => `Show more · ${n} of ${tot.toLocaleString("en-US")}`,
+    samePeriod: "+ Same period",
+    add: "+ COLLECTION", saved: "✓ SAVED",
+    details: "▼ DETAILS", close: "▲ CLOSE",
+    remove: "✕",
+    wikiLink: "View on Wikipedia ↗",
+    wikiFonte: L => `SOURCE: WIKIPEDIA (${L}) · CC BY-SA`,
+    empty: "Your collection is empty — explore the galleries",
+    browse: "EXPLORE THE GALLERIES",
+    filter: "Filter your collection…",
+    allGalleries: "All galleries",
+    artworks: n => `${n} ${n===1?"work":"works"}`,
+    curationTitle: "Curation",
+    curationSub: "18 thematic galleries, arranged by visual experience — click to explore.",
+    addTitle: "Add Artwork",
+    addSub: "For works from collectives, galleries and museums without an open API.",
+    addBtn: "Add to Collection",
+    titleReq: "A title is required.",
+    fields: {
+      title:"Title *", artist:"Artist", date:"Date / Period", medium:"Medium",
+      dim:"Dimensions", origin:"Origin / Country", style:"Style / Movement",
+      museum:"Museum / Collection", credit:"Credit line", imgUrl:"Image URL",
+      extUrl:"Reference link", desc:"Description", gallery:"Gallery"
+    },
+    noGallery: "— no gallery —",
+    footer: "18 GALLERIES · MUSEUMS WORLDWIDE · PERSONAL COLLECTION",
+    erro: "Error",
+    hd: "Loading high resolution…",
+    ant: "Previous work", prox: "Next work",
+    zoomMais: "Zoom in", zoomMenos: "Zoom out", zoomReset: "Actual size", fechar: "Close",
+    recarregar: "Reload", topo: "Back to top",
+    alas: ALAS_NOMES.en,
+  },
   fr: {
     tabs: ["Rechercher", "Collection personnelle", "Expositions", "Ajouter une œuvre"],
-    searchDirect: "Recherche directe — œuvre, artiste, style, période...",
-    searchRefine: n => `Affiner dans ${n}... (optionnel)`,
+    buscarBtn: "RECHERCHER",
+    searchDirect: "Rechercher une œuvre, un artiste, un style, une période…",
+    searchRefine: n => `Rechercher dans ${n}… (facultatif)`,
     from: "DE", to: "À",
-    searching: n => n ? `Recherche dans ${n}...` : "Consultation de la base d'art mondiale...",
+    searching: n => n ? `Recherche dans ${n}…` : "Recherche dans la collection…",
     found: (n, i) => `${n} œuvre${n>1?"s":""} · ${i} avec image`,
-    select: "Sélectionnez une galerie ou recherchez directement",
-    noImg: "image non disponible",
+    select: "Choisissez une galerie ou lancez une recherche",
+    noImg: "image indisponible",
     explore: "Explorer à partir de cette œuvre",
-    moreAla: "Plus dans cette galerie",
+    moreAla: "Autres œuvres de cette galerie",
     showMore: (n, tot) => `Voir plus · ${n} sur ${tot.toLocaleString("fr-FR")}`,
     samePeriod: "+ Même période",
-    loadMore: "Voir 18 de plus",
-    add: "+ COLLECTION", saved: "✓ SAUVÉ",
+    add: "+ COLLECTION", saved: "✓ AJOUTÉE",
     details: "▼ DÉTAILS", close: "▲ FERMER",
     remove: "✕",
-    wikiLink: "Voir sur Wikipedia ↗",
-    empty: "Collection vide — explorez les galeries",
+    wikiLink: "Voir sur Wikipédia ↗",
+    wikiFonte: L => `SOURCE${NBSP}: WIKIPÉDIA (${L}) · CC BY-SA`,
+    empty: "Votre collection est vide — explorez les galeries",
     browse: "EXPLORER LES GALERIES",
-    filter: "Filtrer la collection...",
+    filter: "Filtrer votre collection…",
     allGalleries: "Toutes les galeries",
     artworks: n => `${n} œuvre${n>1?"s":""}`,
     curationTitle: "Curation",
-    curationSub: "18 galeries thématiques par expérience visuelle — cliquez pour explorer.",
+    curationSub: "18 galeries thématiques, pensées à partir du regard — cliquez pour explorer.",
     addTitle: "Ajouter une œuvre",
-    addSub: "Pour les œuvres de groupes, galeries et musées sans API ouverte.",
-    addBtn: "Ajouter à la Collection",
-    titleReq: "Titre obligatoire.",
+    addSub: "Pour les œuvres de collectifs, de galeries et de musées sans API ouverte.",
+    addBtn: "Ajouter à la collection",
+    titleReq: "Le titre est obligatoire.",
     fields: {
       title:"Titre *", artist:"Artiste", date:"Date / Période", medium:"Technique",
       dim:"Dimensions", origin:"Origine / Pays", style:"Style / Mouvement",
@@ -80,160 +131,62 @@ const T = {
       extUrl:"Lien de référence", desc:"Description", gallery:"Galerie"
     },
     noGallery: "— sans galerie —",
-    footer: "18 GALERIES · MUSÉES MONDIAUX · COLLECTION PERSONNELLE",
-    global: "Collection d'Art Mondial",
-    alas: {
-      retratos:"Portraits", pessoas_reais:"Personnages Connus", historico:"Histoire", cidades:"Émotion",
-      objetos:"Objets", lugares:"Lieux Connus",
-      natureza:"Nature", familiar:"Ambiance Familiale", nudes:"Nus Féminins",
-      esoterico:"Ésotérisme", sacro:"Sacré", arquitetura:"Architecture",
-      povo:"Gens du Peuple", perspectiva:"Perspective", luz_sol:"Lumière du Soleil",
-      cores:"Couleurs", fase:"Psyché", femininas:"Artistes Féminines",
-    }
-  },
-  en: {
-    tabs: ["Search", "Personal Collection", "Exhibitions", "Add Artwork"],
-    searchDirect: "Direct search — artwork, artist, style, period...",
-    searchRefine: n => `Refine in ${n}... (optional)`,
-    from: "FROM", to: "TO",
-    searching: n => n ? `Searching in ${n}...` : "Consulting global art database...",
-    found: (n, i) => `${n} artwork${n>1?"s":""} · ${i} with image`,
-    select: "Select a gallery or search directly",
-    noImg: "image unavailable",
-    explore: "Explore from this artwork",
-    moreAla: "More in this gallery",
-    showMore: (n, tot) => `Show more · ${n} of ${tot.toLocaleString("en-US")}`,
-    samePeriod: "+ Same period",
-    loadMore: "Show 18 more",
-    add: "+ COLLECTION", saved: "✓ SAVED",
-    details: "▼ DETAILS", close: "▲ CLOSE",
-    remove: "✕",
-    wikiLink: "See on Wikipedia ↗",
-    empty: "Empty collection — explore the galleries",
-    browse: "EXPLORE GALLERIES",
-    filter: "Filter collection...",
-    allGalleries: "All galleries",
-    artworks: n => `${n} artwork${n>1?"s":""}`,
-    curationTitle: "Curation",
-    curationSub: "18 thematic galleries by visual experience — click to explore.",
-    addTitle: "Add Artwork",
-    addSub: "For works from groups, galleries and museums without open API.",
-    addBtn: "Add to Collection",
-    titleReq: "Title is required.",
-    fields: {
-      title:"Title *", artist:"Artist", date:"Date / Period", medium:"Technique",
-      dim:"Dimensions", origin:"Origin / Country", style:"Style / Movement",
-      museum:"Museum / Collection", credit:"Credits", imgUrl:"Image URL",
-      extUrl:"Reference link", desc:"Description", gallery:"Gallery"
-    },
-    noGallery: "— no gallery —",
-    footer: "18 GALLERIES · GLOBAL MUSEUMS · PERSONAL COLLECTION",
-    global: "Global Art Collection",
-    alas: {
-      retratos:"Portraits", pessoas_reais:"Known People", historico:"History", cidades:"Emotion",
-      objetos:"Objects", lugares:"Famous Places",
-      natureza:"Nature", familiar:"Home Environment", nudes:"Female Nudes",
-      esoterico:"Esotericism", sacro:"Sacred", arquitetura:"Architecture",
-      povo:"Common People", perspectiva:"Perspective", luz_sol:"Sunlight",
-      cores:"Colors", fase:"Psyche", femininas:"Female Artists",
-    }
+    footer: "18 GALERIES · MUSÉES DU MONDE · COLLECTION PERSONNELLE",
+    erro: "Erreur",
+    hd: "Chargement en haute résolution…",
+    ant: "Œuvre précédente", prox: "Œuvre suivante",
+    zoomMais: "Agrandir", zoomMenos: "Réduire", zoomReset: "Taille d'origine", fechar: "Fermer",
+    recarregar: "Recharger", topo: "Haut de page",
+    alas: ALAS_NOMES.fr,
   },
   es: {
-    tabs: ["Buscar", "Colección", "Exposiciones", "Agregar Obra"],
-    searchDirect: "Búsqueda directa — obra, artista, estilo, período...",
-    searchRefine: n => `Refinar en ${n}... (opcional)`,
+    tabs: ["Buscar", "Colección personal", "Exposiciones", "Agregar obra"],
+    buscarBtn: "BUSCAR",
+    searchDirect: "Busca obras, artistas, estilos, períodos…",
+    searchRefine: n => `Buscar en ${n}… (opcional)`,
     from: "DESDE", to: "HASTA",
-    searching: n => n ? `Buscando en ${n}...` : "Consultando base de arte global...",
+    searching: n => n ? `Buscando en ${n}…` : "Buscando en la colección…",
     found: (n, i) => `${n} obra${n>1?"s":""} · ${i} con imagen`,
-    select: "Selecciona una galería o busca directamente",
+    select: "Elige una galería o busca directamente",
     noImg: "imagen no disponible",
-    explore: "Explorar desde esta obra",
-    moreAla: "Más en esta galería",
-    showMore: (n, tot) => `Mostrar más · ${n} de ${tot.toLocaleString("es-ES")}`,
+    explore: "Explorar a partir de esta obra",
+    moreAla: "Más obras de esta galería",
+    showMore: (n, tot) => `Ver más · ${n} de ${tot.toLocaleString("es-ES")}`,
     samePeriod: "+ Mismo período",
-    loadMore: "Ver 18 más",
-    add: "+ COLECCIÓN", saved: "✓ GUARDADO",
+    add: "+ COLECCIÓN", saved: "✓ GUARDADA",
     details: "▼ DETALLES", close: "▲ CERRAR",
     remove: "✕",
     wikiLink: "Ver en Wikipedia ↗",
-    empty: "Colección vacía — explora las galerías",
-    browse: "EXPLORAR GALERÍAS",
-    filter: "Filtrar colección...",
+    wikiFonte: L => `FUENTE: WIKIPEDIA (${L}) · CC BY-SA`,
+    empty: "Tu colección está vacía — explora las galerías",
+    browse: "EXPLORAR LAS GALERÍAS",
+    filter: "Filtrar tu colección…",
     allGalleries: "Todas las galerías",
     artworks: n => `${n} obra${n>1?"s":""}`,
     curationTitle: "Curaduría",
-    curationSub: "18 galerías temáticas por experiencia visual — haz clic para explorar.",
-    addTitle: "Agregar Obra",
-    addSub: "Para obras de grupos, galerías y museos sin API abierta.",
-    addBtn: "Agregar a la Colección",
+    curationSub: "18 galerías temáticas, organizadas por la experiencia visual — haz clic para explorar.",
+    addTitle: "Agregar obra",
+    addSub: "Para obras de colectivos, galerías y museos sin API abierta.",
+    addBtn: "Agregar a la colección",
     titleReq: "El título es obligatorio.",
     fields: {
       title:"Título *", artist:"Artista", date:"Fecha / Período", medium:"Técnica",
       dim:"Dimensiones", origin:"Origen / País", style:"Estilo / Movimiento",
-      museum:"Museo / Colección", credit:"Créditos", imgUrl:"URL de imagen",
+      museum:"Museo / Colección", credit:"Créditos", imgUrl:"URL de la imagen",
       extUrl:"Enlace de referencia", desc:"Descripción", gallery:"Galería"
     },
     noGallery: "— sin galería —",
-    footer: "18 GALERÍAS · MUSEOS GLOBALES · COLECCIÓN PERSONAL",
-    global: "Colección de Arte Global",
-    alas: {
-      retratos:"Retratos", pessoas_reais:"Personas Conocidas", historico:"Historia", cidades:"Emoción",
-      objetos:"Objetos", lugares:"Lugares Conocidos",
-      natureza:"Naturaleza", familiar:"Ambiente Familiar", nudes:"Desnudos Femeninos",
-      esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Arquitectura",
-      povo:"Gente del Pueblo", perspectiva:"Perspectiva", luz_sol:"Luz del Sol",
-      cores:"Colores", fase:"Psiqué", femininas:"Artistas Femeninas",
-    }
-  },
-  it: {
-    tabs: ["Cerca", "Collezione", "Mostre", "Aggiungi Opera"],
-    searchDirect: "Ricerca diretta — opera, artista, stile, periodo...",
-    searchRefine: n => `Raffina in ${n}... (facoltativo)`,
-    from: "DA", to: "A",
-    searching: n => n ? `Ricerca in ${n}...` : "Consultazione del database d'arte globale...",
-    found: (n, i) => `${n} opera${n>1?"e":""}` + ` · ${i} con immagine`,
-    select: "Seleziona una galleria o cerca direttamente",
-    noImg: "immagine non disponibile",
-    explore: "Esplora da questa opera",
-    moreAla: "Altro in questa galleria",
-    showMore: (n, tot) => `Mostra altro · ${n} di ${tot.toLocaleString("it-IT")}`,
-    samePeriod: "+ Stesso periodo",
-    loadMore: "Mostra altre 18",
-    add: "+ COLLEZIONE", saved: "✓ SALVATO",
-    details: "▼ DETTAGLI", close: "▲ CHIUDI",
-    remove: "✕",
-    wikiLink: "Vedi su Wikipedia ↗",
-    empty: "Collezione vuota — esplora le gallerie",
-    browse: "ESPLORA LE GALLERIE",
-    filter: "Filtra la collezione...",
-    allGalleries: "Tutte le gallerie",
-    artworks: n => `${n} opera${n>1?"e":""}`,
-    curationTitle: "Curatela",
-    curationSub: "18 gallerie tematiche per esperienza visiva — clicca per esplorare.",
-    addTitle: "Aggiungi Opera",
-    addSub: "Per opere da gruppi, gallerie e musei senza API aperta.",
-    addBtn: "Aggiungi alla Collezione",
-    titleReq: "Il titolo è obbligatorio.",
-    fields: {
-      title:"Titolo *", artist:"Artista", date:"Data / Periodo", medium:"Tecnica",
-      dim:"Dimensioni", origin:"Origine / Paese", style:"Stile / Movimento",
-      museum:"Museo / Collezione", credit:"Crediti", imgUrl:"URL immagine",
-      extUrl:"Link di riferimento", desc:"Descrizione", gallery:"Galleria"
-    },
-    noGallery: "— senza galleria —",
-    footer: "18 GALLERIE · MUSEI GLOBALI · COLLEZIONE PERSONALE",
-    global: "Collezione d'Arte Globale",
-    alas: {
-      retratos:"Ritratti", pessoas_reais:"Persone Note", historico:"Storia", cidades:"Emozione",
-      objetos:"Oggetti", lugares:"Luoghi Noti",
-      natureza:"Natura", familiar:"Ambiente Familiare", nudes:"Nudi Femminili",
-      esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Architettura",
-      povo:"Gente del Popolo", perspectiva:"Prospettiva", luz_sol:"Luce del Sole",
-      cores:"Colori", fase:"Psiche", femininas:"Artiste Femminili",
-    }
+    footer: "18 GALERÍAS · MUSEOS DEL MUNDO · COLECCIÓN PERSONAL",
+    erro: "Error",
+    hd: "Cargando en alta resolución…",
+    ant: "Obra anterior", prox: "Obra siguiente",
+    zoomMais: "Ampliar", zoomMenos: "Reducir", zoomReset: "Tamaño original", fechar: "Cerrar",
+    recarregar: "Recargar", topo: "Volver arriba",
+    alas: ALAS_NOMES.es,
   },
   pt: {
     tabs: ["Buscar", "Coleção Pessoal", "Exposições", "Adicionar Obra"],
+    buscarBtn: "BUSCAR",
     searchDirect: "Busca direta — obra, artista, estilo, período...",
     searchRefine: n => `Refinar em ${n}... (opcional)`,
     from: "DE", to: "ATÉ",
@@ -245,11 +198,11 @@ const T = {
     moreAla: "Mais nesta galeria",
     showMore: (n, tot) => `Mostrar mais · ${n} de ${tot.toLocaleString("pt-BR")}`,
     samePeriod: "+ Mesmo período",
-    loadMore: "Ver mais 18",
     add: "+ COLEÇÃO", saved: "✓ SALVO",
     details: "▼ DETALHES", close: "▲ FECHAR",
     remove: "✕",
     wikiLink: "Ver na Wikipédia ↗",
+    wikiFonte: L => `FONTE: WIKIPÉDIA (${L}) · CC BY-SA`,
     empty: "Coleção vazia — explore as galerias",
     browse: "EXPLORAR AS GALERIAS",
     filter: "Filtrar a coleção...",
@@ -269,63 +222,103 @@ const T = {
     },
     noGallery: "— sem galeria —",
     footer: "18 GALERIAS · MUSEUS MUNDIAIS · COLEÇÃO PESSOAL",
-    global: "Coleção de Arte Mundial",
-    alas: {
-      retratos:"Retratos", pessoas_reais:"Pessoas Conhecidas", historico:"História", cidades:"Emoção",
-      objetos:"Objetos", lugares:"Lugares Conhecidos",
-      natureza:"Natureza", familiar:"Ambiente Familiar", nudes:"Nus Femininos",
-      esoterico:"Esoterismo", sacro:"Sacro", arquitetura:"Arquitetura",
-      povo:"Gente do Povo", perspectiva:"Perspectiva", luz_sol:"Luz do Sol",
-      cores:"Cores", fase:"Psiquê", femininas:"Artistas Femininas",
-    }
+    erro: "Erro",
+    hd: "Carregando alta resolução…",
+    ant: "Obra anterior", prox: "Próxima obra",
+    zoomMais: "Ampliar", zoomMenos: "Reduzir", zoomReset: "Tamanho original", fechar: "Fechar",
+    recarregar: "Recarregar", topo: "Voltar ao topo",
+    alas: ALAS_NOMES.pt,
+  },
+  it: {
+    tabs: ["Cerca", "Collezione personale", "Mostre", "Aggiungi opera"],
+    buscarBtn: "CERCA",
+    searchDirect: "Cerca opere, artisti, stili, periodi…",
+    searchRefine: n => `Cerca in ${n}… (facoltativo)`,
+    from: "DAL", to: "AL",
+    searching: n => n ? `Ricerca in ${n}…` : "Ricerca nella collezione…",
+    found: (n, i) => `${n} ${n===1?"opera":"opere"} · ${i} con immagine`,
+    select: "Scegli una galleria o cerca direttamente",
+    noImg: "immagine non disponibile",
+    explore: "Esplora a partire da quest'opera",
+    moreAla: "Altre opere di questa galleria",
+    showMore: (n, tot) => `Mostra altre · ${n} di ${tot.toLocaleString("it-IT")}`,
+    samePeriod: "+ Stesso periodo",
+    add: "+ COLLEZIONE", saved: "✓ SALVATA",
+    details: "▼ DETTAGLI", close: "▲ CHIUDI",
+    remove: "✕",
+    wikiLink: "Vedi su Wikipedia ↗",
+    wikiFonte: L => `FONTE: WIKIPEDIA (${L}) · CC BY-SA`,
+    empty: "La tua collezione è vuota — esplora le gallerie",
+    browse: "ESPLORA LE GALLERIE",
+    filter: "Filtra la tua collezione…",
+    allGalleries: "Tutte le gallerie",
+    artworks: n => `${n} ${n===1?"opera":"opere"}`,
+    curationTitle: "Curatela",
+    curationSub: "18 gallerie tematiche, ordinate per esperienza visiva — clicca per esplorare.",
+    addTitle: "Aggiungi un'opera",
+    addSub: "Per opere di collettivi, gallerie e musei senza API aperta.",
+    addBtn: "Aggiungi alla collezione",
+    titleReq: "Il titolo è obbligatorio.",
+    fields: {
+      title:"Titolo *", artist:"Artista", date:"Data / Periodo", medium:"Tecnica",
+      dim:"Dimensioni", origin:"Origine / Paese", style:"Stile / Movimento",
+      museum:"Museo / Collezione", credit:"Crediti", imgUrl:"URL dell'immagine",
+      extUrl:"Link di riferimento", desc:"Descrizione", gallery:"Galleria"
+    },
+    noGallery: "— nessuna galleria —",
+    footer: "18 GALLERIE · MUSEI DEL MONDO · COLLEZIONE PERSONALE",
+    erro: "Errore",
+    hd: "Caricamento in alta risoluzione…",
+    ant: "Opera precedente", prox: "Opera successiva",
+    zoomMais: "Ingrandisci", zoomMenos: "Riduci", zoomReset: "Dimensione originale", fechar: "Chiudi",
+    recarregar: "Ricarica", topo: "Torna su",
+    alas: ALAS_NOMES.it,
   },
   de: {
-    tabs: ["Suchen", "Sammlung", "Ausstellungen", "Werk hinzufügen"],
-    searchDirect: "Direktsuche — Werk, Künstler, Stil, Epoche...",
-    searchRefine: n => `Eingrenzen in ${n}... (optional)`,
+    tabs: ["Suche", "Persönliche Sammlung", "Ausstellungen", "Werk hinzufügen"],
+    buscarBtn: "SUCHEN",
+    searchDirect: "Werke, Künstler, Stile, Epochen suchen …",
+    searchRefine: n => `In „${n}“ suchen … (optional)`,
     from: "VON", to: "BIS",
-    searching: n => n ? `Suche in ${n}...` : "Abfrage der Weltkunst-Datenbank...",
-    found: (n, i) => `${n} Werk${n>1?"e":""} · ${i} mit Bild`,
+    searching: n => n ? `Suche in „${n}“ …` : "Suche in der Sammlung …",
+    found: (n, i) => `${n} ${n===1?"Werk":"Werke"} · ${i} mit Bild`,
     select: "Wählen Sie eine Galerie oder suchen Sie direkt",
     noImg: "Bild nicht verfügbar",
-    explore: "Von diesem Werk aus erkunden",
-    moreAla: "Mehr in dieser Galerie",
+    explore: "Von diesem Werk aus entdecken",
+    moreAla: "Mehr aus dieser Galerie",
     showMore: (n, tot) => `Mehr anzeigen · ${n} von ${tot.toLocaleString("de-DE")}`,
     samePeriod: "+ Gleiche Epoche",
-    loadMore: "18 weitere anzeigen",
     add: "+ SAMMLUNG", saved: "✓ GESPEICHERT",
     details: "▼ DETAILS", close: "▲ SCHLIESSEN",
     remove: "✕",
     wikiLink: "Auf Wikipedia ansehen ↗",
-    empty: "Sammlung leer — erkunden Sie die Galerien",
-    browse: "GALERIEN ERKUNDEN",
-    filter: "Sammlung filtern...",
+    wikiFonte: L => `QUELLE: WIKIPEDIA (${L}) · CC BY-SA`,
+    empty: "Ihre Sammlung ist leer — entdecken Sie die Galerien",
+    browse: "GALERIEN ENTDECKEN",
+    filter: "Sammlung filtern …",
     allGalleries: "Alle Galerien",
-    artworks: n => `${n} Werk${n>1?"e":""}`,
+    artworks: n => `${n} ${n===1?"Werk":"Werke"}`,
     curationTitle: "Kuratierung",
-    curationSub: "18 thematische Galerien nach visueller Erfahrung — zum Erkunden klicken.",
+    curationSub: "18 thematische Galerien, geordnet nach dem Seherlebnis — zum Entdecken klicken.",
     addTitle: "Werk hinzufügen",
-    addSub: "Für Werke aus Gruppen, Galerien und Museen ohne offene API.",
+    addSub: "Für Werke von Kollektiven, Galerien und Museen ohne offene API.",
     addBtn: "Zur Sammlung hinzufügen",
-    titleReq: "Titel erforderlich.",
+    titleReq: "Bitte geben Sie einen Titel ein.",
     fields: {
       title:"Titel *", artist:"Künstler", date:"Datum / Epoche", medium:"Technik",
-      dim:"Maße", origin:"Herkunft / Land", style:"Stil / Bewegung",
-      museum:"Museum / Sammlung", credit:"Nachweis", imgUrl:"Bild-URL",
-      extUrl:"Referenzlink", desc:"Beschreibung", gallery:"Galerie"
+      dim:"Maße", origin:"Herkunft / Land", style:"Stil / Strömung",
+      museum:"Museum / Sammlung", credit:"Bildnachweis", imgUrl:"Bild-URL",
+      extUrl:"Weblink", desc:"Beschreibung", gallery:"Galerie"
     },
-    noGallery: "— ohne Galerie —",
-    footer: "18 GALERIEN · WELTMUSEEN · PERSÖNLICHE SAMMLUNG",
-    global: "Weltkunst-Sammlung",
-    alas: {
-      retratos:"Porträts", pessoas_reais:"Bekannte Persönlichkeiten", historico:"Geschichte", cidades:"Emotion",
-      objetos:"Objekte", lugares:"Bekannte Orte",
-      natureza:"Natur", familiar:"Familiäres Ambiente", nudes:"Weibliche Akte",
-      esoterico:"Esoterik", sacro:"Sakrales", arquitetura:"Architektur",
-      povo:"Menschen aus dem Volk", perspectiva:"Perspektive", luz_sol:"Sonnenlicht",
-      cores:"Farben", fase:"Psyche", femininas:"Künstlerinnen",
-    }
-  }
+    noGallery: "— keine Galerie —",
+    footer: "18 GALERIEN · MUSEEN DER WELT · PERSÖNLICHE SAMMLUNG",
+    erro: "Fehler",
+    hd: "Hohe Auflösung wird geladen …",
+    ant: "Vorheriges Werk", prox: "Nächstes Werk",
+    zoomMais: "Vergrößern", zoomMenos: "Verkleinern", zoomReset: "Originalgröße", fechar: "Schließen",
+    recarregar: "Neu laden", topo: "Nach oben",
+    alas: ALAS_NOMES.de,
+  },
 };
 
 // ─── 18 Alas ──────────────────────────────────────────────────────────────────
@@ -419,7 +412,7 @@ async function getWeather() {
 
 // ─── Busca ────────────────────────────────────────────────────────────────────
 async function searchArt(query, ala, fromYear, toYear, lang, limit = PAGE) {
-  const p = new URLSearchParams({ q: query, lang: lang || "fr", limit: String(limit) });
+  const p = new URLSearchParams({ q: query, lang: lang || "en", limit: String(limit) });
   if (ala) { p.append("ala", ala.nameEn||ala.id); p.append("alaHint", ala.hint||""); p.append("alaId", ala.id); }
   if (fromYear) p.append("fromYear", fromYear);
   if (toYear)   p.append("toYear", toYear);
@@ -456,15 +449,30 @@ export function Logo({ small }) {
   );
 }
 
-// ─── Seletor de idioma — EN · FR · PT, em linha ───────────────────────────────
+// ─── Seletor de idioma — como antes: quatro bandeiras e "outros idiomas" ─────
+// Inglês primeiro (idioma principal). Italiano e alemão ficam no menu "outros idiomas";
+// quando um deles está ativo, o menu mostra qual é.
+const IDIOMAS_PRINCIPAIS = [
+  { code:"en", flag:"🇬🇧", nome:"English" },
+  { code:"fr", flag:"🇫🇷", nome:"Français" },
+  { code:"es", flag:"🇪🇸", nome:"Español" },
+  { code:"pt", flag:"🇵🇹", nome:"Português" },
+];
+const IDIOMAS_OUTROS = [
+  { code:"it", flag:"🇮🇹", nome:"Italiano" },
+  { code:"de", flag:"🇩🇪", nome:"Deutsch" },
+];
+const ROT_OUTROS = {
+  en:"other languages", fr:"autres langues", es:"otros idiomas",
+  pt:"outros idiomas", it:"altre lingue", de:"weitere Sprachen",
+};
 export function LangSwitcher({ lang, setLang }) {
-  const principais = [
-    { code:"en", flag:"🇬🇧" },
-    { code:"fr", flag:"🇫🇷" },
-    { code:"pt", flag:"🇵🇹" },
-  ];
+  const [abrir, setAbrir] = useState(false);
+  const escolher = code => { setLang(code); saveLang(code); setAbrir(false); };
+  const ativoOutro = IDIOMAS_OUTROS.find(l => l.code === lang);
   const btn = (l) => (
-    <button key={l.code} onClick={() => { setLang(l.code); saveLang(l.code); }}
+    <button key={l.code} onClick={() => escolher(l.code)} title={l.nome} aria-label={l.nome}
+      aria-pressed={lang===l.code}
       style={{
         background:"none", border:"none", cursor:"pointer",
         fontSize:20, lineHeight:1, padding:"2px 3px",
@@ -477,15 +485,37 @@ export function LangSwitcher({ lang, setLang }) {
   );
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:3 }}>
-      <div className="lang-switcher">{principais.map(btn)}</div>
+      <div className="lang-switcher">{IDIOMAS_PRINCIPAIS.map(btn)}</div>
+      <div style={{ position:"relative" }}>
+        <button onClick={() => setAbrir(a => !a)} aria-expanded={abrir}
+          style={{ background:"none", border:"none", padding:0, fontSize:11, color:"#0a0a0a",
+                   cursor:"pointer", letterSpacing:0.3, opacity: ativoOutro ? 0.9 : 0.65,
+                   fontFamily:"'Cormorant Garamond',Georgia,serif", userSelect:"none" }}>
+          {ativoOutro ? `${ativoOutro.flag} ${ativoOutro.nome}` : (ROT_OUTROS[lang] || ROT_OUTROS.en)} ▾
+        </button>
+        {abrir && (
+          <div style={{ position:"absolute", right:0, top:"18px", background:"#fff",
+                        border:"1px solid #e0e0e0", borderRadius:6, boxShadow:"0 2px 8px rgba(0,0,0,.12)",
+                        padding:4, zIndex:50, display:"flex", flexDirection:"column", gap:2 }}>
+            {IDIOMAS_OUTROS.map(l => (
+              <button key={l.code} onClick={() => escolher(l.code)}
+                style={{ background: lang===l.code?"#f0f0f0":"none", border:"none", cursor:"pointer",
+                         fontSize:12, padding:"4px 10px", whiteSpace:"nowrap", textAlign:"left",
+                         display:"flex", alignItems:"center", gap:6, borderRadius:4 }}>
+                <span style={{ fontSize:16 }}>{l.flag}</span> {l.nome}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 // ─── Rodapé: "X obras · Acervo: <museu>" ao lado do logo pequeno
 // Total e rótulo fixos; só o nome do museu troca, um por vez, por esmaecimento.
-const ROT_ACERVO = { fr:"Fonds :", en:"Holdings:", es:"Acervo:", pt:"Acervo:", it:"Collezione:", de:"Sammlung:" };
-const ROT_OBRAS  = { fr:"œuvres", en:"works", es:"obras", pt:"obras", it:"opere", de:"Werke" };
+const ROT_ACERVO = { en:"Collections:", fr:"Collections\u00a0:", es:"Colecciones:", pt:"Acervo:", it:"Collezioni:", de:"Sammlungen:" };
+const ROT_OBRAS  = { en:"works", fr:"œuvres", es:"obras", pt:"obras", it:"opere", de:"Werke" };
 const LOCALE     = { fr:"fr-FR", en:"en-US", es:"es-ES", pt:"pt-BR", it:"it-IT", de:"de-DE" };
 function AcervoRodape({ lang = "en" }) {
   const [lista, setLista]     = useState([]);
@@ -589,6 +619,7 @@ function AlaBtn({ name, ala, active, onClick }) {
 // onPrev/onNext opcionais: quando presentes, mostra setas, aceita ← → do teclado
 // e o gesto de deslizar no celular. pos/total exibem "37 / 1.240".
 function ZoomViewer({ art, onClose, onPrev, onNext, pos, total, neighbors = [], lang = "en" }) {
+  const t = T[lang] || T.en;
   const [scale, setScale]   = useState(1);
   const [pos2, setPos]      = useState({ x: 0, y: 0 });
   const [drag, setDrag]     = useState(null);
@@ -662,7 +693,7 @@ function ZoomViewer({ art, onClose, onPrev, onNext, pos, total, neighbors = [], 
         style={{ overflow:"hidden", width:"94vw", height:"84vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
         {!loaded && (
           <div style={{ position:"absolute", color:"#888", fontFamily:"Verdana,sans-serif", fontSize:13 }}>
-            <span style={{ display:"inline-block", animation:"spin 1s linear infinite" }}>⟳</span> carregando alta resolução…
+            <span style={{ display:"inline-block", animation:"spin 1s linear infinite" }}>⟳</span> {t.hd}
           </div>
         )}
         <img key={art.id} src={src} alt={art.title} draggable={false} onLoad={() => setLoaded(true)}
@@ -685,27 +716,27 @@ function ZoomViewer({ art, onClose, onPrev, onNext, pos, total, neighbors = [], 
         </p>
       </div>
 
-      {onPrev && <button aria-label="anterior" onClick={e => { e.stopPropagation(); onPrev(); }} style={arrow("left")}>‹</button>}
-      {onNext && <button aria-label="próxima"  onClick={e => { e.stopPropagation(); onNext(); }} style={arrow("right")}>›</button>}
+      {onPrev && <button aria-label={t.ant} title={t.ant} onClick={e => { e.stopPropagation(); onPrev(); }} style={arrow("left")}>‹</button>}
+      {onNext && <button aria-label={t.prox} title={t.prox} onClick={e => { e.stopPropagation(); onNext(); }} style={arrow("right")}>›</button>}
 
       <div style={{ position:"fixed", top:16, right:16, display:"flex", gap:8, zIndex:100000 }}>
-        <ZoomBtn onClick={e => { e.stopPropagation(); setScale(s => Math.min(s + 0.5, 8)); }}>+</ZoomBtn>
-        <ZoomBtn onClick={e => { e.stopPropagation(); setScale(s => Math.max(s - 0.5, 1)); }}>−</ZoomBtn>
-        <ZoomBtn onClick={e => { e.stopPropagation(); reset(); }}>⟲</ZoomBtn>
-        <ZoomBtn onClick={e => { e.stopPropagation(); onClose(); }} close>✕</ZoomBtn>
+        <ZoomBtn rotulo={t.zoomMais} onClick={e => { e.stopPropagation(); setScale(s => Math.min(s + 0.5, 8)); }}>+</ZoomBtn>
+        <ZoomBtn rotulo={t.zoomMenos} onClick={e => { e.stopPropagation(); setScale(s => Math.max(s - 0.5, 1)); }}>−</ZoomBtn>
+        <ZoomBtn rotulo={t.zoomReset} onClick={e => { e.stopPropagation(); reset(); }}>⟲</ZoomBtn>
+        <ZoomBtn rotulo={t.fechar} onClick={e => { e.stopPropagation(); onClose(); }} close>✕</ZoomBtn>
       </div>
     </div>,
     document.body
   );
 }
 
-function ZoomBtn({ children, onClick, close }) {
+function ZoomBtn({ children, onClick, close, rotulo }) {
   const [h, setH] = useState(false);
   return (
-    <button onClick={onClick} onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+    <button onClick={onClick} title={rotulo} aria-label={rotulo} onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
       style={{ width:44, height:44, borderRadius:6,
         background: close ? (h ? "#d41515" : "rgba(212,21,21,0.8)") : (h ? "#fff" : "rgba(255,255,255,0.15)"),
-        border:"1px solid rgba(255,255,255,0.4)", color:"#fff",
+        border:"1px solid rgba(255,255,255,0.4)", color: (h && !close) ? "#111" : "#fff",
         fontSize:20, fontWeight:700, cursor:"pointer", transition:"all .15s",
         display:"flex", alignItems:"center", justifyContent:"center",
         boxShadow:"0 2px 8px rgba(0,0,0,0.4)" }}>
@@ -763,9 +794,9 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, onZoom, t, lang=
           <div style={{ borderTop:"1px solid #f0ece4", paddingTop:9, display:"flex", flexDirection:"column", gap:5 }}>
             {art.dimensions&&<p style={{ margin:0, fontSize:10.5, color:"#bbb", fontFamily:"monospace" }}>{art.dimensions}</p>}
             {art.description&&<p style={{ margin:0, fontSize:13, color:"#444", lineHeight:1.65, fontFamily:"'Cormorant Garamond',serif" }}>{art.description}</p>}
-            {art.wiki&&(art.wiki[lang||"en"]||art.wiki.en||art.wiki.fr)&&(()=>{
-              const ordem = [lang, "pt", "fr", "en", "es", "it", "de"].filter(Boolean);
-              const wLang = ordem.find(L => art.wiki[L]) || "fr";
+            {art.wiki&&Object.values(art.wiki).some(Boolean)&&(()=>{
+              const ordem = [lang, "en", "fr", "es", "it", "pt", "de"].filter(Boolean);
+              const wLang = ordem.find(L => art.wiki[L]) || "en";
               const wText = art.wiki[wLang];
               if (!wText) return null;
               return (
@@ -776,7 +807,7 @@ function Card({ art, onAdd, onRemove, inCollection, onNavigate, onZoom, t, lang=
                   </p>
                   <p style={{ margin:"4px 0 0", fontSize:9, color:"#bbb",
                     fontFamily:"Verdana,sans-serif", letterSpacing:1 }}>
-                    FONTE: WIKIPEDIA ({wLang.toUpperCase()}) · CC BY-SA
+                    {t.wikiFonte(wLang.toUpperCase())}
                   </p>
                 </div>
               );
@@ -891,7 +922,7 @@ function CuradoriaTab({ col, onClickAla, t, lang }) {
               onMouseLeave={e=>{ e.currentTarget.style.background=`linear-gradient(90deg, ${ala.color}18 0%, transparent 100%)`; e.currentTarget.style.borderColor=`${ala.color}33`; }}>
               <div style={{ flex:1,minWidth:0 }}>
                 <p style={{ margin:0,fontSize:12,fontFamily:"Verdana,sans-serif",fontWeight:600,color:"#0a0a0a",lineHeight:"1" }}>{t.alas[ala.id]}</p>
-                <p style={{ margin:"3px 0 0",fontSize:10.5,color:"#aaa",fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis" }}>{ala.desc[lang] || ala.desc.fr || ""}</p>
+                <p style={{ margin:"3px 0 0",fontSize:10.5,color:"#aaa",fontFamily:"'Cormorant Garamond',serif",fontStyle:"italic",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis" }}>{ala.desc[lang] || ala.desc.en || ""}</p>
               </div>
               {c>0&&<span style={{ fontSize:9.5,color:ala.color,background:`${ala.color}18`,border:`1px solid ${ala.color}33`,borderRadius:10,padding:"1px 6px",fontFamily:"Verdana,sans-serif",flexShrink:0 }}>{c}</span>}
             </button>
@@ -927,6 +958,21 @@ export default function App() {
   const [loadingMore,setLoadingMore] = useState(false);
 
   useEffect(()=>{ setCol(loadCol()); },[]);
+  useEffect(()=>{ try { document.documentElement.lang = lang; } catch {} },[lang]);
+
+  // Abas no celular: se não cabem (francês, alemão…), deslizam de lado e a borda direita
+  // esmaece até o fim, para indicar que há mais.
+  const abasRef = useRef(null);
+  const [abasCortadas, setAbasCortadas] = useState(false);
+  const medirAbas = useCallback(() => {
+    const el = abasRef.current; if (!el) return;
+    setAbasCortadas(el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
+  }, []);
+  useEffect(() => {
+    medirAbas();
+    window.addEventListener("resize", medirAbas);
+    return () => window.removeEventListener("resize", medirAbas);
+  }, [lang, col.length, medirAbas]);
 
   // Ping de visita — conta 1×/dia por navegador, sem guardar IP (lado do servidor)
   useEffect(()=>{ fetch("/api/visita").catch(()=>{}); },[]);
@@ -1023,19 +1069,20 @@ export default function App() {
   return (
     <div className="germ-app" style={{ minHeight:"100vh",color:"#0a0a0a",fontFamily:"'Cormorant Garamond',Georgia,serif" }}>
       <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet"/>
-      <style>{`*{box-sizing:border-box}@keyframes spin{to{transform:rotate(360deg)}}.lang-switcher{display:flex;align-items:center;gap:6px}@media(max-width:600px){.germ-header{padding:14px 16px 0!important}.germ-app main{padding:22px 16px!important}.germ-logo-topo{transform:scale(.6);transform-origin:left top;height:44px;margin-right:-38%}.germ-ambient{padding:5px 16px!important}.germ-topo{margin-bottom:10px!important}.lang-switcher{gap:2px}.germ-abas{overflow-x:auto;scrollbar-width:none}.germ-abas::-webkit-scrollbar{display:none}.germ-abas button{white-space:nowrap;padding:9px 11px 9px 0!important;margin-right:0!important;flex-shrink:0;font-size:9.5px!important;letter-spacing:.5px!important}}`}</style>
+      <style>{`*{box-sizing:border-box}@keyframes spin{to{transform:rotate(360deg)}}.lang-switcher{display:flex;align-items:center;gap:6px}@media(max-width:600px){.germ-header{padding:14px 16px 0!important}.germ-app main{padding:22px 16px!important}.germ-logo-topo{transform:scale(.6);transform-origin:left top;height:44px;margin-right:-38%}.germ-ambient{padding:5px 16px!important}.germ-topo{margin-bottom:10px!important}.lang-switcher{gap:2px}.germ-abas{overflow-x:auto;scrollbar-width:none}.germ-abas::-webkit-scrollbar{display:none}.ala-btn span{line-height:1.3!important}.germ-abas button{white-space:nowrap;padding:9px 11px 9px 0!important;margin-right:0!important;flex-shrink:0;font-size:9.5px!important;letter-spacing:.5px!important}}`}</style>
 
       <AmbientBar lang={lang}/>
 
       <header className="germ-header" style={{ borderBottom:"1px solid #e8e4dc",padding:"18px 36px 0" }}>
         <div style={{ maxWidth:1300,margin:"0 auto" }}>
           <div className="germ-topo" style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:16,gap:12 }}>
-            <div className="germ-logo-topo" onClick={()=>window.location.reload()} style={{ cursor:"pointer" }} title={{en:"Reload",fr:"Recharger",pt:"Recarregar"}[lang]}><Logo/></div>
+            <div className="germ-logo-topo" onClick={()=>window.location.reload()} style={{ cursor:"pointer" }} title={t.recarregar}><Logo/></div>
             <div style={{ display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6 }}>
               <LangSwitcher lang={lang} setLang={setLang}/>
             </div>
           </div>
-          <nav className="germ-abas" style={{ display:"flex" }}>
+          <nav className="germ-abas" ref={abasRef} onScroll={medirAbas}
+            style={{ display:"flex", ...(abasCortadas ? { WebkitMaskImage:"linear-gradient(to right, #000 82%, transparent)", maskImage:"linear-gradient(to right, #000 82%, transparent)" } : {}) }}>
             {TABS.map(tb=>(
               <button key={tb.id} onClick={()=>setTab(tb.id)} style={{ background:"none",border:"none",borderBottom:tab===tb.id?"2px solid #0a0a0a":"2px solid transparent",color:tab===tb.id?"#0a0a0a":"#aaa",padding:"9px 20px 9px 0",marginRight:4,cursor:"pointer",fontSize:10.5,fontFamily:"Verdana,sans-serif",letterSpacing:1,textTransform:"uppercase",transition:"color .18s" }}>{tb.label}</button>
             ))}
@@ -1057,7 +1104,7 @@ export default function App() {
               {query.trim()&&(
                 <button onClick={doSearch} disabled={busy}
                   style={{ background:"none",border:"none",cursor:busy?"default":"pointer",fontSize:10.5,fontFamily:"Verdana,sans-serif",letterSpacing:2,color:busy?"#ccc":"#0a0a0a",paddingLeft:16,whiteSpace:"nowrap" }}>
-                  {busy?<span style={{ display:"inline-block",animation:"spin 1s linear infinite" }}>⟳</span>:`${t.tabs[0].toUpperCase()} →`}
+                  {busy?<span style={{ display:"inline-block",animation:"spin 1s linear infinite" }}>⟳</span>:`${t.buscarBtn} →`}
                 </button>
               )}
             </div>
@@ -1070,7 +1117,7 @@ export default function App() {
 
             {phase==="searching"&&<div style={{ display:"flex",alignItems:"center",gap:8,marginBottom:14 }}><div style={{ width:6,height:6,borderRadius:"50%",background:"#ccc",animation:"spin 1s linear infinite" }}/><span style={{ fontSize:10.5,color:"#aaa",fontFamily:"Verdana,sans-serif" }}>{t.searching(activeAla?t.alas[activeAla.id]:null)}</span></div>}
             {phase==="done"&&results.length>0&&<p style={{ fontSize:10.5,color:"#aaa",fontFamily:"Verdana,sans-serif",marginBottom:14 }}>{t.found(results.length,results.filter(r=>r.imageUrl).length)}</p>}
-            {phase==="error"&&<p style={{ fontSize:10.5,color:"#b22222",fontFamily:"Verdana,sans-serif",marginBottom:14 }}>Erreur: {errMsg}</p>}
+            {phase==="error"&&<p style={{ fontSize:10.5,color:"#b22222",fontFamily:"Verdana,sans-serif",marginBottom:14 }}>{t.erro}: {errMsg}</p>}
 
             {results.length>0&&(
               <div className="artworks-grid" style={{ display:"grid",gap:18 }}>
@@ -1160,7 +1207,7 @@ export default function App() {
 
       <footer className="germ-footer" style={{ borderTop:"1px solid #ece9e2",padding:"16px 36px",display:"flex",justifyContent:"space-between",alignItems:"baseline",flexWrap:"wrap",gap:"10px 24px" }}>
         <div style={{ display:"flex",alignItems:"baseline",flexWrap:"wrap",gap:"8px 22px" }}>
-          <div onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{ cursor:"pointer" }} title={{en:"Back to top",fr:"Haut de page",pt:"Voltar ao topo"}[lang]}><Logo small/></div>
+          <div onClick={()=>window.scrollTo({top:0,behavior:"smooth"})} style={{ cursor:"pointer" }} title={t.topo}><Logo small/></div>
           <AcervoRodape lang={lang}/>
         </div>
         <p className="germ-footer-tag" style={{ margin:0,fontSize:9,color:"#ccc",fontFamily:"Verdana,sans-serif",letterSpacing:2 }}>{t.footer}</p>

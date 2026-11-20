@@ -4,9 +4,12 @@
 export const ROTAS = ["nos-somos", "direitos", "editorial", "loja", "contatos"];
 
 export const ROTULOS = {
-  en: { "nos-somos":"About us",        direitos:"Rights", editorial:"Editorial",  loja:"Shop",     contatos:"Contact" },
-  fr: { "nos-somos":"Qui sommes-nous", direitos:"Droits", editorial:"Éditorial",  loja:"Boutique", contatos:"Contact" },
-  pt: { "nos-somos":"Nós Somos",       direitos:"Direitos", editorial:"Editorial", loja:"Loja",   contatos:"Contatos" },
+  en: { "nos-somos":"About us",        direitos:"Rights",   editorial:"Editorial",   loja:"Shop",     contatos:"Contact" },
+  fr: { "nos-somos":"Qui sommes-nous", direitos:"Droits",   editorial:"Éditorial",   loja:"Boutique", contatos:"Contact" },
+  es: { "nos-somos":"Quiénes somos",   direitos:"Derechos", editorial:"Editorial",   loja:"Tienda",   contatos:"Contacto" },
+  pt: { "nos-somos":"Nós Somos",       direitos:"Direitos", editorial:"Editorial",   loja:"Loja",     contatos:"Contatos" },
+  it: { "nos-somos":"Chi siamo",       direitos:"Diritti",  editorial:"Editoriale",  loja:"Negozio",  contatos:"Contatti" },
+  de: { "nos-somos":"Über uns",        direitos:"Rechte",   editorial:"Editorial",   loja:"Shop",     contatos:"Kontakt" },
 };
 
 export default function MenuRodape({ lang = "en", atual = "", centro = false }) {

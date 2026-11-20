@@ -14,31 +14,33 @@ import { createPortal } from "react-dom";
 const BUSTO  = "/emmanuel-busto.jpg";
 const FIGURA = "/emmanuel-figura.jpg";
 
+// A interface fala como o resto do site; a fala de Emmanuel Rio (abertura e erro)
+// mantém o tratamento formal da personagem em cada idioma.
 const TX = {
-  fr: { convite:"Demandez à Emmanuel Rio", campo:"Écrivez votre question…", enviar:"ENVOYER", fechar:"Fermer",
-        credito:"Albert Schindler, 1836 · Art Institute of Chicago",
-        erro:"Je ne peux pas converser pour le moment. Revenez plus tard — le fonds reste ouvert, et vous pouvez parcourir les ailes normalement.",
-        abertura:"Je suis Emmanuel Rio. Je peux expliquer comment ce fonds est organisé, parler de toute œuvre qui s'y trouve, ou raconter ma propre histoire. Que préférez-vous ?" },
   en: { convite:"Ask Emmanuel Rio", campo:"Type your question…", enviar:"SEND", fechar:"Close",
         credito:"Albert Schindler, 1836 · Art Institute of Chicago",
-        erro:"I cannot talk just now. Come back later — the collection stays open, and you can walk the wings as usual.",
+        erro:"I cannot talk just now. Do come back a little later — the collection stays open, and you can browse the galleries as usual.",
         abertura:"I am Emmanuel Rio. I can explain how this collection is arranged, discuss any work held here, or tell you my own story. Which would you prefer?" },
-  es: { convite:"Pregunte a Emmanuel Rio", campo:"Escriba su pregunta…", enviar:"ENVIAR", fechar:"Cerrar",
+  fr: { convite:"Demandez à Emmanuel Rio", campo:"Écrivez votre question…", enviar:"ENVOYER", fechar:"Fermer",
         credito:"Albert Schindler, 1836 · Art Institute of Chicago",
-        erro:"No puedo conversar en este momento. Vuelva más tarde — el acervo sigue abierto y puede recorrer las alas con normalidad.",
-        abertura:"Soy Emmanuel Rio. Puedo explicar cómo está organizado este acervo, hablar de cualquier obra que esté aquí, o contar mi propia historia. ¿Qué prefiere?" },
+        erro:"Je ne puis vous répondre pour le moment. Revenez un peu plus tard : la collection reste ouverte, et vous pouvez parcourir les galeries comme d’habitude.",
+        abertura:"Je suis Emmanuel Rio. Je peux vous expliquer comment cette collection est organisée, vous parler de n’importe quelle œuvre qu’elle conserve, ou vous raconter ma propre histoire. Que préférez-vous\u00a0?" },
+  es: { convite:"Pregúntale a Emmanuel Rio", campo:"Escribe tu pregunta…", enviar:"ENVIAR", fechar:"Cerrar",
+        credito:"Albert Schindler, 1836 · Art Institute of Chicago",
+        erro:"No puedo conversar en este momento. Vuelva un poco más tarde: la colección sigue abierta y puede recorrer las galerías con normalidad.",
+        abertura:"Soy Emmanuel Rio. Puedo explicarle cómo está organizada esta colección, hablarle de cualquier obra que se encuentre aquí o contarle mi propia historia. ¿Qué prefiere?" },
   pt: { convite:"Pergunte ao Emmanuel Rio", campo:"Escreva sua pergunta…", enviar:"ENVIAR", fechar:"Fechar",
         credito:"Albert Schindler, 1836 · Art Institute of Chicago",
         erro:"Não posso conversar neste momento. Volte em outra hora — o acervo continua aberto, e você pode percorrer as alas normalmente.",
         abertura:"Sou Emmanuel Rio. Posso explicar como este acervo está organizado, falar de qualquer obra que esteja aqui, ou contar a minha própria história. O que prefere?" },
   it: { convite:"Chiedi a Emmanuel Rio", campo:"Scrivi la tua domanda…", enviar:"INVIA", fechar:"Chiudi",
         credito:"Albert Schindler, 1836 · Art Institute of Chicago",
-        erro:"Non posso conversare in questo momento. Torni più tardi — la raccolta resta aperta e può percorrere le ale normalmente.",
-        abertura:"Sono Emmanuel Rio. Posso spiegare come è organizzata questa raccolta, parlare di qualsiasi opera qui presente, o raccontare la mia storia. Cosa preferisce?" },
-  de: { convite:"Fragen Sie Emmanuel Rio", campo:"Schreiben Sie Ihre Frage…", enviar:"SENDEN", fechar:"Schließen",
+        erro:"Non posso conversare in questo momento. Torni un po’ più tardi: la collezione resta aperta e può visitare le gallerie come sempre.",
+        abertura:"Sono Emmanuel Rio. Posso spiegarle come è ordinata questa collezione, parlarle di qualunque opera vi sia custodita o raccontarle la mia storia. Che cosa preferisce?" },
+  de: { convite:"Fragen Sie Emmanuel Rio", campo:"Ihre Frage …", enviar:"SENDEN", fechar:"Schließen",
         credito:"Albert Schindler, 1836 · Art Institute of Chicago",
-        erro:"Ich kann im Augenblick nicht sprechen. Kommen Sie später wieder — die Sammlung bleibt geöffnet, und Sie können die Flügel wie gewohnt durchgehen.",
-        abertura:"Ich bin Emmanuel Rio. Ich kann erklären, wie diese Sammlung geordnet ist, über jedes hier verwahrte Werk sprechen oder meine eigene Geschichte erzählen. Was möchten Sie?" },
+        erro:"Ich kann im Augenblick nicht sprechen. Kommen Sie bitte etwas später wieder — die Sammlung bleibt geöffnet, und Sie können die Galerien wie gewohnt besuchen.",
+        abertura:"Ich bin Emmanuel Rio. Ich kann Ihnen erklären, wie diese Sammlung geordnet ist, über jedes Werk sprechen, das sie bewahrt, oder Ihnen meine eigene Geschichte erzählen. Was ist Ihnen lieber?" },
 };
 
 export default function Atendente({ lang = "en" }) {
