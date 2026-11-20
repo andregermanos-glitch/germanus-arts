@@ -12,6 +12,8 @@ const saveCol  = col => { try { localStorage.setItem("germ_col", JSON.stringify(
 // O site sempre abre em inglês; quem escolher outro idioma fica com ele nas próximas visitas
 // (chave "germ_idioma" — a antiga "germ_lang" é ignorada de propósito).
 export const IDIOMAS = ["en", "fr", "es", "pt", "it", "de"];
+// Variante de cada idioma para o navegador (corretor, leitor de tela, tradutor automático)
+export const LANG_HTML = { en:"en-US", fr:"fr-FR", es:"es", pt:"pt-BR", it:"it-IT", de:"de-DE" };
 export const loadLang = () => {
   try { const l = localStorage.getItem("germ_idioma"); return IDIOMAS.includes(l) ? l : "en"; }
   catch { return "en"; }
@@ -404,7 +406,7 @@ async function getWeather() {
         } catch {}
         const code = cw?.weathercode ?? 0;
         const icon = code===0?"☀️":code<=3?"🌤":code<=49?"🌫":code<=69?"🌧":"⛈";
-        resolve({ temp: Math.round(cw?.temperature ?? 0), icon, city });
+        resolve({ temp: cw?.temperature ?? 0, icon, city });   // °C; a barra converte para °F em inglês
       } catch { resolve(null); }
     }, () => resolve(null), { timeout: 6000, maximumAge: 300000 });
   });
@@ -450,10 +452,10 @@ export function Logo({ small }) {
 }
 
 // ─── Seletor de idioma — como antes: quatro bandeiras e "outros idiomas" ─────
-// Inglês primeiro (idioma principal). Italiano e alemão ficam no menu "outros idiomas";
+// Inglês americano primeiro (idioma principal). Italiano e alemão ficam no menu "outros idiomas";
 // quando um deles está ativo, o menu mostra qual é.
 const IDIOMAS_PRINCIPAIS = [
-  { code:"en", flag:"🇬🇧", nome:"English" },
+  { code:"en", flag:"🇺🇸", nome:"English" },
   { code:"fr", flag:"🇫🇷", nome:"Français" },
   { code:"es", flag:"🇪🇸", nome:"Español" },
   { code:"pt", flag:"🇵🇹", nome:"Português" },
@@ -580,7 +582,7 @@ function AmbientBar({ lang = "en" }) {
     <div className="germ-ambient" style={{ background:"#f5f4f0", borderBottom:"1px solid #ece9e2", padding:"5px 36px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:"2px 12px", flexWrap:"wrap" }}>
       <span style={s}>{moon && (() => { const L = LUA[lang] || LUA.en;
         return `${moon.emoji} ${L.rotulo} · ${L.dia} ${moon.dia} · ${L.fases[moon.idx]}`; })()}</span>
-      <span style={s}>{wL?"···":weather?`${weather.icon} ${weather.temp}°C${weather.city?` · ${weather.city}`:""}` : "—"}</span>
+      <span style={s}>{wL?"···":weather?`${weather.icon} ${lang==="en" ? `${Math.round(weather.temp*9/5+32)}°F` : `${Math.round(weather.temp)}°C`}${weather.city?` · ${weather.city}`:""}` : "—"}</span>
     </div>
   );
 }
@@ -958,7 +960,7 @@ export default function App() {
   const [loadingMore,setLoadingMore] = useState(false);
 
   useEffect(()=>{ setCol(loadCol()); },[]);
-  useEffect(()=>{ try { document.documentElement.lang = lang; } catch {} },[lang]);
+  useEffect(()=>{ try { document.documentElement.lang = LANG_HTML[lang] || lang; } catch {} },[lang]);
 
   // Abas no celular: se não cabem (francês, alemão…), deslizam de lado e a borda direita
   // esmaece até o fim, para indicar que há mais.

@@ -19,7 +19,7 @@ const FIGURA = "/emmanuel-figura.jpg";
 const TX = {
   en: { convite:"Ask Emmanuel Rio", campo:"Type your question…", enviar:"SEND", fechar:"Close",
         credito:"Albert Schindler, 1836 · Art Institute of Chicago",
-        erro:"I cannot talk just now. Do come back a little later — the collection stays open, and you can browse the galleries as usual.",
+        erro:"I cannot talk just now. Please come back a little later — the collection stays open, and you can browse the galleries as usual.",
         abertura:"I am Emmanuel Rio. I can explain how this collection is arranged, discuss any work held here, or tell you my own story. Which would you prefer?" },
   fr: { convite:"Demandez à Emmanuel Rio", campo:"Écrivez votre question…", enviar:"ENVOYER", fechar:"Fermer",
         credito:"Albert Schindler, 1836 · Art Institute of Chicago",

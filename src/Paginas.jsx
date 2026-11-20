@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from "react";
 import "./germanus.css";
-import { Logo, LangSwitcher, loadLang } from "./App";
+import { Logo, LangSwitcher, loadLang, LANG_HTML } from "./App";
 import MenuRodape, { ROTULOS } from "./MenuRodape";
 
 const VERMELHO = "#b03a2e";
@@ -246,7 +246,7 @@ export default function Paginas({ slug }) {
   useEffect(() => {
     const nome = (ROTULOS[lang] || ROTULOS.en)[slug];
     document.title = `${nome} — GERMANUS.Art`;
-    document.documentElement.lang = lang;
+    document.documentElement.lang = LANG_HTML[lang] || lang;
   }, [slug, lang]);
   return (
     <Moldura lang={lang} setLang={setLang} slug={slug}>
