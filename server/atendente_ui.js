@@ -32,6 +32,21 @@ const ALAS = {
 };
 const ALA_POR_NOME = Object.fromEntries(Object.entries(ALAS).map(([id, n]) => [n.toLowerCase(), id]));
 
+// Nomes das galerias como o visitante os vê no site, em cada idioma (mesmo arquivo usado
+// pelo frontend). Se o arquivo faltar, o atendente segue funcionando só com os nomes internos.
+let NOMES_VISIVEIS = {};
+try { NOMES_VISIVEIS = require("../src/alas_nomes.json"); }
+catch (e) { console.log("🗣  Atendente — alas_nomes.json não encontrado; usando nomes internos"); }
+const GALERIA = { pt:"galeria", en:"gallery", fr:"galerie", es:"galería", it:"galleria", de:"Galerie" };
+
+function nomesNoIdioma(lang) {
+  const nomes = NOMES_VISIVEIS[lang];
+  if (!nomes) return "";
+  return Object.entries(ALAS)
+    .map(([id, interno]) => `${interno} = ${nomes[id] || interno}`)
+    .join("; ");
+}
+
 function resolverAla(entrada) {
   const t = String(entrada || "").trim().toLowerCase();
   if (ALAS[t]) return t;
@@ -145,7 +160,8 @@ AS 18 ALAS
 ${Object.values(ALAS).join(", ")}.
 
 IDIOMA
-Responda em ${IDIOMAS[lang] || IDIOMAS.pt}. Os verbetes estão em português; traduza com naturalidade, sem calque. Termos fixos: natureza-morta = still life / nature morte; pintura de história = history painting / peinture d'histoire; claro-escuro = chiaroscuro / clair-obscur; veladura = glaze / glacis; ponto de fuga = vanishing point / point de fuite; ala = wing / aile; domínio público = public domain / domaine public.
+Responda em ${IDIOMAS[lang] || IDIOMAS.en}. Os verbetes estão em português; traduza com naturalidade, sem calque. Termos fixos: natureza-morta = still life / nature morte; pintura de história = history painting / peinture d'histoire; claro-escuro = chiaroscuro / clair-obscur; veladura = glaze / glacis; ponto de fuga = vanishing point / point de fuite; domínio público = public domain / domaine public.
+No site, as alas aparecem como galerias: em ${IDIOMAS[lang] || IDIOMAS.en}, diga "${GALERIA[lang] || GALERIA.en}". ${nomesNoIdioma(lang) ? `Ao citar uma ala, use exatamente o nome que o visitante vê no site, neste idioma (nome interno = nome no site): ${nomesNoIdioma(lang)}.` : ""}
 
 ÍNDICE DO CORPUS (use ler_verbete com o slug, ou buscar_verbete por palavra)
 ${indice}`;
@@ -199,7 +215,7 @@ function montarAtendente(app, pool) {
 
   app.post("/api/atendente", async (req, res) => {
     const ip = (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || req.ip || "0";
-    const lang = IDIOMAS[req.body?.lang] ? req.body.lang : "pt";
+    const lang = IDIOMAS[req.body?.lang] ? req.body.lang : "en";
     const pergunta = String(req.body?.pergunta || "").slice(0, MAX_PERGUNTA).trim();
 
     if (!pergunta) return res.status(400).json({ erro: "pergunta_vazia" });

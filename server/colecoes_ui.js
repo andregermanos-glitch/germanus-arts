@@ -95,15 +95,19 @@ function montarColecoes(app, pool) {
       if (!b.slug || !b.titulo_pt) return res.status(400).json({ error: "slug e titulo_pt obrigatórios" });
       await pool.query(`
         INSERT INTO colecoes (slug, titulo_pt, titulo_fr, titulo_en, titulo_es, titulo_it, titulo_de,
-                              texto_pt, publicada, ordem)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+                              texto_pt, publicada, ordem,
+                              texto_fr, texto_en, texto_es, texto_it, texto_de)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
         ON CONFLICT (slug) DO UPDATE SET
           titulo_pt=EXCLUDED.titulo_pt, titulo_fr=EXCLUDED.titulo_fr, titulo_en=EXCLUDED.titulo_en,
           titulo_es=EXCLUDED.titulo_es, titulo_it=EXCLUDED.titulo_it, titulo_de=EXCLUDED.titulo_de,
-          texto_pt=EXCLUDED.texto_pt, publicada=EXCLUDED.publicada, ordem=EXCLUDED.ordem`,
+          texto_pt=EXCLUDED.texto_pt, publicada=EXCLUDED.publicada, ordem=EXCLUDED.ordem,
+          texto_fr=EXCLUDED.texto_fr, texto_en=EXCLUDED.texto_en, texto_es=EXCLUDED.texto_es,
+          texto_it=EXCLUDED.texto_it, texto_de=EXCLUDED.texto_de`,
         [b.slug, b.titulo_pt, b.titulo_fr || null, b.titulo_en || null, b.titulo_es || null,
          b.titulo_it || null, b.titulo_de || null, b.texto_pt || null,
-         b.publicada !== false, parseInt(b.ordem || 0, 10)]);
+         b.publicada !== false, parseInt(b.ordem || 0, 10),
+         b.texto_fr || null, b.texto_en || null, b.texto_es || null, b.texto_it || null, b.texto_de || null]);
       res.json({ ok: true, slug: b.slug });
     } catch (e) { res.status(500).json({ error: e.message }); }
   });
@@ -243,6 +247,8 @@ button.go{background:#1D9E7522;border-color:#1D9E7555;color:#5fd6a8}
     <div><label>título DE</label><input id="f_de" value="${esc(atual?.titulo_de||"")}"></div>
   </div>
   <label>texto de abertura (PT)</label><textarea id="f_texto">${esc(atual?.texto_pt||"")}</textarea>
+  <p style="font-size:11px;color:#888;margin:10px 0 0">Texto de abertura nos outros idiomas — sem texto, o visitante vê o inglês e, na falta dele, o português.</p>
+  ${["en","fr","es","it","de"].map(L => `<label>texto de abertura (${L.toUpperCase()})</label><textarea id="f_texto_${L}" style="min-height:70px">${esc(atual?.["texto_" + L]||"")}</textarea>`).join("")}
   <div style="margin-top:10px"><button class="go" onclick="salvar()">salvar coleção</button>
   <span id="msg" style="font-size:12px;color:#666;margin-left:10px"></span></div>
 </div>
@@ -268,7 +274,9 @@ async function salvar(){
     publicada: g('f_pub').value.trim() !== 'false',
     titulo_pt:g('f_pt').value, titulo_fr:g('f_fr').value, titulo_en:g('f_en').value,
     titulo_es:g('f_es').value, titulo_it:g('f_it').value, titulo_de:g('f_de').value,
-    texto_pt:g('f_texto').value };
+    texto_pt:g('f_texto').value,
+    texto_en:g('f_texto_en').value, texto_fr:g('f_texto_fr').value, texto_es:g('f_texto_es').value,
+    texto_it:g('f_texto_it').value, texto_de:g('f_texto_de').value };
   if(!b.slug || !b.titulo_pt) return alert('slug e título PT são obrigatórios');
   g('msg').textContent = 'salvando…';
   var d = await (await fetch('/api/colecoes/salvar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)})).json();
