@@ -11,7 +11,7 @@
     "objetos": "Objets", "lugares": "Lieux célèbres", "natureza": "Nature", "familiar": "Vie domestique",
     "nudes": "Nus féminins", "esoterico": "Ésotérisme", "sacro": "Art sacré", "arquitetura": "Architecture",
     "povo": "Gens du peuple", "perspectiva": "Perspective", "luz_sol": "Lumière du soleil", "cores": "Couleurs",
-    "fase": "Psyché", "femininas": "Artistes femmes"
+    "fase": "Psyché", "femininas": "Femmes artistes"
   },
   "es": {
     "retratos": "Retratos", "pessoas_reais": "Personajes célebres", "historico": "Historia", "cidades": "Emoción",
@@ -35,9 +35,9 @@
     "fase": "Psiche", "femininas": "Artiste donne"
   },
   "de": {
-    "retratos": "Porträts", "pessoas_reais": "Berühmte Menschen", "historico": "Geschichte", "cidades": "Emotion",
+    "retratos": "Porträts", "pessoas_reais": "Berühmte Persönlichkeiten", "historico": "Geschichte", "cidades": "Emotion",
     "objetos": "Objekte", "lugares": "Berühmte Orte", "natureza": "Natur", "familiar": "Häusliches Leben",
-    "nudes": "Weibliche Akte", "esoterico": "Esoterik", "sacro": "Sakrale Kunst", "arquitetura": "Architektur",
+    "nudes": "Frauenakte", "esoterico": "Esoterik", "sacro": "Sakrale Kunst", "arquitetura": "Architektur",
     "povo": "Einfache Leute", "perspectiva": "Perspektive", "luz_sol": "Sonnenlicht", "cores": "Farben",
     "fase": "Psyche", "femininas": "Künstlerinnen"
   }

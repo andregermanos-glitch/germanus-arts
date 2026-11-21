@@ -2,6 +2,8 @@
 // Usado na página inicial (abaixo da seleção de ala e do Emmanuel Rio) e nas páginas internas.
 
 export const ROTAS = ["nos-somos", "direitos", "editorial", "loja", "contatos"];
+// Editorial fica fora do menu por enquanto (a página continua existindo em /editorial).
+const MENU = ROTAS.filter(s => s !== "editorial");
 
 export const ROTULOS = {
   en: { "nos-somos":"About us",        direitos:"Rights",   editorial:"Editorial",   loja:"Shop",     contatos:"Contact" },
@@ -20,7 +22,7 @@ export default function MenuRodape({ lang = "en", atual = "", centro = false }) 
       justifyContent: centro ? "center" : "flex-start",
       gap:"6px 0", paddingTop:14, marginTop:14, borderTop:"1px solid #f0ece4",
     }}>
-      {ROTAS.map((slug, i) => (
+      {MENU.map((slug, i) => (
         <span key={slug} style={{ display:"inline-flex", alignItems:"center" }}>
           {i > 0 && <span aria-hidden="true" style={{ color:"#d8d2c6", margin:"0 12px", fontSize:10 }}>·</span>}
           <a href={`/${slug}`} style={{
