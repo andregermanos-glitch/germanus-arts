@@ -155,52 +155,52 @@ Die Sammlung steht allen frei zum Ansehen, Studieren und Teilen. Die Redaktion v
   },
   "direitos": {
     en:
-`Every work in the collection is in the public domain. We follow the rule of Brazilian copyright law: a work enters the public domain 70 years after January 1 of the year following the author's death. Older works by unknown artists, or by artists whose date of death is unknown, undergo additional checks before entering the collection.
+`Every work in the collection is in the public domain. Our rights review follows Brazilian copyright law, under which a work enters the public domain on January 1 of the 71st year after its author's death. Older works by unknown artists, or by artists whose date of death is unknown, get additional checks before they join the collection.
 
-Images come from two sources: museums with open-access policies, which release them under a CC0 license, and Wikimedia Commons, where the license is checked file by file. Every work goes through a rights review before publication, and each record states its source.
+Copyright terms differ from country to country. If you are outside Brazil, please check how the law where you live applies before reusing an image.
 
-GERMANUS.Art Editorial texts are our own, written with the help of artificial intelligence and reviewed by our curators. News items cite and link to their original sources.
+Our images come from two sources: museums with open-access policies, which release them into the public domain under CC0, and Wikimedia Commons, where we check the license file by file. Every work goes through a rights review before it is published, and every record lists its source.
 
-If you believe an image or text should not be here, please write to us through the Contact page. We review every request and, where appropriate, remove the content.`,
+If you believe an image or text should not be here, please contact us through the Contact page. We review every request and remove content when appropriate.`,
     fr: fr(
-`Toutes les œuvres de la collection appartiennent au domaine public. Nous suivons la règle du droit d'auteur brésilien : une œuvre entre dans le domaine public 70 ans après le 1er janvier de l'année qui suit la mort de son auteur. Les œuvres anciennes d'auteur inconnu, ou dont la date de décès n'est pas connue, font l'objet d'une vérification supplémentaire avant d'entrer dans la collection.
+`Toutes les œuvres de la collection appartiennent au domaine public. Notre contrôle des droits suit le droit d'auteur brésilien : une œuvre entre dans le domaine public le 1er janvier de la 71e année qui suit la mort de son auteur. Les œuvres anciennes d'auteur inconnu, ou dont l'auteur a une date de décès inconnue, font l'objet de vérifications supplémentaires avant d'entrer dans la collection.
 
-Les images proviennent de deux sources : des musées pratiquant l'accès ouvert, qui les diffusent sous licence CC0, et Wikimedia Commons, où la licence est vérifiée fichier par fichier. Chaque œuvre passe par un contrôle des droits avant publication, et chaque fiche indique sa source.
+La durée des droits varie d'un pays à l'autre. Si vous résidez hors du Brésil, vérifiez comment s'applique la loi de votre pays avant de réutiliser une image.
 
-Les textes de l'Éditorial GERMANUS.Art sont de notre plume, rédigés avec l'aide de l'intelligence artificielle et relus par la curation. Les articles citent leurs sources originales et renvoient vers elles.
+Nos images proviennent de deux sources : des musées pratiquant l'accès ouvert, qui les placent dans le domaine public au moyen de CC0, et Wikimedia Commons, où nous vérifions la licence fichier par fichier. Chaque œuvre passe par un contrôle des droits avant publication, et chaque notice indique sa source.
 
-Si vous estimez qu'une image ou un texte ne devrait pas figurer ici, écrivez-nous depuis la page Contact. Nous examinons chaque demande et, le cas échéant, retirons le contenu.`),
+Si vous estimez qu'une image ou un texte ne devrait pas figurer ici, écrivez-nous depuis la page Contact. Nous examinons chaque demande et retirons le contenu lorsque c'est justifié.`),
     es:
-`Todas las obras de la colección están en dominio público. Seguimos la regla de la legislación brasileña de derechos de autor: una obra pasa al dominio público 70 años después del 1 de enero del año siguiente a la muerte de su autor. Las obras antiguas de autoría desconocida, o cuya fecha de muerte se desconoce, pasan por una verificación adicional antes de entrar en la colección.
+`Todas las obras de la colección están en dominio público. Nuestra revisión de derechos sigue la legislación brasileña de derechos de autor: una obra pasa al dominio público el 1 de enero del año 71 posterior a la muerte de su autor. Las obras antiguas de autoría desconocida, o cuyo autor tiene fecha de muerte desconocida, pasan por verificaciones adicionales antes de entrar en la colección.
 
-Las imágenes provienen de dos fuentes: museos con políticas de acceso abierto, que las publican bajo licencia CC0, y Wikimedia Commons, donde la licencia se verifica archivo por archivo. Cada obra pasa por una revisión de derechos antes de publicarse, y cada ficha indica su fuente.
+Los plazos de protección varían de un país a otro. Si estás fuera de Brasil, comprueba cómo se aplica la ley de tu país antes de reutilizar una imagen.
 
-Los textos del Editorial GERMANUS.Art son de nuestra autoría, escritos con apoyo de inteligencia artificial y revisados por la curaduría. Las noticias citan y enlazan sus fuentes originales.
+Nuestras imágenes provienen de dos fuentes: museos con políticas de acceso abierto, que las ponen en dominio público mediante CC0, y Wikimedia Commons, donde verificamos la licencia archivo por archivo. Cada obra pasa por una revisión de derechos antes de publicarse, y cada ficha indica su fuente.
 
-Si consideras que alguna imagen o algún texto no debería estar aquí, escríbenos desde la página de Contacto. Analizamos cada solicitud y, cuando corresponde, retiramos el contenido.`,
+Si consideras que alguna imagen o algún texto no debería estar aquí, escríbenos desde la página de Contacto. Analizamos cada solicitud y retiramos el contenido cuando corresponde.`,
     it:
-`Tutte le opere della collezione sono di pubblico dominio. Seguiamo la regola della legge brasiliana sul diritto d'autore: un'opera diventa di pubblico dominio 70 anni dopo il 1° gennaio dell'anno successivo alla morte dell'autore. Le opere antiche di autore ignoto, o di cui non si conosce la data di morte, sono sottoposte a una verifica aggiuntiva prima di entrare nella collezione.
+`Tutte le opere della collezione sono di pubblico dominio. Il nostro controllo dei diritti segue la legge brasiliana sul diritto d'autore: un'opera diventa di pubblico dominio il 1° gennaio del 71° anno successivo alla morte dell'autore. Le opere antiche di autore ignoto, o il cui autore ha una data di morte sconosciuta, sono sottoposte a verifiche aggiuntive prima di entrare nella collezione.
 
-Le immagini provengono da due fonti: musei con politiche di accesso aperto, che le rendono disponibili con licenza CC0, e Wikimedia Commons, dove la licenza viene verificata file per file. Ogni opera passa un controllo dei diritti prima della pubblicazione, e ogni scheda ne indica la fonte.
+La durata dei diritti varia da un Paese all'altro. Se ti trovi fuori dal Brasile, verifica come si applica la legge del tuo Paese prima di riutilizzare un'immagine.
 
-I testi dell'Editoriale GERMANUS.Art sono nostri, scritti con il supporto dell'intelligenza artificiale e rivisti dalla curatela. Le notizie citano le fonti originali e vi rimandano con un link.
+Le nostre immagini provengono da due fonti: musei con politiche di accesso aperto, che le rendono di pubblico dominio tramite CC0, e Wikimedia Commons, dove verifichiamo la licenza file per file. Ogni opera passa un controllo dei diritti prima della pubblicazione, e ogni scheda ne indica la fonte.
 
-Se ritieni che un'immagine o un testo non debba trovarsi qui, scrivici dalla pagina Contatti. Esaminiamo ogni richiesta e, se necessario, rimuoviamo il contenuto.`,
+Se ritieni che un'immagine o un testo non debba trovarsi qui, scrivici dalla pagina Contatti. Esaminiamo ogni richiesta e, quando è giustificato, rimuoviamo il contenuto.`,
     de:
-`Alle Werke der Sammlung sind gemeinfrei. Wir folgen der Regel des brasilianischen Urheberrechts: Ein Werk wird 70 Jahre nach dem 1. Januar des auf den Tod des Urhebers folgenden Jahres gemeinfrei. Ältere Werke unbekannter Urheber oder mit unbekanntem Todesdatum werden vor der Aufnahme in die Sammlung zusätzlich geprüft.
+`Alle Werke der Sammlung sind gemeinfrei. Unsere Rechteprüfung folgt dem brasilianischen Urheberrecht: Ein Werk wird am 1. Januar des 71. Jahres nach dem Tod seines Urhebers gemeinfrei. Ältere Werke unbekannter Urheber oder von Urhebern mit unbekanntem Todesdatum werden vor der Aufnahme in die Sammlung zusätzlich geprüft.
 
-Die Bilder stammen aus zwei Quellen: aus Museen mit Open-Access-Politik, die sie unter der Lizenz CC0 bereitstellen, und aus Wikimedia Commons, wo die Lizenz Datei für Datei geprüft wird. Jedes Werk durchläuft vor der Veröffentlichung eine Rechteprüfung, und jeder Eintrag nennt seine Quelle.
+Schutzfristen unterscheiden sich von Land zu Land. Wenn Sie sich außerhalb Brasiliens befinden, prüfen Sie bitte vor der Weiterverwendung eines Bildes, was das Recht Ihres Landes vorsieht.
 
-Die Texte der Redaktion von GERMANUS.Art sind eigene Texte, mit Unterstützung künstlicher Intelligenz verfasst und kuratorisch geprüft. Die Nachrichten nennen und verlinken ihre Originalquellen.
+Unsere Bilder stammen aus zwei Quellen: aus Museen mit Open-Access-Politik, die sie mit CC0 gemeinfrei stellen, und aus Wikimedia Commons, wo wir die Lizenz Datei für Datei prüfen. Jedes Werk durchläuft vor der Veröffentlichung eine Rechteprüfung, und jeder Eintrag nennt seine Quelle.
 
-Wenn Sie der Meinung sind, dass ein Bild oder ein Text nicht hierher gehört, schreiben Sie uns über die Seite „Kontakt“. Wir prüfen jede Anfrage und entfernen den Inhalt gegebenenfalls.`,
+Wenn Sie der Meinung sind, dass ein Bild oder ein Text nicht hierher gehört, schreiben Sie uns über die Seite „Kontakt“. Wir prüfen jede Anfrage und entfernen den Inhalt, wenn es begründet ist.`,
   },
   "loja": {
-    en: `Coming soon: tote bags and T-shirts featuring public-domain works from the collection, each piece labeled with the work's title, date and source.`,
-    fr: fr(`Bientôt : des tote bags et des t-shirts ornés d'œuvres du domaine public de la collection, chaque pièce accompagnée d'une étiquette indiquant le titre, la date et la source de l'œuvre.`),
-    es: `Próximamente: bolsas de tela y camisetas con obras de la colección en dominio público, cada pieza con una etiqueta que indica el título, la fecha y la fuente de la obra.`,
-    it: `Prossimamente: shopper in tela e magliette con opere di pubblico dominio della collezione, ogni pezzo con un'etichetta che ne riporta titolo, data e fonte.`,
-    de: `Demnächst: Stofftaschen und T-Shirts mit gemeinfreien Werken aus der Sammlung – jedes Stück mit einem Etikett, das Titel, Datum und Quelle des Werks nennt.`,
+    en: `Coming soon: tote bags and T-shirts featuring public-domain works from the collection, each labeled with the work's title, date, and source.`,
+    fr: fr(`Bientôt : des tote bags et des t-shirts illustrés d'œuvres du domaine public issues de la collection, chacun accompagné d'une étiquette indiquant le titre, la date et la source de l'œuvre.`),
+    es: `Próximamente: bolsas de tela y camisetas con obras de dominio público de la colección, cada una con una etiqueta que indica el título, la fecha y la fuente de la obra.`,
+    it: `Prossimamente: shopper in tela e magliette con opere di pubblico dominio della collezione, ciascuna con un'etichetta che riporta titolo, data e fonte dell'opera.`,
+    de: `Demnächst: Stofftaschen und T-Shirts mit gemeinfreien Werken aus der Sammlung – jedes Stück mit einem Etikett, das Titel, Datierung und Quelle des Werks nennt.`,
   },
   "contatos": {
     en: `TikTok: @germanus.art`,
@@ -257,7 +257,215 @@ E Artistas Femininas devolve a moldura a quem, por séculos, esteve mais dentro 
 VIVA o instante que ainda vamos perceber!`,
 
   en:
-`Between rights and people, GERMANUS.Art was born.
+`GERMANUS.Art was born where rights meet people.
+
+Representation is the social portrait that springs from the individual: the will to take shape outside of time. We believe the philosophy of art begins with the individual's rupture before the work of art. What reaches the canvas is art itself, defined as will.
+
+That is why the galleries open with personal representation, in Portraits. It is the most intuitive path, even though the oldest works in our collection are sacred. Starting with the portrait is a deliberate choice. Being, the persona, the self a person builds: this is where the collection begins — the space of the human being, bounded by a frame.
+
+But the art of the ego does not end at the frame; it spills into history. Famous Figures represents the ego and its conquests, echoing through eternity on painted canvas.
+
+Yet the persona exists apart from history. Living beings tell history through their social context, and society is a collision of outcomes — neither fair nor certain, dirty at heart, romantic to the eye. Ordinary People is the gallery that looks for that context: where and when it happens — labor, form, pain, life within a frame.
+
+History is not a single instant: it spills past the frame and colors the way we look. Society does not determine history; history determines society. So History records, honors, and catalogs time — not the other way around.
+
+What fits inside a frame? Time, society, people, their stories? The context of things tells us why history and time are as they are. Things shape us; that is why we make them and admire them. Objects is art history told as primitive semiotics.
+
+The persona is not only ego and history; it is also defined by space, and the frame decides what we see. Nature is the portrait of what does not change and cannot be pinned down: untamed nature, which shapes the human being.
+
+Nature cannot be tamed, but the places that shape the persona are frames full of meaning. Famous Places holds what still carries meaning and weight in itself, and outlasts its own history.
+
+Meaning is not only horizontal; it echoes customs, lives, and all that says more than we can express. Sacred Art answers that incompleteness — it might just as well be called Religious, since it seeks our bond with the ineffable. And as an allegory of the ineffable there is Esotericism, where myth is the very image of reality.
+
+The ineffable needs a meaning, and must carry the meaning of life forward. Home Life brings the mystical and the sacred into a single frame. The family is more than a social portrait: in paint, it carries the mystical, religious, and philosophical meanings of every age.
+
+The human body is form, and form asks to be represented. In Female Nudes the body is timeless, inspiring and conspiring — yet above all it has been a record of women's bodies shaped to the values and ideas of each era.
+
+Architecture gathers images, academic or not, of buildings often treated as minor in history, yet which stand as records of engineering and culture.
+
+Perspective is less about angles of construction than about angles of formation: life seen from other origins, straight lines shaping new realities. The persona is not self-made; it is the sum of forms that combine into new realities.
+
+Sunlight reminds us that time is an instant in the memory of those who know how to look. Light is an instant; form depends on light. Every instant is a form lit up, a delicate record left by someone who knows that time is short. All you have to do is SEE!
+
+Time has its forms, but forms can give way to color. In Colors, it is not color that takes on form: it is form that takes on color. Seeing color is modernity — the record of the after-moment, the instant that lasts.
+
+In Emotion, color joins feeling, and form gives way to color for its psychological and emotional force. This is the home of abstraction, which carries forward what Fauvism began when it freed color from form — and which is not bound to the materials color is made of.
+
+But form is also an imposition. It seeps into the mind, and the mind has many ways of seeing form. Psyche shows that the frame cannot hold the record: the image slips into the imagination, and that is what the mind keeps. Art has always been thought's riddle about itself and about reality. In 1936, Dalí sensed the Spanish Civil War coming in Soft Construction with Boiled Beans.
+
+And Women Artists gives the frame back to those who, for centuries, were far more often inside it than in front of it: women who painted their own time through their own eyes.
+
+Here's to the moment we have yet to see!`,
+
+  fr: fr(
+`GERMANUS.Art est née à la croisée des droits et des personnes.
+
+La représentation est le portrait social qui naît de l'individu : sa volonté de prendre forme hors du temps. Nous pensons que la philosophie de l'art naît de la rupture de l'individu devant l'œuvre. Ce qui parvient sur la toile, c'est l'art lui-même, défini comme volonté.
+
+C'est pourquoi les galeries s'ouvrent sur la représentation de la personne, avec Portraits. C'est le chemin le plus intuitif, même si les œuvres les plus anciennes de notre collection sont sacrées. Commencer par le portrait est un choix délibéré. L'être, la persona, le soi que chacun se construit : voilà où commence la collection — l'espace de la personne humaine, circonscrit par un cadre.
+
+Mais l'art de l'ego ne s'arrête pas au cadre ; il déborde sur l'histoire. Personnages célèbres représente l'ego et ses conquêtes, qui résonnent pour l'éternité sur la toile peinte.
+
+La persona, pourtant, existe indépendamment de l'histoire. L'être vivant raconte l'histoire à travers son contexte social, et la société est un choc d'issues ni justes ni certaines, sales par essence, romantiques au regard. Gens du peuple est la galerie qui cherche ce contexte : où et quand cela se passe — le travail, la forme, la douleur, la vie dans un cadre.
+
+L'histoire n'est pas un instant : elle déborde du cadre et imprègne le regard. Le social ne la détermine pas ; c'est elle qui le détermine. Ainsi, la galerie Histoire consigne, honore et catalogue le temps — et non l'inverse.
+
+Que tient-il dans un cadre ? Le temps, la société, les êtres, leurs histoires ? Le contexte des choses dit pourquoi l'histoire et le temps sont ce qu'ils sont. Les choses façonnent l'homme ; c'est pourquoi il les crée et les admire. Objets raconte l'histoire de l'art comme une sémiotique primitive.
+
+La persona n'est pas seulement ego et histoire ; elle se définit aussi par l'espace, et le cadre décide de ce que l'on voit. Nature est le portrait de l'immuable et de l'insaisissable : la nature indomptée qui façonne l'être humain.
+
+La nature ne se laisse pas dompter, mais les lieux qui façonnent la persona sont des cadres chargés de sens. Lieux célèbres garde ce qui porte encore en soi sens et portée, et qui dure au-delà de sa propre histoire.
+
+Le sens n'est pas seulement horizontal ; il fait résonner des coutumes, des vies, et tout ce qui dit plus que nous ne savons exprimer. À cette incomplétude répond Art sacré, qu'on aurait tout aussi bien pu appeler art religieux, puisqu'il cherche notre lien avec l'indicible. Et, comme allégorie de l'indicible, vient Ésotérisme, où le mythe est l'image même de la réalité.
+
+L'indicible a besoin d'un sens, et doit perpétuer le sens de la vie. Vie domestique réunit le mystique et le sacré dans un même cadre. La famille est plus qu'une représentation sociale : elle porte, en peinture, les sens mystiques, religieux et philosophiques de chaque époque.
+
+Le corps humain est forme, et la forme appelle la représentation. Dans Nus féminins, le corps est intemporel, inspirant et conspirateur — mais il fut avant tout le témoignage de corps de femmes modelés selon les valeurs et les idées de chaque époque.
+
+Architecture rassemble des images, académiques ou non, d'édifices souvent tenus pour mineurs par l'histoire, mais qui témoignent de l'ingénierie et de la culture.
+
+Perspective parle moins d'angles de construction que d'angles de formation : la vie vue depuis d'autres origines, la ligne droite qui fait naître de nouvelles réalités. La persona n'est pas son propre produit, mais la somme de formes qui s'additionnent et créent de nouvelles réalités.
+
+Lumière du soleil nous rappelle que le temps est un instant dans la mémoire de qui sait voir. La lumière est instant ; la forme dépend de la lumière. Chaque instant est une forme éclairée, trace sensible de qui sait que le temps est court. Il suffit de VOIR !
+
+Le temps a ses formes, mais les formes peuvent céder à la couleur. Dans Couleurs, ce n'est pas la couleur qui prend forme : c'est la forme qui prend couleur. Voir la couleur, c'est la modernité — la trace de l'après-instant, l'instant qui dure.
+
+Dans Émotion, la couleur rejoint le sentiment, et la forme cède à la couleur par sa force psychologique et émotionnelle. C'est le lieu de l'abstraction, qui poursuit ce que le fauvisme avait commencé en libérant la couleur de la forme, et qui ne se limite pas aux matériaux dont la couleur est faite.
+
+Mais la forme est aussi une imposition. Elle imprègne l'esprit, et l'esprit a bien des façons de voir la forme. Psyché montre que le cadre ne retient pas la trace : l'image se perd dans l'imaginaire, et c'est cela que l'esprit garde. L'art a toujours été une énigme de la pensée sur elle-même et sur la réalité. En 1936, Dalí pressentait la guerre civile espagnole dans Construction molle avec haricots bouillis.
+
+Et Femmes artistes rend le cadre à celles qui, pendant des siècles, se sont trouvées bien plus souvent dedans que devant : des femmes qui ont peint leur temps avec leur propre regard.
+
+VIVE l'instant qu'il nous reste à percevoir !`),
+
+  es:
+`GERMANUS.Art nació en el cruce entre los derechos y las personas.
+
+La representación es el retrato social que nace del individuo: su voluntad de tomar forma fuera del tiempo. Creemos que la filosofía del arte surge de la ruptura del individuo ante la obra. Lo que llega al lienzo es el arte mismo, definido como voluntad.
+
+Por eso las galerías se abren con la representación de la persona, en Retratos. Es el camino más intuitivo, aunque las obras más antiguas de nuestra colección sean sacras. Empezar por el retrato es una elección deliberada. El ser, la persona, el yo que cada uno construye: ahí comienza la colección — el espacio de la persona humana, delimitado por un marco.
+
+Pero el arte del ego no termina en el marco; se derrama sobre la historia. Personajes célebres representa el ego y sus conquistas, que resuenan por la eternidad en el lienzo pintado.
+
+La persona, sin embargo, existe con independencia de la historia. El ser vivo cuenta la historia a través de su contexto social, y la sociedad es un choque de desenlaces ni justos ni ciertos, sucios en esencia, románticos a la vista. Gente del pueblo es la galería que busca ese contexto: dónde y cuándo sucede — el trabajo, la forma, el dolor, la vida enmarcada.
+
+La historia no es un instante: desborda el marco e impregna la mirada. Lo social no la determina; es ella la que determina lo social. Así, Historia registra, honra y cataloga el tiempo — y no al revés.
+
+¿Qué cabe en un marco? ¿El tiempo, la sociedad, las personas, sus historias? El contexto de las cosas explica por qué la historia y el tiempo son lo que son. Las cosas moldean al hombre; por eso las crea y las admira. Objetos cuenta la historia del arte como una semiótica primitiva.
+
+La persona no es solo ego e historia; también se define por el espacio, y el marco decide lo que se ve. Naturaleza es el retrato de lo inmutable y lo inasible: la naturaleza indómita que moldea al ser humano.
+
+La naturaleza no se deja domar, pero los lugares que moldean a la persona son marcos cargados de sentido. Lugares célebres guarda lo que todavía tiene significado y peso en sí mismo, y perdura más allá de su propia historia.
+
+El significado no es solo horizontal; hace resonar costumbres, vidas y todo aquello que dice más de lo que logramos expresar. A esa incompletud responde Arte sacro, que bien podría llamarse religioso, pues busca nuestro vínculo con lo indecible. Y, como alegoría de lo indecible, está Esoterismo, donde el mito es la imagen misma de la realidad.
+
+Lo indecible necesita un sentido, y debe perpetuar el sentido de la vida. Vida doméstica reúne lo místico y lo sagrado en un mismo marco. La familia es más que una imagen social: lleva, en pintura, los sentidos místicos, religiosos y filosóficos de cada época.
+
+El cuerpo humano es forma, y la forma pide ser representada. En Desnudos femeninos, el cuerpo es atemporal, inspirador y conspirador — pero fue, sobre todo, testimonio de cuerpos de mujeres moldeados según los valores y las ideas de cada época.
+
+Arquitectura reúne imágenes, académicas o no, de edificios a menudo considerados menores por la historia, pero que son testimonio de la ingeniería y de la cultura.
+
+Perspectiva trata menos de ángulos de construcción que de ángulos de formación: la vida vista desde otros orígenes, la línea recta que da forma a nuevas realidades. La persona no es producto de sí misma, sino la suma de formas que se combinan y crean nuevas realidades.
+
+Luz del sol nos recuerda que el tiempo es un instante en la memoria de quien sabe mirar. La luz es instante; la forma depende de la luz. Cada instante es una forma iluminada, huella sensible de quien sabe que el tiempo es breve. ¡Basta con VER!
+
+El tiempo tiene sus formas, pero las formas pueden ceder ante el color. En Colores, no es el color el que toma forma: es la forma la que toma color. Ver el color es la modernidad — la huella del posmomento, el instante que perdura.
+
+En Emoción, el color se une al sentimiento, y la forma cede ante el color por su fuerza psicológica y emocional. Es el lugar de la abstracción, que continúa lo que el fauvismo empezó al liberar el color de la forma, y que no se limita a los materiales con que se hace el color.
+
+Pero la forma también es imposición. Impregna la mente, y la mente tiene muchas maneras de ver la forma. Psique muestra que el marco no retiene la huella: la imagen se pierde en lo imaginario, y eso es lo que la mente guarda. El arte siempre ha sido un enigma del pensamiento sobre sí mismo y sobre la realidad. En 1936, Dalí presintió la Guerra Civil española en Construcción blanda con judías hervidas.
+
+Y Mujeres artistas devuelve el marco a quienes, durante siglos, estuvieron mucho más dentro de él que frente a él: mujeres que pintaron su tiempo con su propia mirada.
+
+¡VIVA el instante que aún nos queda por percibir!`,
+
+  it:
+`GERMANUS.Art è nata all'incrocio tra i diritti e le persone.
+
+La rappresentazione è il ritratto sociale che nasce dall'individuo: la sua volontà di prendere forma fuori dal tempo. Crediamo che la filosofia dell'arte nasca dalla rottura dell'individuo davanti all'opera. Ciò che giunge sulla tela è l'arte stessa, definita come volontà.
+
+Per questo le gallerie si aprono con la rappresentazione della persona, in Ritratti. È il percorso più intuitivo, anche se le opere più antiche della nostra collezione sono sacre. Cominciare dal ritratto è una scelta deliberata. L'essere, la persona, il sé che ciascuno costruisce: è qui che comincia la collezione — lo spazio della persona umana, racchiuso da una cornice.
+
+Ma l'arte dell'ego non si ferma alla cornice: trabocca nella storia. Personaggi celebri rappresenta l'ego e le sue conquiste, che risuonano per l'eternità sulla tela dipinta.
+
+La persona, però, esiste indipendentemente dalla storia. L'essere vivente racconta la storia attraverso il suo contesto sociale, e la società è uno scontro di esiti né giusti né certi, sporchi nell'essenza, romantici allo sguardo. Gente del popolo è la galleria che cerca questo contesto: dove e quando accade — il lavoro, la forma, il dolore, la vita in cornice.
+
+La storia non è un istante: trabocca dalla cornice e impregna lo sguardo. Il sociale non la determina; è lei a determinarlo. Così Storia registra, onora e cataloga il tempo — e non il contrario.
+
+Che cosa sta dentro una cornice? Il tempo, la società, le persone, le loro storie? Il contesto delle cose spiega perché la storia e il tempo sono ciò che sono. Le cose plasmano l'uomo; per questo egli le crea e le ammira. Oggetti racconta la storia dell'arte come una semiotica primitiva.
+
+La persona non è solo ego e storia; si definisce anche attraverso lo spazio, e la cornice decide ciò che si vede. Natura è il ritratto dell'immutabile e dell'inafferrabile: la natura indomita che plasma l'essere umano.
+
+La natura non si lascia domare, ma i luoghi che plasmano la persona sono cornici cariche di senso. Luoghi celebri custodisce ciò che ha ancora in sé significato e peso, e che dura oltre la propria storia.
+
+Il significato non è solo orizzontale: fa risuonare costumi, vite e tutto ciò che dice più di quanto riusciamo a esprimere. A questa incompiutezza risponde Arte sacra, che potrebbe ben chiamarsi religiosa, perché cerca il nostro legame con l'indicibile. E, come allegoria dell'indicibile, c'è Esoterismo, dove il mito è l'immagine stessa della realtà.
+
+L'indicibile ha bisogno di un senso, e deve perpetuare il senso della vita. Vita domestica riunisce il mistico e il sacro in un'unica cornice. La famiglia è più di un'immagine sociale: porta con sé, nella pittura, i significati mistici, religiosi e filosofici di ogni epoca.
+
+Il corpo umano è forma, e la forma chiede di essere rappresentata. In Nudi femminili il corpo è senza tempo, ispiratore e cospiratore — ma fu soprattutto la testimonianza di corpi di donne modellati sui valori e sulle idee di ogni epoca.
+
+Architettura raccoglie immagini, accademiche o no, di edifici spesso considerati minori dalla storia, ma che testimoniano l'ingegneria e la cultura.
+
+Prospettiva parla meno di angoli di costruzione che di angoli di formazione: la vita vista da altre origini, la linea retta che dà forma a nuove realtà. La persona non è prodotto di sé stessa, ma la somma di forme che si combinano e creano nuove realtà.
+
+Luce del sole ci ricorda che il tempo è un istante nella memoria di chi sa guardare. La luce è istante; la forma dipende dalla luce. Ogni istante è una forma illuminata, traccia sensibile di chi sa che il tempo è breve. Basta VEDERE!
+
+Il tempo ha le sue forme, ma le forme possono cedere al colore. In Colori non è il colore a prendere forma: è la forma a prendere colore. Vedere il colore è la modernità — la traccia del dopo-istante, l'istante che dura.
+
+In Emozione il colore si unisce al sentimento, e la forma cede al colore per la sua forza psicologica ed emotiva. È il luogo dell'astrazione, che prosegue ciò che il fauvismo aveva cominciato liberando il colore dalla forma, e che non si limita ai materiali di cui il colore è fatto.
+
+Ma la forma è anche imposizione. Impregna la mente, e la mente ha molti modi di vedere la forma. Psiche mostra che la cornice non trattiene la traccia: l'immagine si perde nell'immaginario, ed è questo che la mente conserva. L'arte è sempre stata un enigma del pensiero su sé stesso e sulla realtà. Nel 1936 Dalí presentiva la guerra civile spagnola in Costruzione molle con fagioli bolliti.
+
+E Artiste donne restituisce la cornice a chi, per secoli, vi è stata molto più dentro che davanti: donne che hanno dipinto il loro tempo con il proprio sguardo.
+
+VIVA l'istante che ancora ci resta da percepire!`,
+
+  de:
+`GERMANUS.Art entstand dort, wo Rechte und Menschen einander begegnen.
+
+Darstellung ist das gesellschaftliche Bildnis, das aus dem Einzelnen hervorgeht: sein Wille, jenseits der Zeit Gestalt anzunehmen. Wir glauben, dass die Philosophie der Kunst aus dem Bruch des Einzelnen vor dem Kunstwerk entsteht. Was auf die Leinwand gelangt, ist die Kunst selbst, verstanden als Wille.
+
+Deshalb beginnen die Galerien mit der Darstellung des Menschen, in Porträts. Das ist der naheliegendste Weg, auch wenn die ältesten Werke unserer Sammlung sakral sind. Mit dem Porträt zu beginnen, ist eine bewusste Entscheidung. Das Sein, die Persona, das Selbst, das jeder sich baut: Hier beginnt die Sammlung – der Raum des Menschen, umschlossen von einem Rahmen.
+
+Doch die Kunst des Egos endet nicht am Rahmen; sie fließt in die Geschichte über. Berühmte Persönlichkeiten zeigt das Ego und seine Eroberungen, die auf der bemalten Leinwand in Ewigkeit nachhallen.
+
+Die Persona existiert jedoch unabhängig von der Geschichte. Der lebende Mensch erzählt Geschichte durch seinen gesellschaftlichen Kontext, und die Gesellschaft ist ein Zusammenprall von Ausgängen, weder gerecht noch gewiss, schmutzig im Wesen, romantisch im Blick. Einfache Leute ist die Galerie, die diesen Kontext sucht: wo und wann es geschieht – die Arbeit, die Form, der Schmerz, das Leben im Rahmen.
+
+Geschichte ist kein Augenblick: Sie fließt über den Rahmen hinaus und färbt den Blick. Nicht das Gesellschaftliche bestimmt die Geschichte; die Geschichte bestimmt das Gesellschaftliche. So hält die Galerie Geschichte die Zeit fest, ehrt und ordnet sie – und nicht umgekehrt.
+
+Was passt in einen Rahmen? Die Zeit, die Gesellschaft, die Menschen, ihre Geschichten? Der Kontext der Dinge erklärt, warum Geschichte und Zeit so sind, wie sie sind. Die Dinge prägen den Menschen; darum erschafft und bewundert er sie. Objekte erzählt Kunstgeschichte als eine ursprüngliche Semiotik.
+
+Die Persona ist nicht nur Ego und Geschichte; sie bestimmt sich auch durch den Raum, und der Rahmen entscheidet, was man sieht. Natur ist das Bildnis des Unveränderlichen und des Ungreifbaren: der ungezähmten Natur, die den Menschen prägt.
+
+Die Natur lässt sich nicht zähmen, doch die Orte, die die Persona prägen, sind Rahmen voller Bedeutung. Berühmte Orte bewahrt, was in sich selbst noch Bedeutung und Gewicht trägt und über die eigene Geschichte hinaus fortbesteht.
+
+Bedeutung ist nicht nur horizontal; sie lässt Bräuche, Leben und all das nachklingen, was mehr sagt, als wir auszudrücken vermögen. Auf diese Unvollständigkeit antwortet Sakrale Kunst, die ebenso gut „Religiöse Kunst“ heißen könnte, denn sie sucht unsere Verbindung zum Unsagbaren. Und als Allegorie des Unsagbaren folgt Esoterik, wo der Mythos das Bild der Wirklichkeit selbst ist.
+
+Das Unsagbare braucht einen Sinn und muss den Sinn des Lebens weitertragen. Häusliches Leben vereint das Mystische und das Heilige in einem einzigen Rahmen. Die Familie ist mehr als ein gesellschaftliches Bild: In der Malerei trägt sie die mystischen, religiösen und philosophischen Bedeutungen jeder Epoche.
+
+Der menschliche Körper ist Form, und die Form verlangt nach Darstellung. In Frauenakte ist der Körper zeitlos, inspirierend und verschwörerisch – vor allem aber war er Zeugnis weiblicher Körper, geformt nach den Werten und Vorstellungen der jeweiligen Epoche.
+
+Architektur versammelt Bilder, akademische wie nichtakademische, von Bauten, die in der Geschichte oft als nebensächlich galten und doch von Ingenieurskunst und Kultur zeugen.
+
+Perspektive handelt weniger von Winkeln der Konstruktion als von Winkeln der Formung: das Leben, von anderen Ursprüngen aus gesehen, die gerade Linie, die neue Wirklichkeiten entstehen lässt. Die Persona ist nicht ihr eigenes Produkt, sondern die Summe von Formen, die sich verbinden und neue Wirklichkeiten schaffen.
+
+Sonnenlicht erinnert uns daran, dass die Zeit ein Augenblick im Gedächtnis derer ist, die zu sehen verstehen. Licht ist Augenblick; die Form hängt vom Licht ab. Jeder Augenblick ist eine beleuchtete Form, die feine Spur dessen, der weiß, dass die Zeit kurz ist. Man muss nur SEHEN!
+
+Die Zeit hat ihre Formen, doch die Formen können der Farbe weichen. In Farben ist es nicht die Farbe, die Form annimmt: Es ist die Form, die Farbe annimmt. Farbe zu sehen ist die Moderne – die Spur des Nach-Augenblicks, der Augenblick, der bleibt.
+
+In Emotion verbindet sich die Farbe mit dem Gefühl, und die Form weicht der Farbe um ihrer psychologischen und emotionalen Kraft willen. Hier ist der Ort der Abstraktion, die fortführt, was der Fauvismus begann, als er die Farbe von der Form befreite, und die sich nicht auf die Materialien beschränkt, aus denen Farbe gemacht ist.
+
+Doch die Form ist auch Zwang. Er durchdringt den Geist, und der Geist kennt viele Arten, die Form zu sehen. Psyche zeigt, dass der Rahmen die Spur nicht festhält: Das Bild verliert sich im Imaginären, und eben das bewahrt der Geist. Die Kunst war immer ein Rätsel des Denkens über sich selbst und über die Wirklichkeit. 1936 ahnte Dalí in „Weiche Konstruktion mit gekochten Bohnen“ den Spanischen Bürgerkrieg voraus.
+
+Und Künstlerinnen gibt den Rahmen jenen zurück, die jahrhundertelang weit öfter in ihm standen als vor ihm: Frauen, die ihre Zeit mit dem eigenen Blick malten.
+
+ES LEBE der Augenblick, den wir erst noch wahrnehmen werden!`,
+};
+
+// Versões anteriores (gravadas por este arquivo) das traduções revisadas em 21/11/2026 —
+// reconhecidas para que a sincronização troque pelas atuais. Texto editado no painel não é tocado.
+const ANTERIORES = {
+  "nos-somos": { en: [`Between rights and people, GERMANUS.Art was born.
 
 Representation is the social portrait born of the individual: the will to take on a form beyond time. We believe that the philosophy of art arises from the individual's rupture in the face of the art object. What is set down on the canvas is the very definition of art as will.
 
@@ -295,10 +503,7 @@ But form is also an imposition. Imposition seeps into the mind, and the mind has
 
 And Women Artists gives the frame back to those who, for centuries, were more often inside it than in front of it: women who painted their time with their own eyes.
 
-LONG LIVE the instant we have yet to perceive!`,
-
-  fr: fr(
-`Entre les droits et les personnes : ainsi est née GERMANUS.Art.
+LONG LIVE the instant we have yet to perceive!`], fr: [fr(`Entre les droits et les personnes : ainsi est née GERMANUS.Art.
 
 La représentation est le portrait social qui naît de l'individu : sa volonté de prendre forme hors du temps. Nous pensons que la philosophie de l'art naît de la rupture de l'individu face à l'objet d'art. Ce que l'on pose sur la toile est la définition même de l'art comme volonté.
 
@@ -336,10 +541,7 @@ Mais la forme est aussi une imposition. L'imposition imprègne l'esprit, et l'es
 
 Et Artistes femmes rend le cadre à celles qui, pendant des siècles, se sont trouvées plus souvent dedans que devant : des femmes qui ont peint leur temps avec leur propre regard.
 
-VIVE l'instant qu'il nous reste à percevoir !`),
-
-  es:
-`Entre derechos y personas: así nació GERMANUS.Art.
+VIVE l'instant qu'il nous reste à percevoir !`)], es: [`Entre derechos y personas: así nació GERMANUS.Art.
 
 La representación es el retrato social que nace del individuo: su voluntad de materializarse fuera del tiempo. Creemos que la filosofía del arte surge con la ruptura del individuo frente al objeto artístico. Lo que se pone en el lienzo es la definición misma del arte como voluntad.
 
@@ -377,10 +579,7 @@ Pero la forma también es imposición. La imposición impregna la mente, y la me
 
 Y Mujeres artistas devuelve el marco a quienes, durante siglos, estuvieron más dentro de él que frente a él: mujeres que pintaron su tiempo con su propia mirada.
 
-¡VIVA el instante que aún vamos a percibir!`,
-
-  it:
-`Tra diritti e persone: così è nata GERMANUS.Art.
+¡VIVA el instante que aún vamos a percibir!`], it: [`Tra diritti e persone: così è nata GERMANUS.Art.
 
 La rappresentazione è il ritratto sociale che nasce dall'individuo: la sua volontà di farsi materia fuori dal tempo. Crediamo che la filosofia dell'arte nasca dalla rottura dell'individuo di fronte all'oggetto d'arte. Ciò che si pone sulla tela è la definizione stessa dell'arte come volontà.
 
@@ -418,10 +617,7 @@ Ma la forma è anche imposizione. L'imposizione impregna la mente, e la mente ha
 
 E Artiste donne restituisce la cornice a chi, per secoli, vi è stata più dentro che davanti: donne che hanno dipinto il loro tempo con il proprio sguardo.
 
-VIVA l'istante che dobbiamo ancora percepire!`,
-
-  de:
-`Zwischen Rechten und Menschen – so entstand GERMANUS.Art.
+VIVA l'istante che dobbiamo ancora percepire!`], de: [`Zwischen Rechten und Menschen – so entstand GERMANUS.Art.
 
 Darstellung ist das gesellschaftliche Bildnis, das aus dem Einzelnen hervorgeht: sein Wille, jenseits der Zeit Gestalt anzunehmen. Wir glauben, dass die Philosophie der Kunst mit dem Bruch des Einzelnen vor dem Kunstobjekt entsteht. Was auf die Leinwand gebracht wird, ist die Definition der Kunst als Wille schlechthin.
 
@@ -459,7 +655,39 @@ Doch die Form ist auch Zwang. Der Zwang durchdringt den Geist, und der Geist ken
 
 Und die Galerie Künstlerinnen gibt den Rahmen jenen zurück, die jahrhundertelang öfter in ihm standen als vor ihm: Frauen, die ihre Zeit mit dem eigenen Blick malten.
 
-ES LEBE der Augenblick, den wir noch wahrnehmen werden!`,
+ES LEBE der Augenblick, den wir noch wahrnehmen werden!`] },
+  "direitos": { en: [`Every work in the collection is in the public domain. We follow the rule of Brazilian copyright law: a work enters the public domain 70 years after January 1 of the year following the author's death. Older works by unknown artists, or by artists whose date of death is unknown, undergo additional checks before entering the collection.
+
+Images come from two sources: museums with open-access policies, which release them under a CC0 license, and Wikimedia Commons, where the license is checked file by file. Every work goes through a rights review before publication, and each record states its source.
+
+GERMANUS.Art Editorial texts are our own, written with the help of artificial intelligence and reviewed by our curators. News items cite and link to their original sources.
+
+If you believe an image or text should not be here, please write to us through the Contact page. We review every request and, where appropriate, remove the content.`], fr: [fr(`Toutes les œuvres de la collection appartiennent au domaine public. Nous suivons la règle du droit d'auteur brésilien : une œuvre entre dans le domaine public 70 ans après le 1er janvier de l'année qui suit la mort de son auteur. Les œuvres anciennes d'auteur inconnu, ou dont la date de décès n'est pas connue, font l'objet d'une vérification supplémentaire avant d'entrer dans la collection.
+
+Les images proviennent de deux sources : des musées pratiquant l'accès ouvert, qui les diffusent sous licence CC0, et Wikimedia Commons, où la licence est vérifiée fichier par fichier. Chaque œuvre passe par un contrôle des droits avant publication, et chaque fiche indique sa source.
+
+Les textes de l'Éditorial GERMANUS.Art sont de notre plume, rédigés avec l'aide de l'intelligence artificielle et relus par la curation. Les articles citent leurs sources originales et renvoient vers elles.
+
+Si vous estimez qu'une image ou un texte ne devrait pas figurer ici, écrivez-nous depuis la page Contact. Nous examinons chaque demande et, le cas échéant, retirons le contenu.`)], es: [`Todas las obras de la colección están en dominio público. Seguimos la regla de la legislación brasileña de derechos de autor: una obra pasa al dominio público 70 años después del 1 de enero del año siguiente a la muerte de su autor. Las obras antiguas de autoría desconocida, o cuya fecha de muerte se desconoce, pasan por una verificación adicional antes de entrar en la colección.
+
+Las imágenes provienen de dos fuentes: museos con políticas de acceso abierto, que las publican bajo licencia CC0, y Wikimedia Commons, donde la licencia se verifica archivo por archivo. Cada obra pasa por una revisión de derechos antes de publicarse, y cada ficha indica su fuente.
+
+Los textos del Editorial GERMANUS.Art son de nuestra autoría, escritos con apoyo de inteligencia artificial y revisados por la curaduría. Las noticias citan y enlazan sus fuentes originales.
+
+Si consideras que alguna imagen o algún texto no debería estar aquí, escríbenos desde la página de Contacto. Analizamos cada solicitud y, cuando corresponde, retiramos el contenido.`], it: [`Tutte le opere della collezione sono di pubblico dominio. Seguiamo la regola della legge brasiliana sul diritto d'autore: un'opera diventa di pubblico dominio 70 anni dopo il 1° gennaio dell'anno successivo alla morte dell'autore. Le opere antiche di autore ignoto, o di cui non si conosce la data di morte, sono sottoposte a una verifica aggiuntiva prima di entrare nella collezione.
+
+Le immagini provengono da due fonti: musei con politiche di accesso aperto, che le rendono disponibili con licenza CC0, e Wikimedia Commons, dove la licenza viene verificata file per file. Ogni opera passa un controllo dei diritti prima della pubblicazione, e ogni scheda ne indica la fonte.
+
+I testi dell'Editoriale GERMANUS.Art sono nostri, scritti con il supporto dell'intelligenza artificiale e rivisti dalla curatela. Le notizie citano le fonti originali e vi rimandano con un link.
+
+Se ritieni che un'immagine o un testo non debba trovarsi qui, scrivici dalla pagina Contatti. Esaminiamo ogni richiesta e, se necessario, rimuoviamo il contenuto.`], de: [`Alle Werke der Sammlung sind gemeinfrei. Wir folgen der Regel des brasilianischen Urheberrechts: Ein Werk wird 70 Jahre nach dem 1. Januar des auf den Tod des Urhebers folgenden Jahres gemeinfrei. Ältere Werke unbekannter Urheber oder mit unbekanntem Todesdatum werden vor der Aufnahme in die Sammlung zusätzlich geprüft.
+
+Die Bilder stammen aus zwei Quellen: aus Museen mit Open-Access-Politik, die sie unter der Lizenz CC0 bereitstellen, und aus Wikimedia Commons, wo die Lizenz Datei für Datei geprüft wird. Jedes Werk durchläuft vor der Veröffentlichung eine Rechteprüfung, und jeder Eintrag nennt seine Quelle.
+
+Die Texte der Redaktion von GERMANUS.Art sind eigene Texte, mit Unterstützung künstlicher Intelligenz verfasst und kuratorisch geprüft. Die Nachrichten nennen und verlinken ihre Originalquellen.
+
+Wenn Sie der Meinung sind, dass ein Bild oder ein Text nicht hierher gehört, schreiben Sie uns über die Seite „Kontakt“. Wir prüfen jede Anfrage und entfernen den Inhalt gegebenenfalls.`] },
+  "loja": { en: [`Coming soon: tote bags and T-shirts featuring public-domain works from the collection, each piece labeled with the work's title, date and source.`], fr: [fr(`Bientôt : des tote bags et des t-shirts ornés d'œuvres du domaine public de la collection, chaque pièce accompagnée d'une étiquette indiquant le titre, la date et la source de l'œuvre.`)], es: [`Próximamente: bolsas de tela y camisetas con obras de la colección en dominio público, cada pieza con una etiqueta que indica el título, la fecha y la fuente de la obra.`], it: [`Prossimamente: shopper in tela e magliette con opere di pubblico dominio della collezione, ogni pezzo con un'etichetta che ne riporta titolo, data e fonte.`], de: [`Demnächst: Stofftaschen und T-Shirts mit gemeinfreien Werken aus der Sammlung – jedes Stück mit einem Etikett, das Titel, Datum und Quelle des Werks nennt.`] },
 };
 
 // Compara textos ignorando maiúsculas, acentos, pontuação, espaços e o título no começo.
@@ -475,6 +703,7 @@ function traducoesNossas(slug, L) {
     TRAD_PADRAO[slug]?.[L],
     TRAD_V1[slug]?.[`texto_${L}`],
     slug === "nos-somos" ? MANIFESTO[L] : null,
+    ...(ANTERIORES[slug]?.[L] || []),
   ].filter(Boolean);
 }
 
